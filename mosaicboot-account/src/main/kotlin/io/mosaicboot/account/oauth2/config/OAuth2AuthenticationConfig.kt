@@ -4,13 +4,11 @@ import io.mosaicboot.account.oauth2.service.MosaicOAuth2AuthorizedClientReposito
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
-import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository
-import org.springframework.security.oauth2.client.web.OAuth2AuthorizationRequestRedirectFilter
 import org.springframework.security.web.SecurityFilterChain
 
-@EnableConfigurationProperties(MosaicOAuth2Properties::class)
+@EnableConfigurationProperties(OAuth2Properties::class)
 class OAuth2AuthenticationConfig(
-    private val mosaicOAuth2Properties: MosaicOAuth2Properties,
+    private val OAuth2Properties: OAuth2Properties,
 ) {
     @Bean
     fun mosaicOAuth2AuthorizedClientRepository(): MosaicOAuth2AuthorizedClientRepository {
@@ -42,7 +40,7 @@ class OAuth2AuthenticationConfig(
                 }
                 login.authorizationEndpoint {
 //                    it.authorizationRequestResolver(oAuth2AuthorizationRequestRedirectFilter.resol)
-                    it.baseUri(mosaicOAuth2Properties.authorizationRequestBaseUri)
+                    it.baseUri(OAuth2Properties.authorizationRequestBaseUri)
                 }
                 login.successHandler { request, response, authentication -> }
             }

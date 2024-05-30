@@ -12,16 +12,16 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.web.SecurityFilterChain
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter
 
-@EnableConfigurationProperties(MosaicJwtAuthenticationProperties::class)
-class MosaicJwtAuthenticationConfig(
-    private val mosaicJwtAuthenticationProperties: MosaicJwtAuthenticationProperties,
+@EnableConfigurationProperties(JwtAuthenticationProperties::class)
+class MosaicAccountJwtAuthenticationConfig(
+    private val jwtAuthenticationProperties: JwtAuthenticationProperties,
 ) {
     @Bean
     fun jwtAuthenticationService(
         jwtAuthenticationKeyRepository: JwtAuthenticationKeyRepository,
     ): JwtAuthenticationService {
         return JwtAuthenticationService(
-            mosaicJwtAuthenticationProperties,
+            jwtAuthenticationProperties,
             jwtAuthenticationKeyRepository
         )
     }
@@ -29,7 +29,7 @@ class MosaicJwtAuthenticationConfig(
     @Bean
     @ConditionalOnMissingBean(JwtAuthenticationTokenWebRepository::class)
     fun jwtAuthenticationTokenWebRepository(): JwtAuthenticationTokenWebRepository {
-        return JwtAuthenticationTokenCookieRepository(mosaicJwtAuthenticationProperties.cookie)
+        return JwtAuthenticationTokenCookieRepository(jwtAuthenticationProperties.cookie)
     }
 
     @Bean

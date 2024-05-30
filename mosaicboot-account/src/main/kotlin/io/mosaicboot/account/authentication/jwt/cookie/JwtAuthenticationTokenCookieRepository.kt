@@ -1,13 +1,13 @@
 package io.mosaicboot.account.authentication.jwt.cookie
 
 import io.mosaicboot.account.authentication.jwt.JwtAuthenticationTokenWebRepository
-import io.mosaicboot.account.authentication.jwt.config.MosaicJwtAuthenticationProperties
+import io.mosaicboot.account.authentication.jwt.config.JwtAuthenticationProperties
 import jakarta.servlet.http.Cookie
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
 
 class JwtAuthenticationTokenCookieRepository(
-    private val cookieSetting: MosaicJwtAuthenticationProperties.Cookie,
+    private val cookieSetting: JwtAuthenticationProperties.Cookie,
 ) : JwtAuthenticationTokenWebRepository {
     override fun loadToken(request: HttpServletRequest): String? {
         return request.cookies

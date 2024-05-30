@@ -7,13 +7,13 @@ import com.nimbusds.jose.jwk.gen.ECKeyGenerator
 import com.nimbusds.jwt.SignedJWT
 import io.mosaicboot.account.authentication.jwt.JwtAuthenticationKeyRepository
 import io.mosaicboot.account.authentication.jwt.JwtAuthenticationToken
-import io.mosaicboot.account.authentication.jwt.config.MosaicJwtAuthenticationProperties
+import io.mosaicboot.account.authentication.jwt.config.JwtAuthenticationProperties
 import io.mosaicboot.account.authentication.jwt.jose.JwkHolder
 import jakarta.annotation.PostConstruct
 import java.util.*
 
 class JwtAuthenticationService(
-    private val properties: MosaicJwtAuthenticationProperties,
+    private val properties: JwtAuthenticationProperties,
     private val jwtAuthenticationKeyRepository: JwtAuthenticationKeyRepository,
 ) {
     val cachedKey = CacheBuilder.newBuilder()

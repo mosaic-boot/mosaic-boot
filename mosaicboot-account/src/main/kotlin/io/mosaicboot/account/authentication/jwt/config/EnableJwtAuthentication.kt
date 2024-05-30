@@ -10,7 +10,7 @@ import java.lang.annotation.Target
 @Target(ElementType.TYPE)
 @Documented
 @Import(
-    MosaicJwtAuthenticationConfig::class,
+    MosaicAccountJwtAuthenticationConfig::class,
 )
 @EnableAccountModule
 annotation class EnableJwtAuthentication

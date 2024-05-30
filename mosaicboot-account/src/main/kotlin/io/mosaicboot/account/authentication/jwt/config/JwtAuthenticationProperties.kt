@@ -3,7 +3,7 @@ package io.mosaicboot.account.authentication.jwt.config
 import org.springframework.boot.context.properties.ConfigurationProperties
 
 @ConfigurationProperties(prefix = "mosaic.account.jwt-authentication")
-data class MosaicJwtAuthenticationProperties(
+data class JwtAuthenticationProperties(
     var cookie: Cookie = Cookie(),
     var key: Key = Key(),
 ) {
