@@ -1,0 +1,36 @@
+name: Test and Maven Deploy
+on:
+  push: {}
+jobs:
+  java-build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set Environment Variables
+        run: |
+          echo "runner_arch=$(uname -m)" >> $GITHUB_ENV
+      - name: Checkout
+        uses: actions/checkout@v2
+      - uses: actions/setup-java@v3
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+          cache: 'gradle'
+      - name: Build
+        run: |
+          chmod +x gradlew
+          ./gradlew build test -x :sample-app:test
+      - id: install-secret-key
+        name: Install gpg secret key
+        if: ${{ startsWith(github.ref, 'refs/tags/') }}
+        run: |
+          cat <(echo -e "${{ secrets.OSSRH_GPG_SECRET_KEY }}") | gpg --batch --import
+          gpg --list-secret-keys --keyid-format LONG
+      - id: publish-to-central
+        name: Publish to Central Repository
+        if: ${{ startsWith(github.ref, 'refs/tags/') }}
+        env:
+          ORG_GRADLE_PROJECT_mavenCentralUsername: ${{ secrets.OSSRH_USERNAME }}
+          ORG_GRADLE_PROJECT_mavenCentralPassword: ${{ secrets.OSSRH_TOKEN }}
+        run: |
+          chmod +x gradlew
+          ./gradlew :mosaic-boot-core:publishToMavenCentral :mosaic-boot-mongodb-default:publishToMavenCentral -Psigning.gnupg.keyName=D67551F1DFE20F8794F88D29EE2773B19F10BD4B -Psigning.gnupg.executable=gpg -Psigning.gnupg.passphrase=${{ secrets.OSSRH_GPG_SECRET_KEY_PASSWORD }}

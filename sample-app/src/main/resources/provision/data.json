@@ -1,0 +1,23 @@
+[
+  {
+    "id": "019559a5-fda4-787e-a8fa-18d7ffe3c5db",
+    "createdAt": "2025-03-03T01:36:45.476Z",
+    "updatedAt": "2025-03-03T01:36:45.476Z",
+    "name": "홍길동",
+    "email": "admin@mosaic-boot.io",
+    "status": "ACTIVE",
+    "roles": [],
+    "timeZone": "Asia/Seoul",
+    "_class": "io.mosaicboot.mongodb.def.entity.UserEntity"
+  },
+  {
+    "id": "019559a6-013c-76ac-bae4-39be2700a83d",
+    "createdAt": "2025-03-03T01:36:46.396Z",
+    "updatedAt": "2025-03-03T01:36:46.396Z",
+    "userId": "019559a5-fda4-787e-a8fa-18d7ffe3c5db",
+    "method": "username:mosaic-sha256",
+    "username": "admin",
+    "credential": "$pbkdf2-sha256$535000$b6GaZU_I0oPAnnbCd-990A==$f4CchqLPiIMHRIdzwBLaKtYYR7vLYWuOC3xO9b1LUHw=",
+    "_class": "io.mosaicboot.mongodb.def.entity.AuthenticationEntity"
+  }
+]

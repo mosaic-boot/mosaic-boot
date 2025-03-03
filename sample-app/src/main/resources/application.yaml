@@ -1,0 +1,82 @@
+spring:
+  application:
+    name: "sample-app"
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration
+      - org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration
+  data:
+    mongodb:
+      uri: mongodb+srv://mosaic-test:Passw0rd@jclab-wp-m0.xfdppzh.mongodb.net/mosaic-test?retryWrites=true&w=majority&appName=jclab-wp-m0
+      auto-index-creation: true
+  devtools:
+    livereload:
+      enabled: true
+    remote:
+      restart:
+        enabled: true
+  security:
+    oauth2:
+      client:
+        registration:
+          kakao:
+            scope: [profile_nickname]
+            redirect-uri: "{baseUrl}/api/user/oauth2/callback/kakao"
+            authorization-grant-type: authorization_code
+            client-authentication-method: client_secret_post
+            client-name: kakao
+#          google:
+#            client-name: google
+#            scope: [profile,email]
+#            redirect-uri: "{baseUrl}/api/user/oauth2/callback/google"
+        provider:
+          kakao:
+            authorization-uri: https://kauth.kakao.com/oauth/authorize
+            token-uri: https://kauth.kakao.com/oauth/token
+            user-info-uri: https://kapi.kakao.com/v2/user/me
+            user-name-attribute: id
+mosaic:
+  provision:
+    enabled: true
+    resources: ["/provision/data.json"]
+  user:
+    enabled: true
+    cookie:
+      prefix: "mosaic-app-"
+      path: "/"
+      domain: ""
+      expiration: 0
+    jwt:
+      issuer: ""
+      secret: "Secret00000000000000000000000000"
+      expiration: 86400
+    api:
+      enabled: true
+      path: "/api/user"
+
+#  datasource:
+#    mongodb:
+#      collections:
+#        tenant:
+#          collection: mosaic.tenants
+#        user:
+#          collection: mosaic.users
+#        authentication:
+#          collection: mosaic.authentications
+#        user-audit-log:
+#          collection: mosaic.userAuditLogs
+
+
+server:
+  forward-headers-strategy: framework
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+      base-path: /_
+  endpoint:
+    health:
+      show-details: when_authorized
+
