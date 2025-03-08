@@ -31,6 +31,7 @@ import io.mosaicboot.core.user.service.UserService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass
+import org.springframework.boot.web.servlet.FilterRegistrationBean
 import org.springframework.context.ApplicationContext
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -80,12 +81,12 @@ class MosaicOAuth2Config {
     @Bean
     fun mosaicOAuth2AuthorizedClientRepository(
         authTokenService: AuthTokenService,
-        mosaicCookieAuthFilter: MosaicCookieAuthFilter,
+        mosaicCookieAuthFilter: FilterRegistrationBean<MosaicCookieAuthFilter>,
         @Autowired(required = false) mosaicOAuth2TokenService: MosaicOAuth2TokenService?,
     ): MosaicOAuth2AuthorizedClientRepository {
         return MosaicOAuth2AuthorizedClientRepository(
             authTokenService = authTokenService,
-            mosaicCookieAuthFilter = mosaicCookieAuthFilter,
+            mosaicCookieAuthFilter = mosaicCookieAuthFilter.filter,
             mosaicOAuth2TokenService = mosaicOAuth2TokenService,
         )
     }
@@ -125,7 +126,6 @@ class MosaicOAuth2Config {
         private val mosaicOAuth2AuthorizedClientRepository: MosaicOAuth2AuthorizedClientRepository,
     ) : WebMvcConfigurer {
         @Bean
-        @Order(-2)
         fun mosaicOAuth2SecurityFilterChain(http: HttpSecurity): SecurityFilterChain {
             http
                 .securityMatcher("${mosaicUserProperties.api.path}/oauth2/**")

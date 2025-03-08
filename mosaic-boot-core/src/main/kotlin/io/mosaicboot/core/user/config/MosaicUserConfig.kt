@@ -29,12 +29,14 @@ import io.mosaicboot.core.user.service.*
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
+import org.springframework.boot.autoconfigure.security.SecurityProperties
 import org.springframework.boot.context.properties.EnableConfigurationProperties
+import org.springframework.boot.web.servlet.FilterRegistrationBean
 import org.springframework.context.ApplicationContext
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Import
-import org.springframework.core.annotation.Order
+import org.springframework.core.Ordered
 import org.springframework.http.HttpStatus
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.web.SecurityFilterChain
@@ -43,6 +45,7 @@ import org.springframework.security.web.authentication.logout.SimpleUrlLogoutSuc
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer
 import org.springframework.web.util.pattern.PathPatternParser
 import java.util.function.Predicate
+
 
 @Configuration(proxyBeanMethods = false)
 @EnableConfigurationProperties(MosaicUserProperties::class)
@@ -112,25 +115,18 @@ class MosaicUserConfig(
 
     @Bean
     fun mosaicAuthFilter(
+        mosaicUserProperties: MosaicUserProperties,
         authTokenService: AuthTokenService,
         objectMapper: ObjectMapper,
-    ): MosaicCookieAuthFilter {
-        return MosaicCookieAuthFilter(
+    ): FilterRegistrationBean<MosaicCookieAuthFilter> {
+        val registrationBean = FilterRegistrationBean<MosaicCookieAuthFilter>()
+        registrationBean.filter = MosaicCookieAuthFilter(
             mosaicUserProperties = mosaicUserProperties,
             authTokenService = authTokenService,
             objectMapper = objectMapper,
         )
-    }
-
-    @Bean
-    fun mosaicAuthenticationHandler(
-        mosaicUserProperties: MosaicUserProperties,
-        mosaicCookieAuthFilter: MosaicCookieAuthFilter,
-    ): MosaicAuthenticationHandler {
-        return MosaicAuthenticationHandler(
-            mosaicUserProperties = mosaicUserProperties,
-            mosaicCookieAuthFilter = mosaicCookieAuthFilter,
-        )
+        registrationBean.order = SecurityProperties.DEFAULT_FILTER_ORDER - 1
+        return registrationBean
     }
 
     @Bean
@@ -146,6 +142,17 @@ class MosaicUserConfig(
             authTokenService = authTokenService,
             mosaicAuthenticationHandler = mosaicAuthenticationHandler,
             mosaicOAuth2UserService = mosaicOAuth2UserService,
+        )
+    }
+
+    @Bean
+    fun mosaicAuthenticationHandler(
+        mosaicUserProperties: MosaicUserProperties,
+        mosaicCookieAuthFilter: FilterRegistrationBean<MosaicCookieAuthFilter>,
+    ): MosaicAuthenticationHandler {
+        return MosaicAuthenticationHandler(
+            mosaicUserProperties = mosaicUserProperties,
+            mosaicCookieAuthFilter = mosaicCookieAuthFilter.filter,
         )
     }
 
@@ -174,7 +181,6 @@ class MosaicUserConfig(
         private val mosaicAuthenticationHandler: MosaicAuthenticationHandler,
     ) : WebMvcConfigurer {
         @Bean
-        @Order(-1)
         fun mosaicUserSecurityFilterChain(http: HttpSecurity): SecurityFilterChain {
             http
                 .securityMatcher("${mosaicUserProperties.api.path}/**")
