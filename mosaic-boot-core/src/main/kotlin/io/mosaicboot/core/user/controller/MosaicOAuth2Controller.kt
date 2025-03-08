@@ -16,12 +16,11 @@
 
 package io.mosaicboot.core.user.controller
 
+import io.mosaicboot.core.auth.config.MosaicAuthProperties
 import io.mosaicboot.core.domain.user.UserStatus
 import io.mosaicboot.core.domain.vo.UserVo
 import io.mosaicboot.core.http.BaseMosaicController
 import io.mosaicboot.core.http.MosaicController
-import io.mosaicboot.core.user.config.MosaicUserProperties
-import io.mosaicboot.core.user.model.LoginResponse
 import io.mosaicboot.core.user.model.RegisterRequest
 import io.mosaicboot.core.user.model.RegisterResponse
 import io.mosaicboot.core.user.oauth2.MosaicOAuth2RegisterToken
@@ -128,7 +127,7 @@ class MosaicOAuth2Controller(
     }
 
     override fun getBaseUrl(applicationContext: ApplicationContext): String {
-        val mosaicUserProperties = applicationContext.getBean(MosaicUserProperties::class.java)
-        return mosaicUserProperties.api.path.trimEnd('/') + "/oauth2/"
+        val mosaicAuthProperties = applicationContext.getBean(MosaicAuthProperties::class.java)
+        return mosaicAuthProperties.api.path.trimEnd('/') + "/oauth2/"
     }
 }
