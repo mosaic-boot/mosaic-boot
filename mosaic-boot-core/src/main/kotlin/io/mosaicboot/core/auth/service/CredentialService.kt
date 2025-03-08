@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.mosaicboot.core.user.service
+package io.mosaicboot.core.auth.service
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.mosaicboot.core.domain.user.Authentication
@@ -24,8 +24,7 @@ import io.mosaicboot.core.user.auth.MosaicCredentialHandler
 import org.springframework.stereotype.Service
 
 @Service
-class AuthenticationService(
-    private val authenticationRepository: AuthenticationRepositoryBase<*>,
+class CredentialService(
     credentialHandlers: List<MosaicCredentialHandler>,
     private val objectMapper: ObjectMapper,
 ) {
@@ -36,14 +35,6 @@ class AuthenticationService(
         .toMap()
 
     private val anyCredentialHandlers = credentialHandlers.filter { it.methods() == null }
-
-    fun findAuthenticationDetail(method: String, username: String): AuthenticationDetail? {
-        return if (method.startsWith("email:")) {
-            authenticationRepository.findByMethodAndEmail(method, username)
-        } else {
-            authenticationRepository.findByMethodAndUsername(method, username)
-        }
-    }
 
     fun isRegistrable(method: String): Boolean {
         val credentialHandler = namedCredentialHandlers[method]

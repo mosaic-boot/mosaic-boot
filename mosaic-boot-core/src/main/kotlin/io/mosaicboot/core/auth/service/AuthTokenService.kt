@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
-package io.mosaicboot.core.user.service
+package io.mosaicboot.core.auth.service
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.nimbusds.jose.JWEAlgorithm
 import com.nimbusds.jose.JWSAlgorithm
 import com.nimbusds.jwt.JWTClaimsSet
+import io.mosaicboot.core.auth.config.MosaicAuthProperties
 import io.mosaicboot.core.domain.user.Authentication
 import io.mosaicboot.core.domain.user.TenantUser
 import io.mosaicboot.core.domain.user.User
@@ -28,20 +29,20 @@ import io.mosaicboot.core.jwt.JwkHelper
 import io.mosaicboot.core.jwt.JwtHelper
 import io.mosaicboot.core.user.auth.MosaicAuthenticatedToken
 import io.mosaicboot.core.user.oauth2.MosaicOAuth2RegisterToken
-import io.mosaicboot.core.user.config.MosaicUserProperties
 import io.mosaicboot.core.user.model.*
 import io.mosaicboot.core.user.oauth2.OAuth2BasicInfo
 import io.mosaicboot.core.user.oauth2.OAuth2RegisterTokenData
+import io.mosaicboot.core.user.service.UserService
 import io.mosaicboot.core.util.WebClientInfo
 import org.springframework.stereotype.Service
 
 @Service
 class AuthTokenService(
-    private val mosaicUserProperties: MosaicUserProperties,
+    private val mosaicAuthProperties: MosaicAuthProperties,
     private val objectMapper: ObjectMapper,
     private val userService: UserService,
 ) {
-    private val jwtConfig = mosaicUserProperties.jwt
+    private val jwtConfig = mosaicAuthProperties.jwt
     private val jwtTokenHelper = let {
         val algorithm = JWSAlgorithm.parse(jwtConfig.algorithm.uppercase())
         JwtHelper(
@@ -51,7 +52,7 @@ class AuthTokenService(
             expirationSeconds = jwtConfig.expiration.toLong(),
         )
     }
-    private val jweConfig = mosaicUserProperties.jwe
+    private val jweConfig = mosaicAuthProperties.jwe
     private val jweTokenHelper = let {
         val algorithm = JWEAlgorithm.parse(jweConfig.algorithm.uppercase())
         JweHelper(

@@ -19,12 +19,13 @@ package io.mosaicboot.core.util
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.nimbusds.jose.JWEAlgorithm
 import com.nimbusds.jwt.JWTClaimsSet
+import io.mosaicboot.core.auth.config.MosaicAuthProperties
 import io.mosaicboot.core.jwt.JweHelper
 import io.mosaicboot.core.jwt.JwkHelper
 import io.mosaicboot.core.user.config.MosaicUserProperties
 
 class ServerSideCrypto(
-    jweConfig: MosaicUserProperties.Jwe,
+    jweConfig: MosaicAuthProperties.Jwe,
     objectMapper: ObjectMapper,
 ) {
     private val jweTokenHelper = let {

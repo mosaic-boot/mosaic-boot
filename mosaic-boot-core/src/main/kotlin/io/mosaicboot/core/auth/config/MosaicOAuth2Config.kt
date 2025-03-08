@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.mosaicboot.core.user.config
+package io.mosaicboot.core.auth.config
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.mosaicboot.core.repository.AuthenticationRepositoryBase
@@ -22,22 +22,19 @@ import io.mosaicboot.core.user.auth.MosaicAuthenticationHandler
 import io.mosaicboot.core.user.auth.MosaicCookieAuthFilter
 import io.mosaicboot.core.user.auth.MosaicOAuth2CredentialHandler
 import io.mosaicboot.core.user.controller.MosaicOAuth2Controller
-import io.mosaicboot.core.user.model.OAuth2AccessTokenJson
 import io.mosaicboot.core.user.oauth2.*
 import io.mosaicboot.core.user.service.MosaicOAuth2UserService
-import io.mosaicboot.core.user.service.AuthTokenService
+import io.mosaicboot.core.auth.service.AuthTokenService
+import io.mosaicboot.core.auth.service.AuthenticationService
 import io.mosaicboot.core.user.service.MosaicOAuth2TokenService
-import io.mosaicboot.core.user.service.UserService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass
 import org.springframework.boot.web.servlet.FilterRegistrationBean
-import org.springframework.context.ApplicationContext
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.core.annotation.Order
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
-import org.springframework.security.oauth2.client.OAuth2AuthorizedClientManager
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository
 import org.springframework.security.oauth2.client.web.OAuth2LoginAuthenticationFilter
@@ -48,7 +45,9 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer
 @ConditionalOnClass(
     name = ["org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService"]
 )
-class MosaicOAuth2Config {
+class MosaicOAuth2Config(
+    private val mosaicAuthProperties: MosaicAuthProperties,
+) {
     @Bean
     fun mosaicOAuth2CredentialHandler(): MosaicOAuth2CredentialHandler {
         return MosaicOAuth2CredentialHandler()
@@ -61,17 +60,16 @@ class MosaicOAuth2Config {
 
     @Bean
     fun mosaicOAuth2UserService(
-        mosaicUserProperties: MosaicUserProperties,
         objectMapper: ObjectMapper,
-        userService: UserService,
+        authenticationService: AuthenticationService,
         authTokenService: AuthTokenService,
         oAuth2UserInfoHandlers: List<OAuth2UserInfoHandler>,
         @Autowired(required = false) mosaicOAuth2TokenService: MosaicOAuth2TokenService?,
     ): MosaicOAuth2UserService {
         return MosaicOAuth2UserService(
-            mosaicUserProperties = mosaicUserProperties,
+            mosaicAuthProperties = mosaicAuthProperties,
             objectMapper = objectMapper,
-            userService = userService,
+            authenticationService = authenticationService,
             authTokenService = authTokenService,
             oAuth2UserInfoHandlers = oAuth2UserInfoHandlers,
             mosaicOAuth2TokenService = mosaicOAuth2TokenService,
@@ -103,14 +101,13 @@ class MosaicOAuth2Config {
     @Bean
     @ConditionalOnBean(OAuth2AccessTokenRepository::class)
     fun mosaicOAuth2TokenService(
-        mosaicUserProperties: MosaicUserProperties,
         objectMapper: ObjectMapper,
         authenticationRepository: AuthenticationRepositoryBase<*>,
         oAuth2AccessTokenRepository: OAuth2AccessTokenRepository,
         clientRegistrationRepository: ClientRegistrationRepository,
     ): MosaicOAuth2TokenService {
         return MosaicOAuth2TokenService(
-            mosaicUserProperties = mosaicUserProperties,
+            mosaicAuthProperties = mosaicAuthProperties,
             objectMapper = objectMapper,
             authenticationRepository = authenticationRepository,
             oAuth2AccessTokenRepository = oAuth2AccessTokenRepository,
@@ -120,15 +117,16 @@ class MosaicOAuth2Config {
 
     @Configuration(proxyBeanMethods = true)
     class WebConfig(
-        private val mosaicUserProperties: MosaicUserProperties,
+        private val mosaicAuthProperties: MosaicAuthProperties,
         private val mosaicAuthenticationHandler: MosaicAuthenticationHandler,
         private val mosaicOAuth2UserService: MosaicOAuth2UserService,
         private val mosaicOAuth2AuthorizedClientRepository: MosaicOAuth2AuthorizedClientRepository,
     ) : WebMvcConfigurer {
         @Bean
+        @Order(-1)
         fun mosaicOAuth2SecurityFilterChain(http: HttpSecurity): SecurityFilterChain {
             http
-                .securityMatcher("${mosaicUserProperties.api.path}/oauth2/**")
+                .securityMatcher("${mosaicAuthProperties.api.path}/oauth2/**")
                 .csrf { it.disable() }
                 .authorizeHttpRequests { authorizeHttpRequests ->
                     authorizeHttpRequests.anyRequest().permitAll()
@@ -136,10 +134,10 @@ class MosaicOAuth2Config {
                 .oauth2Login { oauth2Login ->
                     oauth2Login.authorizedClientRepository(mosaicOAuth2AuthorizedClientRepository)
                     oauth2Login.authorizationEndpoint { endpoint ->
-                        endpoint.baseUri("${mosaicUserProperties.api.path}/oauth2/request")
+                        endpoint.baseUri("${mosaicAuthProperties.api.path}/oauth2/request")
                     }
                     oauth2Login.redirectionEndpoint { endpoint ->
-                        endpoint.baseUri("${mosaicUserProperties.api.path}/oauth2/callback/*")
+                        endpoint.baseUri("${mosaicAuthProperties.api.path}/oauth2/callback/*")
                     }
                     oauth2Login.userInfoEndpoint { endpoint ->
                         endpoint.userService(mosaicOAuth2UserService)

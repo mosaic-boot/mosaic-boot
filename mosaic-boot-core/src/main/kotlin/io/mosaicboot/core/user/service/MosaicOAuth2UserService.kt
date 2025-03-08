@@ -17,6 +17,9 @@
 package io.mosaicboot.core.user.service
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import io.mosaicboot.core.auth.config.MosaicAuthProperties
+import io.mosaicboot.core.auth.service.AuthTokenService
+import io.mosaicboot.core.auth.service.AuthenticationService
 import io.mosaicboot.core.domain.user.AuthMethod
 import io.mosaicboot.core.domain.vo.UserVo
 import io.mosaicboot.core.user.auth.LoginResult
@@ -39,15 +42,15 @@ import org.springframework.web.context.request.ServletRequestAttributes
 
 @Service
 class MosaicOAuth2UserService(
-    private val mosaicUserProperties: MosaicUserProperties,
+    private val mosaicAuthProperties: MosaicAuthProperties,
     private val objectMapper: ObjectMapper,
-    private val userService: UserService,
+    private val authenticationService: AuthenticationService,
     private val authTokenService: AuthTokenService,
     oAuth2UserInfoHandlers: List<OAuth2UserInfoHandler>,
     @Autowired(required = false) private val mosaicOAuth2TokenService: MosaicOAuth2TokenService?,
 ) : OAuth2UserService<OAuth2UserRequest, OAuth2User> {
     val serverSideCrypto = ServerSideCrypto(
-        mosaicUserProperties.jwe,
+        mosaicAuthProperties.jwe,
         objectMapper = objectMapper,
     )
 
@@ -59,7 +62,7 @@ class MosaicOAuth2UserService(
         webClientInfo: WebClientInfo,
         data: OAuth2RegisterTokenData,
     ): RegisterResult {
-        val result = userService.register(
+        val result = authenticationService.register(
             userTemplate = userTemplate,
             method = "${AuthMethod.PREFIX_OAUTH2}:${data.provider}",
             username = data.id,
@@ -91,7 +94,7 @@ class MosaicOAuth2UserService(
             ?.handle(oAuth2User)
             ?: readInfoFromOther(userRequest.clientRegistration.registrationId, oAuth2User)
 
-        val result = userService.login(
+        val result = authenticationService.login(
             "${AuthMethod.PREFIX_OAUTH2}:${basicInfo.provider}",
             basicInfo.id,
             null,

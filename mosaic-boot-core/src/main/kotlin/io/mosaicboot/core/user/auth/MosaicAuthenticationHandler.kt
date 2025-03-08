@@ -16,9 +16,9 @@
 
 package io.mosaicboot.core.user.auth
 
+import io.mosaicboot.core.auth.config.MosaicAuthProperties
 import io.mosaicboot.core.user.config.MosaicUserProperties
 import io.mosaicboot.core.user.oauth2.AuthenticatedOAuth2User
-import io.mosaicboot.core.user.oauth2.MosaicOAuth2RegisterToken
 import io.mosaicboot.core.user.oauth2.TemporaryOAuth2User
 import io.mosaicboot.core.util.UnreachableException
 import jakarta.servlet.http.HttpServletRequest
@@ -29,7 +29,7 @@ import org.springframework.security.web.authentication.AuthenticationSuccessHand
 import org.springframework.security.web.authentication.logout.LogoutHandler
 
 class MosaicAuthenticationHandler(
-    private val mosaicUserProperties: MosaicUserProperties,
+    private val mosaicAuthProperties: MosaicAuthProperties,
     private val mosaicCookieAuthFilter: MosaicCookieAuthFilter,
 ) :
     AuthenticationSuccessHandler,
@@ -52,7 +52,7 @@ class MosaicAuthenticationHandler(
                 val principal = authentication.principal
                 when (principal) {
                     is TemporaryOAuth2User -> {
-                        response.sendRedirect(mosaicUserProperties.oauth2.registerUrl)
+                        response.sendRedirect(mosaicAuthProperties.oauth2.registerUrl)
                     }
                     is AuthenticatedOAuth2User -> {
                         mosaicCookieAuthFilter.applyAuthentication(
@@ -60,7 +60,7 @@ class MosaicAuthenticationHandler(
                             response,
                             principal.authenticatedToken,
                         )
-                        response.sendRedirect(mosaicUserProperties.oauth2.successUrl)
+                        response.sendRedirect(mosaicAuthProperties.oauth2.successUrl)
                     }
                     else -> throw UnreachableException()
                 }

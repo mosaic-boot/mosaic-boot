@@ -17,21 +17,20 @@
 package io.mosaicboot.core.user.auth
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import io.mosaicboot.core.user.config.MosaicUserProperties
+import io.mosaicboot.core.auth.config.MosaicAuthProperties
 import io.mosaicboot.core.user.model.ActiveTenantUser
 import io.mosaicboot.core.user.oauth2.MosaicOAuth2RegisterToken
-import io.mosaicboot.core.user.service.AuthTokenService
+import io.mosaicboot.core.auth.service.AuthTokenService
 import jakarta.servlet.FilterChain
 import jakarta.servlet.http.Cookie
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
 import org.slf4j.LoggerFactory
 import org.springframework.security.core.context.SecurityContextHolder
-import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken
 import org.springframework.web.filter.OncePerRequestFilter
 
 class MosaicCookieAuthFilter(
-    private val mosaicUserProperties: MosaicUserProperties,
+    private val mosaicAuthProperties: MosaicAuthProperties,
     private val authTokenService: AuthTokenService,
     private val objectMapper: ObjectMapper,
 ) : OncePerRequestFilter() {
@@ -39,9 +38,9 @@ class MosaicCookieAuthFilter(
         private val log = LoggerFactory.getLogger(MosaicCookieAuthFilter::class.java)
     }
 
-    private val authTokenCookieName = mosaicUserProperties.cookie.prefix + "auth-token"
-    private val activeTenantCookieName = mosaicUserProperties.cookie.prefix + "active-tenant-user"
-    private val oauth2RegisterTokenCookieName = mosaicUserProperties.cookie.prefix + "oauth2-register-token"
+    private val authTokenCookieName = mosaicAuthProperties.cookie.prefix + "auth-token"
+    private val activeTenantCookieName = mosaicAuthProperties.cookie.prefix + "active-tenant-user"
+    private val oauth2RegisterTokenCookieName = mosaicAuthProperties.cookie.prefix + "oauth2-register-token"
 
     fun applyAuthentication(
         request: HttpServletRequest,
@@ -90,7 +89,7 @@ class MosaicCookieAuthFilter(
         cookie.path = "/"
         cookie.isHttpOnly = true
         cookie.secure = request.isSecure
-        mosaicUserProperties.cookie.expiration
+        mosaicAuthProperties.cookie.expiration
             .takeIf { it > 0 }
             ?.let { cookie.maxAge = it }
         customizer?.invoke(cookie)
@@ -104,10 +103,10 @@ class MosaicCookieAuthFilter(
         filterChain: FilterChain
     ) {
         try {
-            val activeTenantUser = request.cookies.find { it.name == activeTenantCookieName }
+            val activeTenantUser = request.cookies?.find { it.name == activeTenantCookieName }
                 ?.let { cookie -> objectMapper.readValue(cookie.value, ActiveTenantUser::class.java) }
 
-            request.cookies.find { it.name == authTokenCookieName }
+            request.cookies?.find { it.name == authTokenCookieName }
                 ?.let { cookie ->
                     runCatching {
                         authTokenService.verifyAuthenticatedToken(cookie.value, activeTenantUser)
@@ -119,7 +118,7 @@ class MosaicCookieAuthFilter(
                     return
                 }
 
-            request.cookies.find { it.name == oauth2RegisterTokenCookieName }
+            request.cookies?.find { it.name == oauth2RegisterTokenCookieName }
                 ?.let { cookie ->
                     runCatching {
                         authTokenService.verifySocialRegisterTokenData(cookie.value)

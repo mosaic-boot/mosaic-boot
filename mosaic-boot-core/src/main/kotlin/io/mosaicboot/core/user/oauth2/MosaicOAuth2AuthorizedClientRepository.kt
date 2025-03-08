@@ -19,7 +19,7 @@ package io.mosaicboot.core.user.oauth2
 import io.mosaicboot.core.user.auth.MosaicCookieAuthFilter
 import io.mosaicboot.core.user.model.OAuth2AccessTokenJson
 import io.mosaicboot.core.user.model.OAuth2RefreshTokenJson
-import io.mosaicboot.core.user.service.AuthTokenService
+import io.mosaicboot.core.auth.service.AuthTokenService
 import io.mosaicboot.core.user.service.MosaicOAuth2TokenService
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse

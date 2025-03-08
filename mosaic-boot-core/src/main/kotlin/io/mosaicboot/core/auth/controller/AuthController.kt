@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-package io.mosaicboot.core.user.controller
+package io.mosaicboot.core.auth.controller
 
-import io.mosaicboot.core.domain.user.AuthMethod
 import io.mosaicboot.core.domain.user.UserStatus
 import io.mosaicboot.core.domain.vo.UserVo
 import io.mosaicboot.core.http.BaseMosaicController
@@ -25,13 +24,12 @@ import io.mosaicboot.core.util.WebClientInfo
 import io.mosaicboot.core.user.auth.LoginResult
 import io.mosaicboot.core.user.auth.MosaicAuthenticatedToken
 import io.mosaicboot.core.user.auth.MosaicAuthenticationHandler
-import io.mosaicboot.core.user.auth.RegisterResult
 import io.mosaicboot.core.user.config.MosaicUserProperties
 import io.mosaicboot.core.user.model.*
-import io.mosaicboot.core.user.oauth2.MosaicOAuth2RegisterToken
-import io.mosaicboot.core.user.service.AuthTokenService
+import io.mosaicboot.core.auth.service.AuthTokenService
+import io.mosaicboot.core.auth.service.AuthenticationService
+import io.mosaicboot.core.user.controller.toResponseEntity
 import io.mosaicboot.core.user.service.MosaicOAuth2UserService
-import io.mosaicboot.core.user.service.UserService
 import io.mosaicboot.core.util.UnreachableException
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.Parameter
@@ -45,15 +43,12 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.ApplicationContext
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
-import org.springframework.security.core.Authentication
-import org.springframework.security.core.context.SecurityContextHolder
-import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 
 @MosaicController
 class AuthController(
-    private val userService: UserService,
+    private val authenticationService: AuthenticationService,
     private val authTokenService: AuthTokenService,
     private val mosaicAuthenticationHandler: MosaicAuthenticationHandler,
     @Autowired(required = false) private val mosaicOAuth2UserService: MosaicOAuth2UserService?,
@@ -85,7 +80,7 @@ class AuthController(
         @Parameter(hidden = true) webClientInfo: WebClientInfo,
         @RequestBody body: LoginRequest,
     ): ResponseEntity<LoginResponse> {
-        val result = userService.login(
+        val result = authenticationService.login(
             method = body.method,
             username = body.username,
             credential = body.credential,
@@ -152,10 +147,10 @@ class AuthController(
         @Parameter(hidden = true) webClientInfo: WebClientInfo,
         @RequestBody body: RegisterRequest.Plain,
     ): ResponseEntity<RegisterResponse> {
-        if (!userService.isRegistrable(body.method)) {
+        if (!authenticationService.isRegistrable(body.method)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build()
         }
-        val result = userService.register(
+        val result = authenticationService.register(
             userTemplate = UserVo(
                 name = body.name,
                 email = body.email,
@@ -169,56 +164,6 @@ class AuthController(
             webClientInfo = webClientInfo,
         )
         return result.toResponseEntity()
-    }
-
-    @Operation(
-        summary = "Get current user information",
-        description = "Retrieve information about the currently authenticated user"
-    )
-    @ApiResponses(value = [
-        ApiResponse(
-            responseCode = "200",
-            description = "Current user information retrieved successfully",
-            content = [Content(mediaType = "application/json", schema = Schema(implementation = CurrentUserResponse::class))]
-        ),
-        ApiResponse(
-            responseCode = "401",
-            description = "Unauthorized access"
-        )
-    ])
-    @GetMapping("/current")
-    fun getCurrent(
-        authentication: Authentication,
-    ): ResponseEntity<CurrentUserResponse> {
-        if (authentication !is MosaicAuthenticatedToken) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
-        }
-        return ResponseEntity.ok(
-            CurrentUserResponse(
-                userId = authentication.userId,
-                activeTenantId = authentication.activeTenantUser?.tenantId,
-                activeTenantUserId = authentication.activeTenantUser?.tenantUserId,
-                name = "",
-                email = "",
-                permissions = emptyList(),
-            )
-        )
-    }
-
-    @Operation(
-        summary = "Get user tenants",
-        description = "Retrieve list of tenants for the current user"
-    )
-    @ApiResponses(value = [
-        ApiResponse(
-            responseCode = "200",
-            description = "Tenant list retrieved successfully",
-            content = [Content(mediaType = "application/json", schema = Schema(implementation = List::class))]
-        )
-    ])
-    @GetMapping("/current/tenants")
-    fun getTenants(): List<MyTenant> {
-        throw RuntimeException("not impl")
     }
 
     override fun getBaseUrl(applicationContext: ApplicationContext): String {

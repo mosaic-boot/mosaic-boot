@@ -16,7 +16,11 @@
 
 package io.mosaicboot.core.config
 
+import io.mosaicboot.core.auth.config.MosaicAuthConfig
+import io.mosaicboot.core.auth.controller.AuthController
+import io.mosaicboot.core.http.BaseMosaicController
 import io.mosaicboot.core.http.MosaicOpenAPIService
+import io.mosaicboot.core.http.MosaicRequestMappingHandlerMapping
 import io.mosaicboot.core.provision.config.ProvisionConfig
 import io.mosaicboot.core.user.config.MosaicUserConfig
 import io.mosaicboot.core.util.WebClientInfo
@@ -30,8 +34,10 @@ import org.springdoc.core.service.OpenAPIService
 import org.springdoc.core.service.SecurityService
 import org.springdoc.core.utils.PropertyResolverUtils
 import org.springdoc.core.utils.SpringDocUtils
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.context.properties.EnableConfigurationProperties
+import org.springframework.context.ApplicationContext
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Import
@@ -40,13 +46,16 @@ import org.springframework.core.annotation.Order
 import org.springframework.transaction.annotation.EnableTransactionManagement
 import org.springframework.web.method.support.HandlerMethodArgumentResolver
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer
+import org.springframework.web.util.pattern.PathPatternParser
 import java.util.*
+import java.util.function.Predicate
 
 @Configuration(proxyBeanMethods = true)
 @EnableConfigurationProperties(MosaicComponentsProperties::class)
 @EnableTransactionManagement
 @Import(value = [
     MosaicUserConfig::class,
+    MosaicAuthConfig::class,
     ProvisionConfig::class,
 ])
 class MosaicConfig {
@@ -78,6 +87,24 @@ class MosaicConfig {
             serverBaseUrlCustomisers,
             javadocProvider
         )
+    }
+
+    @Bean
+    fun mosaicControllerMapping(
+        applicationContext: ApplicationContext,
+        controllers: List<BaseMosaicController>,
+    ): MosaicRequestMappingHandlerMapping {
+        val requestMappingHandlerMapping = MosaicRequestMappingHandlerMapping()
+        val urlMap = HashMap<String, Predicate<Class<*>>>()
+        controllers.forEach { controller ->
+            urlMap[controller.getBaseUrl(applicationContext)] = Predicate<Class<*>> {
+                    it: Class<*> -> it == controller.javaClass
+            }
+        }
+        requestMappingHandlerMapping.order = -1
+        requestMappingHandlerMapping.pathPrefixes = urlMap
+        requestMappingHandlerMapping.patternParser = PathPatternParser()
+        return requestMappingHandlerMapping
     }
 
     @Configuration(proxyBeanMethods = true)

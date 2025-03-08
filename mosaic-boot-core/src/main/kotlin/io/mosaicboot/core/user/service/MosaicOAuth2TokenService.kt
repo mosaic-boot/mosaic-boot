@@ -17,6 +17,7 @@
 package io.mosaicboot.core.user.service
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import io.mosaicboot.core.auth.config.MosaicAuthProperties
 import io.mosaicboot.core.repository.AuthenticationRepositoryBase
 import io.mosaicboot.core.user.config.MosaicUserProperties
 import io.mosaicboot.core.user.model.OAuth2AccessTokenJson
@@ -45,14 +46,14 @@ import java.time.Instant
 
 @Service
 class MosaicOAuth2TokenService(
-    private val mosaicUserProperties: MosaicUserProperties,
+    private val mosaicAuthProperties: MosaicAuthProperties,
     private val objectMapper: ObjectMapper,
     private val authenticationRepository: AuthenticationRepositoryBase<*>,
     private val oAuth2AccessTokenRepository: OAuth2AccessTokenRepository,
     private val clientRegistrationRepository: ClientRegistrationRepository,
 ) {
     val serverSideCrypto = ServerSideCrypto(
-        mosaicUserProperties.jwe,
+        mosaicAuthProperties.jwe,
         objectMapper = objectMapper,
     )
 
