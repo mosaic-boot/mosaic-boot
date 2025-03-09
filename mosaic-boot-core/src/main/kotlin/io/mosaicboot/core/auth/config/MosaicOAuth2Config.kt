@@ -121,6 +121,7 @@ class MosaicOAuth2Config(
         private val mosaicAuthenticationHandler: MosaicAuthenticationHandler,
         private val mosaicOAuth2UserService: MosaicOAuth2UserService,
         private val mosaicOAuth2AuthorizedClientRepository: MosaicOAuth2AuthorizedClientRepository,
+        private val mosaicAuthFilter: FilterRegistrationBean<MosaicCookieAuthFilter>,
     ) : WebMvcConfigurer {
         @Bean
         @Order(-1)
@@ -142,6 +143,12 @@ class MosaicOAuth2Config(
                         .authorizedClientRepository(mosaicOAuth2AuthorizedClientRepository)
                         .authorizationEndpoint { endpoint ->
                             endpoint.baseUri("${mosaicAuthProperties.api.path}/oauth2/request")
+                                .authorizationRequestRepository(
+                                    CookieAuthorizationRequestRepository(
+                                        mosaicOAuth2UserService,
+                                        mosaicAuthFilter.filter,
+                                    )
+                                )
                         }
                         .redirectionEndpoint { endpoint ->
                             endpoint.baseUri("${mosaicAuthProperties.api.path}/oauth2/callback/*")

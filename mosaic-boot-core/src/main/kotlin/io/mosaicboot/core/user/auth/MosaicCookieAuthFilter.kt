@@ -38,9 +38,11 @@ class MosaicCookieAuthFilter(
         private val log = LoggerFactory.getLogger(MosaicCookieAuthFilter::class.java)
     }
 
+    private val authRedirectUrl = mosaicAuthProperties.cookie.prefix + "auth-redirect-url"
     private val authTokenCookieName = mosaicAuthProperties.cookie.prefix + "auth-token"
     private val activeTenantCookieName = mosaicAuthProperties.cookie.prefix + "active-tenant-user"
     private val oauth2RegisterTokenCookieName = mosaicAuthProperties.cookie.prefix + "oauth2-register-token"
+    private val oauth2AuthorizationRequestCookieName = mosaicAuthProperties.cookie.prefix + "oauth2-authorization-request"
 
     fun applyAuthentication(
         request: HttpServletRequest,
@@ -61,6 +63,40 @@ class MosaicCookieAuthFilter(
         setCookie(request, response, oauth2RegisterTokenCookieName, token.token) { cookie ->
             cookie.maxAge = 3600
         }
+    }
+
+    fun applyOauth2AuthorizationRequest(
+        request: HttpServletRequest,
+        response: HttpServletResponse,
+        data: String?,
+        redirectUrl: String?,
+    ) {
+        if (data != null) {
+            setCookie(request, response, oauth2AuthorizationRequestCookieName, data) { cookie ->
+                cookie.maxAge = 3600
+            }
+        } else {
+            setCookie(request, response, oauth2AuthorizationRequestCookieName, null) { cookie ->
+                cookie.maxAge = 0
+            }
+        }
+        if (redirectUrl != null) {
+            setCookie(request, response, authRedirectUrl, redirectUrl) { cookie ->
+                cookie.maxAge = 3600
+            }
+        }
+    }
+
+    fun getOauth2AuthorizationRequest(
+        request: HttpServletRequest,
+    ): String? {
+        return request.cookies?.find { it.name == oauth2AuthorizationRequestCookieName }?.value
+    }
+
+    fun getAuthRedirectUrl(
+        request: HttpServletRequest,
+    ): String? {
+        return request.cookies?.find { it.name == authRedirectUrl }?.value
     }
 
     fun clearCookies(

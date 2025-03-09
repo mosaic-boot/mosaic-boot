@@ -40,6 +40,7 @@ class MosaicAuthenticationHandler(
         response: HttpServletResponse,
         authentication: Authentication
     ) {
+        val authRedirectUrl = mosaicCookieAuthFilter.getAuthRedirectUrl(request)
         when (authentication) {
             is MosaicAuthenticatedToken -> {
                 mosaicCookieAuthFilter.applyAuthentication(
@@ -60,7 +61,7 @@ class MosaicAuthenticationHandler(
                             response,
                             principal.authenticatedToken,
                         )
-                        response.sendRedirect(mosaicAuthProperties.oauth2.successUrl)
+                        response.sendRedirect(authRedirectUrl ?: mosaicAuthProperties.oauth2.successUrl)
                     }
                     else -> throw UnreachableException()
                 }
