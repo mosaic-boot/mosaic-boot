@@ -28,10 +28,10 @@ import io.mosaicboot.core.jwt.JweHelper
 import io.mosaicboot.core.jwt.JwkHelper
 import io.mosaicboot.core.jwt.JwtHelper
 import io.mosaicboot.core.user.auth.MosaicAuthenticatedToken
-import io.mosaicboot.core.user.oauth2.MosaicOAuth2RegisterToken
+import io.mosaicboot.core.auth.oauth2.MosaicOAuth2RegisterToken
 import io.mosaicboot.core.user.model.*
-import io.mosaicboot.core.user.oauth2.OAuth2BasicInfo
-import io.mosaicboot.core.user.oauth2.OAuth2RegisterTokenData
+import io.mosaicboot.core.auth.oauth2.OAuth2BasicInfo
+import io.mosaicboot.core.auth.oauth2.OAuth2RegisterTokenData
 import io.mosaicboot.core.user.service.UserService
 import io.mosaicboot.core.util.WebClientInfo
 import org.springframework.stereotype.Service

@@ -26,7 +26,7 @@ interface MosaicCredentialHandler {
     fun encode(
         method: String,
         username: String,
-        credential: String?,
+        credential: String,
     ): String?
 
     fun validate(

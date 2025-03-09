@@ -22,6 +22,7 @@ import io.mosaicboot.core.domain.vo.*
 import io.mosaicboot.core.repository.AuthenticationRepositoryBase
 import io.mosaicboot.core.repository.TenantUserRepositoryBase
 import io.mosaicboot.core.repository.UserRepositoryBase
+import io.mosaicboot.core.user.model.ActiveTenantUser
 import org.springframework.stereotype.Service
 import kotlin.jvm.optionals.getOrNull
 
@@ -36,13 +37,14 @@ class UserService(
     /**
      * TODO: caching
      */
-    fun getCurrentActiveUser(userId: String, tenantUserId: String?): CurrentActiveUser? {
-        if (tenantUserId != null) {
-            return tenantUserRepository.findCurrentActiveUserById(tenantUserId)
+    fun getCurrentActiveUser(userId: String, tenantUser: ActiveTenantUser?): CurrentActiveUser {
+        return if (tenantUser != null) {
+            tenantUserRepository.findCurrentActiveUserById(tenantUser.tenantUserId)
                 ?.takeIf { it.user.id == userId }
-        }
-        return userRepository.findById(userId).getOrNull()?.let { user ->
-            CurrentActiveUser(user = user, tenantUser = null)
-        }
+        } else {
+            userRepository.findById(userId).getOrNull()?.let { user ->
+                CurrentActiveUser(user = user, tenantUser = null)
+            }
+        } ?: throw IllegalArgumentException("No current active user")
     }
 }

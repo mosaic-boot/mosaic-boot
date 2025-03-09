@@ -22,7 +22,7 @@ import io.mosaicboot.core.repository.AuthenticationRepositoryBase
 import io.mosaicboot.core.user.config.MosaicUserProperties
 import io.mosaicboot.core.user.model.OAuth2AccessTokenJson
 import io.mosaicboot.core.user.model.OAuth2RefreshTokenJson
-import io.mosaicboot.core.user.oauth2.OAuth2AccessTokenRepository
+import io.mosaicboot.core.auth.oauth2.OAuth2AccessTokenRepository
 import io.mosaicboot.core.util.ServerSideCrypto
 import io.mosaicboot.core.util.UnreachableException
 import org.springframework.security.oauth2.client.ClientAuthorizationException

@@ -16,8 +16,8 @@
 
 package io.mosaicboot.mongodb.def.oauth2.repository
 
-import io.mosaicboot.core.user.oauth2.LockResult
-import io.mosaicboot.core.user.oauth2.OAuth2AccessTokenRepository
+import io.mosaicboot.core.auth.oauth2.LockResult
+import io.mosaicboot.core.auth.oauth2.OAuth2AccessTokenRepository
 import io.mosaicboot.mongodb.def.oauth2.entity.OAuth2AccessTokenEntity
 import org.springframework.data.mongodb.core.MongoTemplate
 import org.springframework.data.mongodb.core.query.Criteria

@@ -31,7 +31,7 @@ class MosaicOAuth2CredentialHandler : MosaicCredentialHandler {
         return null
     }
 
-    override fun encode(method: String, username: String, credential: String?): String? {
+    override fun encode(method: String, username: String, credential: String): String {
         return credential
     }
 

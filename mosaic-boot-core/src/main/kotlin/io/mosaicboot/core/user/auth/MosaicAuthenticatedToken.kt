@@ -28,11 +28,15 @@ class MosaicAuthenticatedToken(
 ) : AbstractAuthenticationToken(authorities) {
     var activeTenantUser: ActiveTenantUser? = null
 
-    override fun getCredentials(): Any {
-        TODO("Not yet implemented")
+    init {
+        isAuthenticated = true
+    }
+
+    override fun getCredentials(): Any? {
+        return null
     }
 
     override fun getPrincipal(): Any {
-        TODO("Not yet implemented")
+        return userId
     }
 }

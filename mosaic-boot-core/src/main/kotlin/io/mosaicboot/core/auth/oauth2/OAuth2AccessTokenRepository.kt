@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-package io.mosaicboot.core.user.oauth2
+package io.mosaicboot.core.auth.oauth2
 
 import java.time.Instant
 
-class LockResult(
-    val success: Boolean,
-    val lockId: String,
-    val unlockAt: Instant,
-)
+interface OAuth2AccessTokenRepository {
+    fun tryLock(userId: String, authenticationId: String): LockResult
+    fun update(userId: String, authenticationId: String, expiresAt: Instant?, data: String)
+    fun read(userId: String, authenticationId: String): String?
+}

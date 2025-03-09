@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.mosaicboot.core.user.oauth2
+package io.mosaicboot.core.auth.oauth2
 
 import org.springframework.security.oauth2.core.user.OAuth2User
 

@@ -36,10 +36,10 @@ class MosaicSha256CredentialHandler : MosaicCredentialHandler {
     override fun encode(
         method: String,
         username: String,
-        credential: String?,
+        credential: String,
     ): String {
         return passwordEncoder.encode(
-            Base64.getDecoder().decode(credential!!)
+            Base64.getDecoder().decode(credential)
         )
     }
 

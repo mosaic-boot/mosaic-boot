@@ -25,6 +25,7 @@ import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Import
 import org.springframework.http.HttpStatus
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
+import org.springframework.security.config.http.SessionCreationPolicy
 import org.springframework.security.web.SecurityFilterChain
 import org.springframework.security.web.authentication.HttpStatusEntryPoint
 import org.springframework.security.web.authentication.logout.SimpleUrlLogoutSuccessHandler
@@ -139,7 +140,13 @@ class MosaicAuthConfig(
         fun mosaicAuthSecurityFilterChain(http: HttpSecurity): SecurityFilterChain {
             http
                 .securityMatcher("${mosaicAuthProperties.api.path}/**")
+                .sessionManagement { it.disable() }
+                .securityContext { it.disable() }
+                .anonymous { it.disable() }
+                .httpBasic { it.disable() }
+                .formLogin { it.disable() }
                 .csrf { it.disable() }
+                .oauth2Login { it.disable() }
                 .authorizeHttpRequests { authorizeHttpRequests ->
                     authorizeHttpRequests.requestMatchers("${mosaicAuthProperties.api.path}/current").authenticated()
                 }

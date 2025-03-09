@@ -14,17 +14,14 @@
  * limitations under the License.
  */
 
-package io.mosaicboot.core.user.oauth2
+package io.mosaicboot.core.auth.oauth2
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.annotation.JsonProperty
 import io.mosaicboot.core.jwt.JwtContentType
-import io.mosaicboot.core.user.model.OAuth2AccessTokenJson
-import io.mosaicboot.core.user.model.OAuth2RefreshTokenJson
 
-@JwtContentType("oauth2-register")
 @JsonIgnoreProperties(ignoreUnknown = true)
-data class OAuth2RegisterTokenData(
+data class OAuth2BasicInfo(
     @field:JsonProperty("provider")
     val provider: String,
     @field:JsonProperty("id")
@@ -33,8 +30,4 @@ data class OAuth2RegisterTokenData(
     val name: String,
     @field:JsonProperty("email")
     val email: String?,
-    @field:JsonProperty("accessToken")
-    val accessToken: OAuth2AccessTokenJson,
-    @field:JsonProperty("refreshToken")
-    val refreshToken: OAuth2RefreshTokenJson?,
 )

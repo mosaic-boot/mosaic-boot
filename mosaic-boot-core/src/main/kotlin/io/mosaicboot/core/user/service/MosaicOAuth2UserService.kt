@@ -18,6 +18,7 @@ package io.mosaicboot.core.user.service
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.mosaicboot.core.auth.config.MosaicAuthProperties
+import io.mosaicboot.core.auth.oauth2.*
 import io.mosaicboot.core.auth.service.AuthTokenService
 import io.mosaicboot.core.auth.service.AuthenticationService
 import io.mosaicboot.core.domain.user.AuthMethod

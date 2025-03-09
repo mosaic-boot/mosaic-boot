@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.mosaicboot.core.user.controller
+package io.mosaicboot.core.auth.controller
 
 import io.mosaicboot.core.auth.config.MosaicAuthProperties
 import io.mosaicboot.core.domain.user.UserStatus
@@ -23,8 +23,9 @@ import io.mosaicboot.core.http.BaseMosaicController
 import io.mosaicboot.core.http.MosaicController
 import io.mosaicboot.core.user.model.RegisterRequest
 import io.mosaicboot.core.user.model.RegisterResponse
-import io.mosaicboot.core.user.oauth2.MosaicOAuth2RegisterToken
-import io.mosaicboot.core.user.oauth2.OAuth2BasicInfo
+import io.mosaicboot.core.auth.oauth2.MosaicOAuth2RegisterToken
+import io.mosaicboot.core.auth.oauth2.OAuth2BasicInfo
+import io.mosaicboot.core.user.controller.toResponseEntity
 import io.mosaicboot.core.user.service.MosaicOAuth2UserService
 import io.mosaicboot.core.util.WebClientInfo
 import io.swagger.v3.oas.annotations.Operation

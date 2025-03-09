@@ -14,19 +14,26 @@
  * limitations under the License.
  */
 
-package io.mosaicboot.core.user.oauth2
+package io.mosaicboot.core.auth.oauth2
 
-import io.mosaicboot.core.user.auth.MosaicAuthenticatedToken
+import io.mosaicboot.core.util.WebClientInfo
 import org.springframework.security.core.GrantedAuthority
+import org.springframework.security.oauth2.client.OAuth2AuthorizedClient
 import org.springframework.security.oauth2.core.user.OAuth2User
 
-class AuthenticatedOAuth2User(
-    val authenticatedToken: MosaicAuthenticatedToken,
-    val oAuth2User: OAuth2User,
+class TemporaryOAuth2User(
+    val webClientInfo: WebClientInfo,
+    val basicInfo: OAuth2BasicInfo,
 ) : OAuth2User {
-    override fun getName(): String = oAuth2User.name
+    private val attributes = HashMap<String, Any?>()
 
-    override fun getAttributes(): MutableMap<String, Any> = oAuth2User.attributes
+    var client: OAuth2AuthorizedClient? = null
+
+    override fun getName(): String {
+        return basicInfo.id
+    }
+
+    override fun getAttributes(): MutableMap<String, Any?> = attributes
 
     override fun getAuthorities(): Collection<GrantedAuthority> = emptyList()
 }

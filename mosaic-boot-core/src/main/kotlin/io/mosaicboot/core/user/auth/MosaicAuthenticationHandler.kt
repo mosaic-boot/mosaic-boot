@@ -18,8 +18,8 @@ package io.mosaicboot.core.user.auth
 
 import io.mosaicboot.core.auth.config.MosaicAuthProperties
 import io.mosaicboot.core.user.config.MosaicUserProperties
-import io.mosaicboot.core.user.oauth2.AuthenticatedOAuth2User
-import io.mosaicboot.core.user.oauth2.TemporaryOAuth2User
+import io.mosaicboot.core.auth.oauth2.AuthenticatedOAuth2User
+import io.mosaicboot.core.auth.oauth2.TemporaryOAuth2User
 import io.mosaicboot.core.util.UnreachableException
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse

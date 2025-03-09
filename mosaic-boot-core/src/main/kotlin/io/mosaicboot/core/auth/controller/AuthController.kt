@@ -16,6 +16,7 @@
 
 package io.mosaicboot.core.auth.controller
 
+import io.mosaicboot.core.auth.config.MosaicAuthProperties
 import io.mosaicboot.core.domain.user.UserStatus
 import io.mosaicboot.core.domain.vo.UserVo
 import io.mosaicboot.core.http.BaseMosaicController
@@ -167,7 +168,7 @@ class AuthController(
     }
 
     override fun getBaseUrl(applicationContext: ApplicationContext): String {
-        val mosaicUserProperties = applicationContext.getBean(MosaicUserProperties::class.java)
-        return mosaicUserProperties.api.path
+        val mosaicAuthProperties = applicationContext.getBean(MosaicAuthProperties::class.java)
+        return mosaicAuthProperties.api.path
     }
 }

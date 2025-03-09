@@ -14,12 +14,19 @@
  * limitations under the License.
  */
 
-package io.mosaicboot.core.user.oauth2
+package io.mosaicboot.core.auth.oauth2
 
-import java.time.Instant
+import io.mosaicboot.core.user.auth.MosaicAuthenticatedToken
+import org.springframework.security.core.GrantedAuthority
+import org.springframework.security.oauth2.core.user.OAuth2User
 
-interface OAuth2AccessTokenRepository {
-    fun tryLock(userId: String, authenticationId: String): LockResult
-    fun update(userId: String, authenticationId: String, expiresAt: Instant?, data: String)
-    fun read(userId: String, authenticationId: String): String?
+class AuthenticatedOAuth2User(
+    val authenticatedToken: MosaicAuthenticatedToken,
+    val oAuth2User: OAuth2User,
+) : OAuth2User {
+    override fun getName(): String = oAuth2User.name
+
+    override fun getAttributes(): MutableMap<String, Any> = oAuth2User.attributes
+
+    override fun getAuthorities(): Collection<GrantedAuthority> = emptyList()
 }

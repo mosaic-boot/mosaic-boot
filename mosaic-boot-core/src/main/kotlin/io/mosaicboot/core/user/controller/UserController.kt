@@ -1,20 +1,16 @@
 package io.mosaicboot.core.user.controller
 
-import io.mosaicboot.core.auth.service.AuthTokenService
 import io.mosaicboot.core.http.BaseMosaicController
 import io.mosaicboot.core.http.MosaicController
 import io.mosaicboot.core.user.auth.MosaicAuthenticatedToken
-import io.mosaicboot.core.user.auth.MosaicAuthenticationHandler
 import io.mosaicboot.core.user.config.MosaicUserProperties
 import io.mosaicboot.core.user.model.*
-import io.mosaicboot.core.user.service.MosaicOAuth2UserService
 import io.mosaicboot.core.user.service.UserService
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.responses.ApiResponses
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.ApplicationContext
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -47,13 +43,17 @@ class UserController(
         if (authentication !is MosaicAuthenticatedToken) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
         }
+        val currentActiveUser = userService.getCurrentActiveUser(
+            authentication.userId,
+            authentication.activeTenantUser,
+        )
         return ResponseEntity.ok(
             CurrentUserResponse(
                 userId = authentication.userId,
                 activeTenantId = authentication.activeTenantUser?.tenantId,
                 activeTenantUserId = authentication.activeTenantUser?.tenantUserId,
-                name = "",
-                email = "",
+                name = currentActiveUser.user.name,
+                email = currentActiveUser.user.email,
                 permissions = emptyList(),
             )
         )

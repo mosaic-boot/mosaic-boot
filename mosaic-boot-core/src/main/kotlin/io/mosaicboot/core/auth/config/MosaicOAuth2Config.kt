@@ -17,12 +17,12 @@
 package io.mosaicboot.core.auth.config
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import io.mosaicboot.core.auth.oauth2.*
 import io.mosaicboot.core.repository.AuthenticationRepositoryBase
 import io.mosaicboot.core.user.auth.MosaicAuthenticationHandler
 import io.mosaicboot.core.user.auth.MosaicCookieAuthFilter
 import io.mosaicboot.core.user.auth.MosaicOAuth2CredentialHandler
-import io.mosaicboot.core.user.controller.MosaicOAuth2Controller
-import io.mosaicboot.core.user.oauth2.*
+import io.mosaicboot.core.auth.controller.MosaicOAuth2Controller
 import io.mosaicboot.core.user.service.MosaicOAuth2UserService
 import io.mosaicboot.core.auth.service.AuthTokenService
 import io.mosaicboot.core.auth.service.AuthenticationService
@@ -127,22 +127,29 @@ class MosaicOAuth2Config(
         fun mosaicOAuth2SecurityFilterChain(http: HttpSecurity): SecurityFilterChain {
             http
                 .securityMatcher("${mosaicAuthProperties.api.path}/oauth2/**")
+                .sessionManagement { it.disable() }
+                .securityContext { it.disable() }
+                .anonymous { it.disable() }
+                .httpBasic { it.disable() }
+                .formLogin { it.disable() }
+                .logout { it.disable() }
                 .csrf { it.disable() }
                 .authorizeHttpRequests { authorizeHttpRequests ->
-                    authorizeHttpRequests.anyRequest().permitAll()
+                    authorizeHttpRequests.requestMatchers("${mosaicAuthProperties.api.path}/oauth2/**").permitAll()
                 }
                 .oauth2Login { oauth2Login ->
-                    oauth2Login.authorizedClientRepository(mosaicOAuth2AuthorizedClientRepository)
-                    oauth2Login.authorizationEndpoint { endpoint ->
-                        endpoint.baseUri("${mosaicAuthProperties.api.path}/oauth2/request")
-                    }
-                    oauth2Login.redirectionEndpoint { endpoint ->
-                        endpoint.baseUri("${mosaicAuthProperties.api.path}/oauth2/callback/*")
-                    }
-                    oauth2Login.userInfoEndpoint { endpoint ->
-                        endpoint.userService(mosaicOAuth2UserService)
-                    }
-                    oauth2Login.successHandler(mosaicAuthenticationHandler)
+                    oauth2Login
+                        .authorizedClientRepository(mosaicOAuth2AuthorizedClientRepository)
+                        .authorizationEndpoint { endpoint ->
+                            endpoint.baseUri("${mosaicAuthProperties.api.path}/oauth2/request")
+                        }
+                        .redirectionEndpoint { endpoint ->
+                            endpoint.baseUri("${mosaicAuthProperties.api.path}/oauth2/callback/*")
+                        }
+                        .userInfoEndpoint { endpoint ->
+                            endpoint.userService(mosaicOAuth2UserService)
+                        }
+                        .successHandler(mosaicAuthenticationHandler)
                 }
             val output = http.build()
             val oAuth2LoginAuthenticationFilter = output.filters.find { it.javaClass == OAuth2LoginAuthenticationFilter::class.java }!!

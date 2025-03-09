@@ -50,7 +50,7 @@ class CredentialService(
     fun encodeCredential(
         method: String,
         username: String,
-        credential: String?,
+        credential: String,
     ): String {
         val credentialHandler = namedCredentialHandlers[method]
 

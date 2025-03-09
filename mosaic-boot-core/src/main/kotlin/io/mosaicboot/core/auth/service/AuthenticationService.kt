@@ -177,7 +177,7 @@ class AuthenticationService(
             val user = userRepository.save(userTemplate)
 
             // Create authentication
-            val encodedCredential = credentialService.encodeCredential(method, username, credential)
+            val encodedCredential = credential?.let { credentialService.encodeCredential(method, username, it) }
 
             val authentication = authenticationRepository.save(
                 AuthenticationVo(

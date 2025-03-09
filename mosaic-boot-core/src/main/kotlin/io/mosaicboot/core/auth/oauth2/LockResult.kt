@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
-package io.mosaicboot.core.user.oauth2
+package io.mosaicboot.core.auth.oauth2
 
-import org.springframework.security.oauth2.core.user.OAuth2User
+import java.time.Instant
 
-interface OAuth2UserInfoHandler {
-    fun getProviderName(): String
-    fun handle(oAuth2User: OAuth2User): OAuth2BasicInfo
-}
+class LockResult(
+    val success: Boolean,
+    val lockId: String,
+    val unlockAt: Instant,
+)
