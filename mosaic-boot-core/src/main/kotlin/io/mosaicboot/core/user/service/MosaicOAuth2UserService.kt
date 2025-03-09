@@ -25,8 +25,6 @@ import io.mosaicboot.core.domain.user.AuthMethod
 import io.mosaicboot.core.domain.vo.UserVo
 import io.mosaicboot.core.user.auth.LoginResult
 import io.mosaicboot.core.user.auth.RegisterResult
-import io.mosaicboot.core.user.config.MosaicUserProperties
-import io.mosaicboot.core.user.oauth2.*
 import io.mosaicboot.core.util.ServerSideCrypto
 import io.mosaicboot.core.util.UnreachableException
 import io.mosaicboot.core.util.WebClientInfo
