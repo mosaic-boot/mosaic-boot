@@ -16,6 +16,8 @@
 
 package io.mosaicboot.core.config
 
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.mosaicboot.core.auth.config.MosaicAuthConfig
 import io.mosaicboot.core.auth.controller.AuthController
 import io.mosaicboot.core.http.BaseMosaicController
@@ -63,6 +65,12 @@ class MosaicConfig {
         init {
             SpringDocUtils.getConfig().addJavaTypeToIgnore(WebClientInfo::class.java)
         }
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(ObjectMapper::class)
+    fun objectMapper(): ObjectMapper {
+        return jacksonObjectMapper()
     }
 
     @Bean

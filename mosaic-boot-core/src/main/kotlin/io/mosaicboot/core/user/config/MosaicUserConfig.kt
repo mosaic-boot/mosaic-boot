@@ -68,7 +68,7 @@ class MosaicUserConfig(
 
     @Bean
     @ConditionalOnProperty(prefix = "mosaic.user.api", name = ["enabled"], havingValue = "true", matchIfMissing = true)
-    fun userController(
+    fun mosaicUserController(
         userService: UserService,
     ): UserController {
         return UserController(

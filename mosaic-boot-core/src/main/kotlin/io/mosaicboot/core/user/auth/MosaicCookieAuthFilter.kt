@@ -18,15 +18,20 @@ package io.mosaicboot.core.user.auth
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.mosaicboot.core.auth.config.MosaicAuthProperties
-import io.mosaicboot.core.user.model.ActiveTenantUser
 import io.mosaicboot.core.auth.oauth2.MosaicOAuth2RegisterToken
 import io.mosaicboot.core.auth.service.AuthTokenService
+import io.mosaicboot.core.user.model.ActiveTenantUser
 import jakarta.servlet.FilterChain
 import jakarta.servlet.http.Cookie
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
 import org.slf4j.LoggerFactory
+import org.springframework.security.core.Authentication
 import org.springframework.security.core.context.SecurityContextHolder
+import org.springframework.security.core.context.SecurityContextHolderStrategy
+import org.springframework.security.web.authentication.AuthenticationFilter
+import org.springframework.security.web.context.RequestAttributeSecurityContextRepository
+import org.springframework.security.web.context.SecurityContextRepository
 import org.springframework.web.filter.OncePerRequestFilter
 
 class MosaicCookieAuthFilter(
@@ -43,6 +48,12 @@ class MosaicCookieAuthFilter(
     private val activeTenantCookieName = mosaicAuthProperties.cookie.prefix + "active-tenant-user"
     private val oauth2RegisterTokenCookieName = mosaicAuthProperties.cookie.prefix + "oauth2-register-token"
     private val oauth2AuthorizationRequestCookieName = mosaicAuthProperties.cookie.prefix + "oauth2-authorization-request"
+
+    private var securityContextRepository: SecurityContextRepository =
+        RequestAttributeSecurityContextRepository()
+
+    private var securityContextHolderStrategy: SecurityContextHolderStrategy =
+        SecurityContextHolder.getContextHolderStrategy()
 
     fun applyAuthentication(
         request: HttpServletRequest,
@@ -119,7 +130,7 @@ class MosaicCookieAuthFilter(
         response: HttpServletResponse,
         name: String,
         value: String?,
-        customizer: ((Cookie) -> Unit)? = null
+        customizer: ((Cookie) -> Unit)? = null,
     ): Cookie {
         val cookie = Cookie(name, value)
         cookie.path = "/"
@@ -136,7 +147,7 @@ class MosaicCookieAuthFilter(
     override fun doFilterInternal(
         request: HttpServletRequest,
         response: HttpServletResponse,
-        filterChain: FilterChain
+        filterChain: FilterChain,
     ) {
         try {
             val activeTenantUser = request.cookies?.find { it.name == activeTenantCookieName }
@@ -150,7 +161,7 @@ class MosaicCookieAuthFilter(
                         log.debug("auth token verification failed (token={})", cookie.value, ex)
                     }.getOrNull()
                 }?.let { authentication ->
-                    SecurityContextHolder.getContext().authentication = authentication
+                    successfulAuthentication(request, response, authentication)
                     return
                 }
 
@@ -162,10 +173,22 @@ class MosaicCookieAuthFilter(
                         log.debug("auth token verification failed (token={})", cookie.value, ex)
                     }.getOrNull()
                 }?.let { authentication ->
-                    SecurityContextHolder.getContext().authentication = authentication
+                    successfulAuthentication(request, response, authentication)
+                    return
                 }
         } finally {
             filterChain.doFilter(request, response)
         }
+    }
+
+    private fun successfulAuthentication(
+        request: HttpServletRequest,
+        response: HttpServletResponse,
+        authentication: Authentication
+    ) {
+        val context = this.securityContextHolderStrategy.createEmptyContext();
+        context.authentication = authentication;
+        this.securityContextHolderStrategy.context = context;
+        this.securityContextRepository.saveContext(context, request, response);
     }
 }
