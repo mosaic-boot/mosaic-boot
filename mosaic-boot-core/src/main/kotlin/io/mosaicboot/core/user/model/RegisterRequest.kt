@@ -57,6 +57,7 @@ sealed class RegisterRequest(
         email = email,
     )
 
+    @JsonIgnoreProperties(ignoreUnknown = true)
     class OAuth2(
         @JsonProperty("name")
         name: String,
