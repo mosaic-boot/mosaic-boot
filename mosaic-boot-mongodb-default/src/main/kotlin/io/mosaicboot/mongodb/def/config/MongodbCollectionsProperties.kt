@@ -33,5 +33,6 @@ data class MongodbCollectionsProperties(
 ) {
     data class Collection(
         var collection: String,
+        var customized: Boolean = false,
     )
 }

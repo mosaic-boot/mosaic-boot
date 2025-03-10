@@ -23,7 +23,7 @@ import org.springframework.data.mongodb.core.mapping.Document
 import org.springframework.data.mongodb.core.mapping.Field
 import java.time.Instant
 
-@Document(collection = "\${mosaic.datasource.mongodb.collections.siteRole.collection:siteRoles}")
+@Document(collection = "\${mosaic.datasource.mongodb.collections.site-role.collection:siteRoles}")
 data class SiteRoleEntity(
     @Id
     override val id: String,

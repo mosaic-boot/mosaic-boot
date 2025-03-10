@@ -18,9 +18,11 @@ package io.mosaicboot.mongodb.def.repository
 
 import io.mosaicboot.core.repository.PermissionRepositoryBase
 import io.mosaicboot.mongodb.def.entity.PermissionEntity
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.data.mongodb.repository.MongoRepository
 import org.springframework.stereotype.Repository
 
 @Repository
+@ConditionalOnProperty(prefix = "mosaic.datasource.mongodb.collections.permission", name = ["customized"], havingValue = "false", matchIfMissing = true)
 interface PermissionRepository : MongoRepository<PermissionEntity, String>,
     PermissionRepositoryBase<PermissionEntity>

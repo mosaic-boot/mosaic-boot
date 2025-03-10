@@ -18,9 +18,11 @@ package io.mosaicboot.mongodb.def.repository
 
 import io.mosaicboot.core.repository.SiteRoleRepository
 import io.mosaicboot.mongodb.def.entity.SiteRoleEntity
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.data.mongodb.repository.MongoRepository
 import org.springframework.stereotype.Repository
 
 @Repository
+@ConditionalOnProperty(prefix = "mosaic.datasource.mongodb.collections.site-role", name = ["customized"], havingValue = "false", matchIfMissing = true)
 interface SiteRoleRepository : MongoRepository<SiteRoleEntity, String>,
     SiteRoleRepository<SiteRoleEntity>

@@ -18,10 +18,12 @@ package io.mosaicboot.mongodb.def.repository
 
 import io.mosaicboot.core.repository.UserRepositoryBase
 import io.mosaicboot.mongodb.def.entity.UserEntity
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.data.mongodb.repository.MongoRepository
 import org.springframework.stereotype.Repository
 
 @Repository
+@ConditionalOnProperty(prefix = "mosaic.datasource.mongodb.collections.user", name = ["customized"], havingValue = "false", matchIfMissing = true)
 interface UserRepository : MongoRepository<UserEntity, String>,
     UserRepositoryBase<UserEntity>,
     UserCustomRepository

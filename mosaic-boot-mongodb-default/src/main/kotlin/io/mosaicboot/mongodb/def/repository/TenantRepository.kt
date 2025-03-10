@@ -17,9 +17,11 @@
 package io.mosaicboot.mongodb.def.repository
 
 import io.mosaicboot.mongodb.def.entity.TenantEntity
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.data.mongodb.repository.MongoRepository
 import org.springframework.stereotype.Repository
 
 @Repository
+@ConditionalOnProperty(prefix = "mosaic.datasource.mongodb.collections.tenant", name = ["customized"], havingValue = "false", matchIfMissing = true)
 interface TenantRepository : MongoRepository<TenantEntity, String> {
 }
