@@ -25,14 +25,19 @@ import org.springframework.security.oauth2.core.OAuth2AccessToken
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class OAuth2AccessTokenJson(
     @JsonProperty("type")
+    @field:JsonProperty("type")
     val type: String,
     @JsonProperty("value")
+    @field:JsonProperty("value")
     val value: String,
     @JsonProperty("issuedAt")
+    @field:JsonProperty("issuedAt")
     val issuedAt: Long?,
     @JsonProperty("expiresAt")
+    @field:JsonProperty("expiresAt")
     val expiresAt: Long?,
     @JsonProperty("scopes")
+    @field:JsonProperty("scopes")
     val scopes: Set<String>,
 ) {
     companion object {

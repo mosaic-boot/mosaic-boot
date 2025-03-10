@@ -26,10 +26,13 @@ import org.springframework.security.oauth2.core.OAuth2RefreshToken
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class OAuth2RefreshTokenJson(
     @JsonProperty("value")
+    @field:JsonProperty("value")
     val value: String,
     @JsonProperty("issuedAt")
+    @field:JsonProperty("issuedAt")
     val issuedAt: Long?,
     @JsonProperty("expiresAt")
+    @field:JsonProperty("expiresAt")
     val expiresAt: Long?,
 ) {
     companion object {
