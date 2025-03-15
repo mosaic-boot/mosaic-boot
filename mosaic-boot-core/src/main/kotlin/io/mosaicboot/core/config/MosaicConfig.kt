@@ -17,13 +17,18 @@
 package io.mosaicboot.core.config
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.datatype.jsr310.JSR310Module
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import com.fasterxml.jackson.module.kotlin.jsonMapper
+import com.fasterxml.jackson.module.kotlin.kotlinModule
 import io.mosaicboot.core.auth.config.MosaicAuthConfig
 import io.mosaicboot.core.auth.controller.AuthController
 import io.mosaicboot.core.http.BaseMosaicController
 import io.mosaicboot.core.http.MosaicOpenAPIService
 import io.mosaicboot.core.http.MosaicRequestMappingHandlerMapping
 import io.mosaicboot.core.provision.config.ProvisionConfig
+import io.mosaicboot.core.tenant.config.MosaicTenantConfig
 import io.mosaicboot.core.user.config.MosaicUserConfig
 import io.mosaicboot.core.util.WebClientInfo
 import io.mosaicboot.core.util.WebClientInfoResolver
@@ -58,6 +63,7 @@ import java.util.function.Predicate
 @Import(value = [
     MosaicUserConfig::class,
     MosaicAuthConfig::class,
+    MosaicTenantConfig::class,
     ProvisionConfig::class,
 ])
 class MosaicConfig {
@@ -70,7 +76,10 @@ class MosaicConfig {
     @Bean
     @ConditionalOnMissingBean(ObjectMapper::class)
     fun objectMapper(): ObjectMapper {
-        return jacksonObjectMapper()
+        return jsonMapper {
+            addModule(kotlinModule())
+            addModule(JavaTimeModule())
+        }
     }
 
     @Bean

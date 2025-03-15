@@ -16,6 +16,7 @@
 
 package io.mosaicboot.core.provision.config
 
+import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.boot.context.properties.EnableConfigurationProperties
@@ -35,7 +36,9 @@ class ProvisionConfig(
     fun mosaicRepositoryPopulator(): Jackson2RepositoryPopulatorFactoryBean {
         val factory = Jackson2RepositoryPopulatorFactoryBean()
 
-        factory.setMapper(objectMapper)
+        val mapper = objectMapper.copy()
+            .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+        factory.setMapper(mapper)
         factory.setResources(
             mosaicProvisionProperties.resources.map {
                 ClassPathResource(it)

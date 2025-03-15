@@ -16,7 +16,7 @@
 
 package io.mosaicboot.mongodb.def.repository
 
-import io.mosaicboot.core.repository.AuthenticationRepositoryBase
+import io.mosaicboot.core.auth.repository.AuthenticationRepositoryBase
 import io.mosaicboot.mongodb.def.entity.AuthenticationEntity
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.data.mongodb.repository.MongoRepository

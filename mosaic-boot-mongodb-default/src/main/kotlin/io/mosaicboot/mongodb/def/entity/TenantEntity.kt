@@ -16,8 +16,8 @@
 
 package io.mosaicboot.mongodb.def.entity
 
-import io.mosaicboot.core.domain.tenant.Tenant
-import io.mosaicboot.core.domain.tenant.TenantStatus
+import io.mosaicboot.core.tenant.entity.Tenant
+import io.mosaicboot.core.tenant.enums.TenantStatus
 import org.springframework.data.annotation.Id
 import org.springframework.data.mongodb.core.mapping.Document
 import org.springframework.data.mongodb.core.mapping.Field
@@ -32,7 +32,7 @@ data class TenantEntity(
     @Field("updatedAt")
     override var updatedAt: Instant,
     @Field("defaultTimeZone")
-    override var defaultTimeZone: String,
+    override var timeZone: String,
     @Field("name")
     override var name: String,
     @Field("status")

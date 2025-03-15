@@ -16,9 +16,8 @@
 
 package io.mosaicboot.mongodb.def.repository
 
-import io.mosaicboot.core.repository.TenantUserRepositoryBase
+import io.mosaicboot.core.user.repository.TenantUserRepositoryBase
 import io.mosaicboot.mongodb.def.entity.TenantUserEntity
-import io.mosaicboot.mongodb.def.entity.UserEntity
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.data.mongodb.repository.MongoRepository
 import org.springframework.stereotype.Repository
@@ -26,4 +25,5 @@ import org.springframework.stereotype.Repository
 @Repository
 @ConditionalOnProperty(prefix = "mosaic.datasource.mongodb.collections.tenant-user", name = ["customized"], havingValue = "false", matchIfMissing = true)
 interface TenantUserRepository : MongoRepository<TenantUserEntity, String>,
-    TenantUserRepositoryBase<TenantUserEntity>
+    TenantUserRepositoryBase<TenantUserEntity>,
+    TenantUserCustomRepository

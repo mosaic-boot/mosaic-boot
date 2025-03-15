@@ -1,17 +1,17 @@
 package io.mosaicboot.core.auth.config
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import io.mosaicboot.core.user.auth.MosaicAuthenticationHandler
-import io.mosaicboot.core.user.auth.MosaicCookieAuthFilter
-import io.mosaicboot.core.user.auth.MosaicSha256CredentialHandler
+import io.mosaicboot.core.auth.MosaicAuthenticationHandler
+import io.mosaicboot.core.auth.MosaicCookieAuthFilter
+import io.mosaicboot.core.auth.MosaicSha256CredentialHandler
 import io.mosaicboot.core.auth.controller.AuthController
 import io.mosaicboot.core.auth.service.AuthTokenService
 import io.mosaicboot.core.auth.service.AuthenticationService
 import io.mosaicboot.core.auth.service.CredentialService
-import io.mosaicboot.core.repository.AuthenticationRepositoryBase
-import io.mosaicboot.core.repository.TenantUserRepositoryBase
-import io.mosaicboot.core.repository.UserRepositoryBase
-import io.mosaicboot.core.user.auth.MosaicCredentialHandler
+import io.mosaicboot.core.auth.repository.AuthenticationRepositoryBase
+import io.mosaicboot.core.user.repository.TenantUserRepositoryBase
+import io.mosaicboot.core.user.repository.UserRepositoryBase
+import io.mosaicboot.core.auth.MosaicCredentialHandler
 import io.mosaicboot.core.user.service.AuditService
 import io.mosaicboot.core.user.service.MosaicOAuth2UserService
 import io.mosaicboot.core.user.service.UserService
@@ -25,7 +25,6 @@ import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Import
 import org.springframework.http.HttpStatus
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
-import org.springframework.security.config.http.SessionCreationPolicy
 import org.springframework.security.web.SecurityFilterChain
 import org.springframework.security.web.authentication.HttpStatusEntryPoint
 import org.springframework.security.web.authentication.logout.SimpleUrlLogoutSuccessHandler

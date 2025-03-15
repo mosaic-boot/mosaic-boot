@@ -16,9 +16,9 @@
 
 package io.mosaicboot.mongodb.def.entity
 
-import io.mosaicboot.core.domain.user.SiteRole
-import io.mosaicboot.core.domain.user.User
-import io.mosaicboot.core.domain.user.UserStatus
+import io.mosaicboot.core.user.entity.SiteRole
+import io.mosaicboot.core.user.entity.User
+import io.mosaicboot.core.user.enums.UserStatus
 import org.springframework.data.annotation.Id
 import org.springframework.data.mongodb.core.index.Indexed
 import org.springframework.data.mongodb.core.mapping.Document

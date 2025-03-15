@@ -16,7 +16,7 @@
 
 package io.mosaicboot.mongodb.def.entity
 
-import io.mosaicboot.core.domain.user.Authentication
+import io.mosaicboot.core.auth.entity.Authentication
 import org.springframework.data.annotation.Id
 import org.springframework.data.mongodb.core.index.CompoundIndex
 import org.springframework.data.mongodb.core.index.CompoundIndexes

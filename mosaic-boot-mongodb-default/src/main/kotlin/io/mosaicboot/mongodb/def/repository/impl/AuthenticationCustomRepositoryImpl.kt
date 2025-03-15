@@ -17,9 +17,9 @@
 package io.mosaicboot.mongodb.def.repository.impl
 
 import com.fasterxml.uuid.Generators
-import io.mosaicboot.core.domain.user.Authentication
-import io.mosaicboot.core.domain.vo.AuthenticationDetail
-import io.mosaicboot.core.domain.vo.AuthenticationVo
+import io.mosaicboot.core.auth.entity.Authentication
+import io.mosaicboot.core.auth.dto.AuthenticationDetail
+import io.mosaicboot.core.auth.dto.AuthenticationInput
 import io.mosaicboot.mongodb.def.config.MongodbCollectionsProperties
 import io.mosaicboot.mongodb.def.entity.AuthenticationEntity
 import io.mosaicboot.mongodb.def.entity.UserEntity
@@ -43,7 +43,7 @@ class AuthenticationCustomRepositoryImpl(
         return mongoTemplate.save(input)
     }
 
-    override fun save(input: AuthenticationVo): AuthenticationEntity {
+    override fun save(input: AuthenticationInput): AuthenticationEntity {
         val now = Instant.now()
         return mongoTemplate.save(AuthenticationEntity(
             id = Generators.timeBasedEpochGenerator().generate().toString(),

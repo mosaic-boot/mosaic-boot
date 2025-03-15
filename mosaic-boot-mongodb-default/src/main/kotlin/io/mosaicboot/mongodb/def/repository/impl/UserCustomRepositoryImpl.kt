@@ -17,7 +17,7 @@
 package io.mosaicboot.mongodb.def.repository.impl
 
 import com.fasterxml.uuid.Generators
-import io.mosaicboot.core.domain.vo.UserVo
+import io.mosaicboot.core.user.dto.UserInput
 import io.mosaicboot.mongodb.def.entity.UserEntity
 import io.mosaicboot.mongodb.def.repository.UserCustomRepository
 import org.springframework.data.mongodb.core.MongoTemplate
@@ -26,7 +26,7 @@ import java.time.Instant
 class UserCustomRepositoryImpl(
     private val mongoTemplate: MongoTemplate,
 ) : UserCustomRepository {
-    override fun save(input: UserVo): UserEntity {
+    override fun save(input: UserInput): UserEntity {
         val now = Instant.now()
         return mongoTemplate.save(UserEntity(
             id = Generators.timeBasedEpochGenerator().generate().toString(),

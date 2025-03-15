@@ -27,6 +27,7 @@ dependencies {
     api("org.springframework.boot:spring-boot-starter-security")
     api("org.springframework.boot:spring-boot-starter-graphql")
     api("org.springframework.security:spring-security-oauth2-core")
+    api("org.springframework.boot:spring-boot-starter-aop")
     compileOnly("org.springframework.security:spring-security-oauth2-client")
 
     implementation("org.springframework:spring-tx")

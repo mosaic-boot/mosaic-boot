@@ -16,9 +16,9 @@
 
 package io.mosaicboot.mongodb.def.repository
 
-import io.mosaicboot.core.domain.vo.UserVo
+import io.mosaicboot.core.user.dto.UserInput
 import io.mosaicboot.mongodb.def.entity.UserEntity
 
 interface UserCustomRepository {
-    fun save(input: UserVo): UserEntity
+    fun save(input: UserInput): UserEntity
 }

@@ -16,9 +16,8 @@
 
 package io.mosaicboot.mongodb.def.repository
 
-import io.mosaicboot.core.domain.SearchInput
-import io.mosaicboot.core.domain.vo.UserAuditLogDetail
-import io.mosaicboot.core.domain.vo.UserAuditLogVo
+import io.mosaicboot.core.user.dto.UserAuditLogDetail
+import io.mosaicboot.core.user.dto.UserAuditLogInput
 import io.mosaicboot.mongodb.def.entity.UserAuditLogEntity
 import org.bson.types.ObjectId
 import org.springframework.data.domain.Page
@@ -27,8 +26,8 @@ import org.springframework.stereotype.Repository
 
 @Repository
 interface UserAuditLogCustomRepository {
-    fun save(input: UserAuditLogVo): UserAuditLogEntity
-    fun saveAll(input: List<UserAuditLogVo>): List<UserAuditLogEntity>
+    fun save(input: UserAuditLogInput): UserAuditLogEntity
+    fun saveAll(input: List<UserAuditLogInput>): List<UserAuditLogEntity>
     fun findByUserId(tenantId: String, userId: String, searchInput: SearchInput, pageable: Pageable): Page<UserAuditLogDetail<ObjectId>>
     fun findByTenantId(tenantId: String, searchInput: SearchInput, pageable: Pageable): Page<UserAuditLogDetail<ObjectId>>
 }

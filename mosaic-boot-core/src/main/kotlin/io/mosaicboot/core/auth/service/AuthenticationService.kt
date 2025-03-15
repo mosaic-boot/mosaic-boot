@@ -18,19 +18,24 @@ package io.mosaicboot.core.auth.service
 
 import com.fasterxml.jackson.core.type.TypeReference
 import com.fasterxml.jackson.databind.ObjectMapper
-import io.mosaicboot.core.domain.user.TenantUser
-import io.mosaicboot.core.domain.user.UserAuditAction
-import io.mosaicboot.core.domain.user.UserAuditLogStatus
-import io.mosaicboot.core.domain.user.UserStatus
-import io.mosaicboot.core.domain.vo.*
-import io.mosaicboot.core.repository.AuthenticationRepositoryBase
-import io.mosaicboot.core.repository.TenantUserRepositoryBase
-import io.mosaicboot.core.repository.UserRepositoryBase
-import io.mosaicboot.core.user.auth.LoginResult
-import io.mosaicboot.core.user.auth.RegisterResult
-import io.mosaicboot.core.user.model.LoginFailureReason
-import io.mosaicboot.core.user.model.RegisterFailureReason
-import io.mosaicboot.core.user.model.TenantLoginStatus
+import io.mosaicboot.core.auth.dto.AuthenticationDetail
+import io.mosaicboot.core.auth.dto.AuthenticationInput
+import io.mosaicboot.core.user.entity.TenantUser
+import io.mosaicboot.core.user.enums.UserAuditAction
+import io.mosaicboot.core.user.enums.UserAuditLogStatus
+import io.mosaicboot.core.user.enums.UserStatus
+import io.mosaicboot.core.auth.repository.AuthenticationRepositoryBase
+import io.mosaicboot.core.user.repository.TenantUserRepositoryBase
+import io.mosaicboot.core.user.repository.UserRepositoryBase
+import io.mosaicboot.core.auth.dto.LoginResult
+import io.mosaicboot.core.auth.dto.RegisterResult
+import io.mosaicboot.core.user.controller.model.LoginFailureReason
+import io.mosaicboot.core.auth.controller.dto.RegisterFailureReason
+import io.mosaicboot.core.user.dto.UserAuditLogInput
+import io.mosaicboot.core.user.dto.UserAuditLoginActionDetail
+import io.mosaicboot.core.user.dto.UserAuditRegisterActionDetail
+import io.mosaicboot.core.user.dto.UserInput
+import io.mosaicboot.core.user.controller.model.TenantLoginStatus
 import io.mosaicboot.core.user.service.AuditService
 import io.mosaicboot.core.util.UnreachableException
 import io.mosaicboot.core.util.WebClientInfo
@@ -144,7 +149,7 @@ class AuthenticationService(
      */
     @Transactional
     fun register(
-        userTemplate: UserVo,
+        userTemplate: UserInput,
         method: String,
         username: String,
         credential: String?,
@@ -180,7 +185,7 @@ class AuthenticationService(
             val encodedCredential = credential?.let { credentialService.encodeCredential(method, username, it) }
 
             val authentication = authenticationRepository.save(
-                AuthenticationVo(
+                AuthenticationInput(
                     userId = user.id,
                     method = method,
                     username = username,
@@ -261,8 +266,8 @@ class AuthenticationService(
         tenantUsers: List<Pair<TenantUser, UserAuditLogStatus?>>,
         auditActionDetail: Any?,
         webClientInfo: WebClientInfo
-    ): List<UserAuditLogVo> {
-        val baseLog = UserAuditLogVo(
+    ): List<UserAuditLogInput> {
+        val baseLog = UserAuditLogInput(
             userId = userId,
             action = action,
             status = status,
@@ -278,7 +283,7 @@ class AuthenticationService(
             add(baseLog)
             tenantUsers.forEach { item ->
                 add(
-                    UserAuditLogVo(
+                    UserAuditLogInput(
                     tenantId = item.first.tenantId,
                     action = action,
                     status = item.second ?: status,
@@ -351,7 +356,7 @@ class AuthenticationService(
         errorMessage: String? = null,
     ) {
         auditService.addLog(
-            UserAuditLogVo(
+            UserAuditLogInput(
                 userId = userId,
                 action = UserAuditAction.ACCOUNT_CREATED,
                 status = status,

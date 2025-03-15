@@ -17,10 +17,8 @@
 package io.mosaicboot.core.auth.service
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import io.mosaicboot.core.domain.user.Authentication
-import io.mosaicboot.core.domain.vo.AuthenticationDetail
-import io.mosaicboot.core.repository.AuthenticationRepositoryBase
-import io.mosaicboot.core.user.auth.MosaicCredentialHandler
+import io.mosaicboot.core.auth.entity.Authentication
+import io.mosaicboot.core.auth.MosaicCredentialHandler
 import org.springframework.stereotype.Service
 
 @Service

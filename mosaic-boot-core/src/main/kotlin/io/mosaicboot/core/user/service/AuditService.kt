@@ -16,9 +16,9 @@
 
 package io.mosaicboot.core.user.service
 
-import io.mosaicboot.core.domain.user.UserAuditLog
-import io.mosaicboot.core.domain.vo.UserAuditLogVo
-import io.mosaicboot.core.repository.UserAuditLogRepositoryBase
+import io.mosaicboot.core.user.entity.UserAuditLog
+import io.mosaicboot.core.user.dto.UserAuditLogInput
+import io.mosaicboot.core.user.repository.UserAuditLogRepositoryBase
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
@@ -28,12 +28,12 @@ class AuditService(
     private val userAuditLogRepository: UserAuditLogRepositoryBase<*, *>,
 ) {
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    fun addLog(log: UserAuditLogVo): UserAuditLog<*> {
+    fun addLog(log: UserAuditLogInput): UserAuditLog<*> {
         return userAuditLogRepository.save(log)
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    fun addLogs(logs: List<UserAuditLogVo>): List<UserAuditLog<*>> {
+    fun addLogs(logs: List<UserAuditLogInput>): List<UserAuditLog<*>> {
         return userAuditLogRepository.saveAll(logs)
     }
 }

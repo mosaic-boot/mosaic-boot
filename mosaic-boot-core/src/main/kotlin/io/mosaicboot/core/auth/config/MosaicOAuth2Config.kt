@@ -18,10 +18,10 @@ package io.mosaicboot.core.auth.config
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.mosaicboot.core.auth.oauth2.*
-import io.mosaicboot.core.repository.AuthenticationRepositoryBase
-import io.mosaicboot.core.user.auth.MosaicAuthenticationHandler
-import io.mosaicboot.core.user.auth.MosaicCookieAuthFilter
-import io.mosaicboot.core.user.auth.MosaicOAuth2CredentialHandler
+import io.mosaicboot.core.auth.repository.AuthenticationRepositoryBase
+import io.mosaicboot.core.auth.MosaicAuthenticationHandler
+import io.mosaicboot.core.auth.MosaicCookieAuthFilter
+import io.mosaicboot.core.auth.MosaicOAuth2CredentialHandler
 import io.mosaicboot.core.auth.controller.MosaicOAuth2Controller
 import io.mosaicboot.core.user.service.MosaicOAuth2UserService
 import io.mosaicboot.core.auth.service.AuthTokenService

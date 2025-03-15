@@ -1,6 +1,6 @@
 package io.mosaicboot.core.auth.oauth2
 
-import io.mosaicboot.core.user.auth.MosaicCookieAuthFilter
+import io.mosaicboot.core.auth.MosaicCookieAuthFilter
 import io.mosaicboot.core.user.service.MosaicOAuth2UserService
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse

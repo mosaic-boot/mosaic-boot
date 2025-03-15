@@ -16,12 +16,11 @@
 
 package io.mosaicboot.mongodb.def.repository.impl
 
-import io.mosaicboot.core.domain.SearchInput
-import io.mosaicboot.core.domain.user.User
-import io.mosaicboot.core.domain.user.UserAuditAction
-import io.mosaicboot.core.domain.user.UserAuditLogStatus
-import io.mosaicboot.core.domain.vo.UserAuditLogDetail
-import io.mosaicboot.core.domain.vo.UserAuditLogVo
+import io.mosaicboot.core.user.entity.User
+import io.mosaicboot.core.user.enums.UserAuditAction
+import io.mosaicboot.core.user.enums.UserAuditLogStatus
+import io.mosaicboot.core.user.dto.UserAuditLogDetail
+import io.mosaicboot.core.user.dto.UserAuditLogInput
 import io.mosaicboot.mongodb.def.entity.UserAuditLogEntity
 import io.mosaicboot.mongodb.def.repository.UserAuditLogCustomRepository
 import org.bson.types.ObjectId
@@ -35,11 +34,11 @@ import java.time.Instant
 class UserAuditLogCustomRepositoryImpl(
     private val mongoTemplate: MongoTemplate,
 ) : UserAuditLogCustomRepository {
-    override fun save(input: UserAuditLogVo): UserAuditLogEntity {
+    override fun save(input: UserAuditLogInput): UserAuditLogEntity {
         return mongoTemplate.save(input.toEntity())
     }
 
-    override fun saveAll(input: List<UserAuditLogVo>): List<UserAuditLogEntity> {
+    override fun saveAll(input: List<UserAuditLogInput>): List<UserAuditLogEntity> {
         return input.map { mongoTemplate.save(it.toEntity()) }
     }
 
@@ -87,7 +86,7 @@ class UserAuditLogCustomRepositoryImpl(
         override val errorMessage: String?,
     ) : UserAuditLogDetail<ObjectId>
 
-    private fun UserAuditLogVo.toEntity(): UserAuditLogEntity {
+    private fun UserAuditLogInput.toEntity(): UserAuditLogEntity {
         return UserAuditLogEntity(
             id = ObjectId.get(),
             createdAt = Instant.now(),

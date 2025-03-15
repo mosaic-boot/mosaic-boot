@@ -17,12 +17,12 @@
 package io.mosaicboot.core.user.service
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import io.mosaicboot.core.auth.service.CredentialService
-import io.mosaicboot.core.domain.vo.*
-import io.mosaicboot.core.repository.AuthenticationRepositoryBase
-import io.mosaicboot.core.repository.TenantUserRepositoryBase
-import io.mosaicboot.core.repository.UserRepositoryBase
-import io.mosaicboot.core.user.model.ActiveTenantUser
+import io.mosaicboot.core.user.entity.User
+import io.mosaicboot.core.auth.repository.AuthenticationRepositoryBase
+import io.mosaicboot.core.user.dto.CurrentActiveUser
+import io.mosaicboot.core.user.repository.TenantUserRepositoryBase
+import io.mosaicboot.core.user.repository.UserRepositoryBase
+import io.mosaicboot.core.user.controller.model.ActiveTenantUser
 import org.springframework.stereotype.Service
 import kotlin.jvm.optionals.getOrNull
 
@@ -34,6 +34,10 @@ class UserService(
     private val auditService: AuditService,
     private val objectMapper: ObjectMapper,
 ) {
+    fun getUser(userId: String): User {
+        return userRepository.findById(userId).get()
+    }
+
     /**
      * TODO: caching
      */

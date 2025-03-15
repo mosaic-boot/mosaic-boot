@@ -16,6 +16,7 @@
 
 package io.mosaicboot.core.user.auth
 
+import io.mosaicboot.core.auth.MosaicSha256PasswordEncoder
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.DisplayName

@@ -21,10 +21,10 @@ import io.mosaicboot.core.auth.config.MosaicAuthProperties
 import io.mosaicboot.core.auth.oauth2.*
 import io.mosaicboot.core.auth.service.AuthTokenService
 import io.mosaicboot.core.auth.service.AuthenticationService
-import io.mosaicboot.core.domain.user.AuthMethod
-import io.mosaicboot.core.domain.vo.UserVo
-import io.mosaicboot.core.user.auth.LoginResult
-import io.mosaicboot.core.user.auth.RegisterResult
+import io.mosaicboot.core.auth.enums.AuthMethod
+import io.mosaicboot.core.user.dto.UserInput
+import io.mosaicboot.core.auth.dto.LoginResult
+import io.mosaicboot.core.auth.dto.RegisterResult
 import io.mosaicboot.core.util.ServerSideCrypto
 import io.mosaicboot.core.util.UnreachableException
 import io.mosaicboot.core.util.WebClientInfo
@@ -57,7 +57,7 @@ class MosaicOAuth2UserService(
 
     @Transactional
     fun register(
-        userTemplate: UserVo,
+        userTemplate: UserInput,
         webClientInfo: WebClientInfo,
         data: OAuth2RegisterTokenData,
     ): RegisterResult {

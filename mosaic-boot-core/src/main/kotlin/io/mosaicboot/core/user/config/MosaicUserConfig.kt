@@ -18,10 +18,10 @@ package io.mosaicboot.core.user.config
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.mosaicboot.core.auth.service.CredentialService
-import io.mosaicboot.core.repository.AuthenticationRepositoryBase
-import io.mosaicboot.core.repository.TenantUserRepositoryBase
-import io.mosaicboot.core.repository.UserAuditLogRepositoryBase
-import io.mosaicboot.core.repository.UserRepositoryBase
+import io.mosaicboot.core.auth.repository.AuthenticationRepositoryBase
+import io.mosaicboot.core.user.repository.TenantUserRepositoryBase
+import io.mosaicboot.core.user.repository.UserAuditLogRepositoryBase
+import io.mosaicboot.core.user.repository.UserRepositoryBase
 import io.mosaicboot.core.user.controller.UserController
 import io.mosaicboot.core.user.service.*
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
@@ -30,7 +30,6 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.http.HttpStatus
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
-import org.springframework.security.config.http.SessionCreationPolicy
 import org.springframework.security.web.SecurityFilterChain
 import org.springframework.security.web.authentication.HttpStatusEntryPoint
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer

@@ -16,7 +16,7 @@
 
 package io.mosaicboot.mongodb.def.entity
 
-import io.mosaicboot.core.domain.user.Permission
+import io.mosaicboot.core.user.entity.Permission
 import org.springframework.data.annotation.Id
 import org.springframework.data.mongodb.core.mapping.Document
 import org.springframework.data.mongodb.core.mapping.Field

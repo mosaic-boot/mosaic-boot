@@ -16,7 +16,7 @@
 
 package io.mosaicboot.io.mosaicboot.core.repository
 
-import io.mosaicboot.core.domain.BaseEntity
+import io.mosaicboot.core.entity.BaseEntity
 import org.springframework.data.repository.CrudRepository
 
 interface BaseRepository<T : BaseEntity<ID>, ID> : CrudRepository<T, ID>

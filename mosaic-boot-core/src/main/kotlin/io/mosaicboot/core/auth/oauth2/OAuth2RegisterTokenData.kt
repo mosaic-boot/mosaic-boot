@@ -19,8 +19,8 @@ package io.mosaicboot.core.auth.oauth2
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.annotation.JsonProperty
 import io.mosaicboot.core.jwt.JwtContentType
-import io.mosaicboot.core.user.model.OAuth2AccessTokenJson
-import io.mosaicboot.core.user.model.OAuth2RefreshTokenJson
+import io.mosaicboot.core.user.controller.model.OAuth2AccessTokenJson
+import io.mosaicboot.core.user.controller.model.OAuth2RefreshTokenJson
 
 @JwtContentType("oauth2-register")
 @JsonIgnoreProperties(ignoreUnknown = true)

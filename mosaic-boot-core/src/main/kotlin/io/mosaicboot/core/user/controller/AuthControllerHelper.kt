@@ -16,8 +16,8 @@
 
 package io.mosaicboot.core.user.controller
 
-import io.mosaicboot.core.user.auth.RegisterResult
-import io.mosaicboot.core.user.model.RegisterResponse
+import io.mosaicboot.core.auth.dto.RegisterResult
+import io.mosaicboot.core.auth.controller.dto.RegisterResponse
 import io.mosaicboot.core.util.UnreachableException
 import org.springframework.http.ResponseEntity
 

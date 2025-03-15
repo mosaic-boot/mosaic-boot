@@ -16,7 +16,7 @@
 
 package io.mosaicboot.core.auth.oauth2
 
-import io.mosaicboot.core.user.auth.MosaicAuthenticatedToken
+import io.mosaicboot.core.auth.MosaicAuthenticatedToken
 import org.springframework.security.core.GrantedAuthority
 import org.springframework.security.oauth2.core.user.OAuth2User
 

@@ -16,9 +16,9 @@
 
 package io.mosaicboot.mongodb.def.entity
 
-import io.mosaicboot.core.domain.user.UserAuditAction
-import io.mosaicboot.core.domain.user.UserAuditLog
-import io.mosaicboot.core.domain.user.UserAuditLogStatus
+import io.mosaicboot.core.user.enums.UserAuditAction
+import io.mosaicboot.core.user.entity.UserAuditLog
+import io.mosaicboot.core.user.enums.UserAuditLogStatus
 import org.bson.types.ObjectId
 import org.springframework.data.annotation.Id
 import org.springframework.data.mongodb.core.mapping.Document

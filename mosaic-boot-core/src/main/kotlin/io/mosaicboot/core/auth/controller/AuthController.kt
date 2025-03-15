@@ -17,16 +17,17 @@
 package io.mosaicboot.core.auth.controller
 
 import io.mosaicboot.core.auth.config.MosaicAuthProperties
-import io.mosaicboot.core.domain.user.UserStatus
-import io.mosaicboot.core.domain.vo.UserVo
+import io.mosaicboot.core.auth.controller.dto.LoginRequest
+import io.mosaicboot.core.auth.controller.dto.LoginResponse
+import io.mosaicboot.core.auth.controller.dto.RegisterRequest
+import io.mosaicboot.core.auth.controller.dto.RegisterResponse
+import io.mosaicboot.core.user.enums.UserStatus
+import io.mosaicboot.core.user.dto.UserInput
 import io.mosaicboot.core.http.BaseMosaicController
 import io.mosaicboot.core.http.MosaicController
 import io.mosaicboot.core.util.WebClientInfo
-import io.mosaicboot.core.user.auth.LoginResult
-import io.mosaicboot.core.user.auth.MosaicAuthenticatedToken
-import io.mosaicboot.core.user.auth.MosaicAuthenticationHandler
-import io.mosaicboot.core.user.config.MosaicUserProperties
-import io.mosaicboot.core.user.model.*
+import io.mosaicboot.core.auth.dto.LoginResult
+import io.mosaicboot.core.auth.MosaicAuthenticationHandler
 import io.mosaicboot.core.auth.service.AuthTokenService
 import io.mosaicboot.core.auth.service.AuthenticationService
 import io.mosaicboot.core.user.controller.toResponseEntity
@@ -54,6 +55,11 @@ class AuthController(
     private val mosaicAuthenticationHandler: MosaicAuthenticationHandler,
     @Autowired(required = false) private val mosaicOAuth2UserService: MosaicOAuth2UserService?,
 ) : BaseMosaicController {
+    override fun getBaseUrl(applicationContext: ApplicationContext): String {
+        val mosaicAuthProperties = applicationContext.getBean(MosaicAuthProperties::class.java)
+        return mosaicAuthProperties.api.path
+    }
+
     @Operation(
         summary = "User login",
         description = "Authenticate user and return tenant access information"
@@ -152,7 +158,7 @@ class AuthController(
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build()
         }
         val result = authenticationService.register(
-            userTemplate = UserVo(
+            userTemplate = UserInput(
                 name = body.name,
                 email = body.email,
                 status = UserStatus.ACTIVE,
@@ -165,10 +171,5 @@ class AuthController(
             webClientInfo = webClientInfo,
         )
         return result.toResponseEntity()
-    }
-
-    override fun getBaseUrl(applicationContext: ApplicationContext): String {
-        val mosaicAuthProperties = applicationContext.getBean(MosaicAuthProperties::class.java)
-        return mosaicAuthProperties.api.path
     }
 }

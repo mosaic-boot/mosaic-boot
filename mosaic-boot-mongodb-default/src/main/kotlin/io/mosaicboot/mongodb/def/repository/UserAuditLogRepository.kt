@@ -16,7 +16,7 @@
 
 package io.mosaicboot.mongodb.def.repository
 
-import io.mosaicboot.core.repository.UserAuditLogRepositoryBase
+import io.mosaicboot.core.user.repository.UserAuditLogRepositoryBase
 import io.mosaicboot.mongodb.def.entity.UserAuditLogEntity
 import org.bson.types.ObjectId
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty

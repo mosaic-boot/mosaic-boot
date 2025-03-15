@@ -17,12 +17,12 @@
 package io.mosaicboot.core.auth.controller
 
 import io.mosaicboot.core.auth.config.MosaicAuthProperties
-import io.mosaicboot.core.domain.user.UserStatus
-import io.mosaicboot.core.domain.vo.UserVo
+import io.mosaicboot.core.user.enums.UserStatus
+import io.mosaicboot.core.user.dto.UserInput
 import io.mosaicboot.core.http.BaseMosaicController
 import io.mosaicboot.core.http.MosaicController
-import io.mosaicboot.core.user.model.RegisterRequest
-import io.mosaicboot.core.user.model.RegisterResponse
+import io.mosaicboot.core.auth.controller.dto.RegisterRequest
+import io.mosaicboot.core.auth.controller.dto.RegisterResponse
 import io.mosaicboot.core.auth.oauth2.MosaicOAuth2RegisterToken
 import io.mosaicboot.core.auth.oauth2.OAuth2BasicInfo
 import io.mosaicboot.core.user.controller.toResponseEntity
@@ -47,6 +47,11 @@ import org.springframework.web.bind.annotation.RequestBody
 class MosaicOAuth2Controller(
     private val mosaicOAuth2UserService: MosaicOAuth2UserService,
 ) : BaseMosaicController {
+    override fun getBaseUrl(applicationContext: ApplicationContext): String {
+        val mosaicAuthProperties = applicationContext.getBean(MosaicAuthProperties::class.java)
+        return mosaicAuthProperties.api.path.trimEnd('/') + "/oauth2/"
+    }
+
     @Operation(
         summary = "Get temporary oauth2 user information",
     )
@@ -114,7 +119,7 @@ class MosaicOAuth2Controller(
         }
 
         val result = mosaicOAuth2UserService.register(
-            userTemplate = UserVo(
+            userTemplate = UserInput(
                 name = body.name,
                 email = body.email,
                 status = UserStatus.ACTIVE,
@@ -125,10 +130,5 @@ class MosaicOAuth2Controller(
             data = authentication.data,
         )
         return result.toResponseEntity()
-    }
-
-    override fun getBaseUrl(applicationContext: ApplicationContext): String {
-        val mosaicAuthProperties = applicationContext.getBean(MosaicAuthProperties::class.java)
-        return mosaicAuthProperties.api.path.trimEnd('/') + "/oauth2/"
     }
 }

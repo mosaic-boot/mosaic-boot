@@ -16,14 +16,14 @@
 
 package io.mosaicboot.mongodb.def.repository
 
-import io.mosaicboot.core.domain.user.Authentication
-import io.mosaicboot.core.domain.vo.AuthenticationDetail
-import io.mosaicboot.core.domain.vo.AuthenticationVo
+import io.mosaicboot.core.auth.entity.Authentication
+import io.mosaicboot.core.auth.dto.AuthenticationDetail
+import io.mosaicboot.core.auth.dto.AuthenticationInput
 import io.mosaicboot.mongodb.def.entity.AuthenticationEntity
 
 interface AuthenticationCustomRepository {
     fun saveEntity(input: Authentication): AuthenticationEntity
-    fun save(input: AuthenticationVo): AuthenticationEntity
+    fun save(input: AuthenticationInput): AuthenticationEntity
     fun findByMethodAndEmail(method: String, email: String): AuthenticationDetail?
     fun findByMethodAndUsername(method: String, username: String): AuthenticationDetail?
     fun appendUserToAuthentication(authentication: Authentication, userId: String): AuthenticationEntity

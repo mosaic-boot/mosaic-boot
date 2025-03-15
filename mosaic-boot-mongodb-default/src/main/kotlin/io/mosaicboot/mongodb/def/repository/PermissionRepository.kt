@@ -16,7 +16,7 @@
 
 package io.mosaicboot.mongodb.def.repository
 
-import io.mosaicboot.core.repository.PermissionRepositoryBase
+import io.mosaicboot.core.user.repository.PermissionRepositoryBase
 import io.mosaicboot.mongodb.def.entity.PermissionEntity
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.data.mongodb.repository.MongoRepository

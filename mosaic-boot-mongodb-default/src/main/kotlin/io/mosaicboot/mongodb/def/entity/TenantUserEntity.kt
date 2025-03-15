@@ -16,9 +16,8 @@
 
 package io.mosaicboot.mongodb.def.entity
 
-import io.mosaicboot.core.domain.user.SiteRole
-import io.mosaicboot.core.domain.user.TenantUser
-import io.mosaicboot.core.domain.user.UserStatus
+import io.mosaicboot.core.user.entity.TenantUser
+import io.mosaicboot.core.user.enums.UserStatus
 import org.springframework.data.annotation.Id
 import org.springframework.data.mongodb.core.index.CompoundIndex
 import org.springframework.data.mongodb.core.index.CompoundIndexes
@@ -48,6 +47,5 @@ data class TenantUserEntity(
     @Field("status")
     override var status: UserStatus,
     @Field("roles")
-    override var roles: Set<SiteRole>,
-) : TenantUser {
-}
+    var roles: List<String>,
+) : TenantUser

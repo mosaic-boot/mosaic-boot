@@ -18,19 +18,13 @@ package io.mosaicboot.core.user.service
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.mosaicboot.core.auth.config.MosaicAuthProperties
-import io.mosaicboot.core.repository.AuthenticationRepositoryBase
-import io.mosaicboot.core.user.config.MosaicUserProperties
-import io.mosaicboot.core.user.model.OAuth2AccessTokenJson
-import io.mosaicboot.core.user.model.OAuth2RefreshTokenJson
+import io.mosaicboot.core.auth.repository.AuthenticationRepositoryBase
+import io.mosaicboot.core.user.controller.model.OAuth2AccessTokenJson
+import io.mosaicboot.core.user.controller.model.OAuth2RefreshTokenJson
 import io.mosaicboot.core.auth.oauth2.OAuth2AccessTokenRepository
 import io.mosaicboot.core.util.ServerSideCrypto
-import io.mosaicboot.core.util.UnreachableException
 import org.springframework.security.oauth2.client.ClientAuthorizationException
-import org.springframework.security.oauth2.client.OAuth2AuthorizeRequest
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClient
-import org.springframework.security.oauth2.client.OAuth2AuthorizedClientManager
-import org.springframework.security.oauth2.client.endpoint.DefaultRefreshTokenTokenResponseClient
-import org.springframework.security.oauth2.client.endpoint.OAuth2AccessTokenResponseClient
 import org.springframework.security.oauth2.client.endpoint.OAuth2RefreshTokenGrantRequest
 import org.springframework.security.oauth2.client.endpoint.RestClientRefreshTokenTokenResponseClient
 import org.springframework.security.oauth2.client.registration.ClientRegistration
