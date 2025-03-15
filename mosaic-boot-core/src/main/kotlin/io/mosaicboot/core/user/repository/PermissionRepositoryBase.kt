@@ -17,6 +17,6 @@
 package io.mosaicboot.core.user.repository
 
 import io.mosaicboot.core.user.entity.Permission
-import io.mosaicboot.io.mosaicboot.core.repository.BaseRepository
+import io.mosaicboot.core.repository.BaseRepository
 
-interface PermissionRepositoryBase<T : Permission> : BaseRepository<T, String>
+interface PermissionRepositoryBase<T : Permission> : BaseRepository<Permission, T, String>

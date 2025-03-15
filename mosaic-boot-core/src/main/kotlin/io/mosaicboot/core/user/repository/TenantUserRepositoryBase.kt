@@ -16,14 +16,8 @@
 
 package io.mosaicboot.core.user.repository
 
+import io.mosaicboot.core.repository.BaseTenantRepository
 import io.mosaicboot.core.user.entity.TenantUser
-import io.mosaicboot.core.user.dto.CurrentActiveUser
-import io.mosaicboot.core.user.dto.TenantUserDetail
-import io.mosaicboot.core.user.dto.TenantUserInput
 
-interface TenantUserRepositoryBase<T : TenantUser> : BaseTenantRepository<T, String> {
-    fun save(tenantUser: TenantUserInput): TenantUser
-    fun findByTenantIdAndUserId(tenantId: String, userId: String): TenantUserDetail?
-    fun findAllByUserId(userId: String): List<TenantUser>
-    fun findCurrentActiveUserById(tenantUserId: String): CurrentActiveUser?
-}
+interface TenantUserRepositoryBase<T : TenantUser> : BaseTenantRepository<TenantUser, T, String>,
+    TenantUserMosaicRepository

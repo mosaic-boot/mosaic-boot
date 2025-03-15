@@ -27,5 +27,5 @@ interface User : UpdatableEntity<String> {
     var name: String
     var email: String
     var status: UserStatus
-    var roles: Set<SiteRole>
+    val roles: List<GlobalRole>
 }

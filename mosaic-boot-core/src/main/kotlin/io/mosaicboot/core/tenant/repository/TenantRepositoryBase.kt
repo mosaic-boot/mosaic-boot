@@ -16,11 +16,8 @@
 
 package io.mosaicboot.core.tenant.repository
 
+import io.mosaicboot.core.repository.BaseRepository
 import io.mosaicboot.core.tenant.entity.Tenant
-import io.mosaicboot.core.tenant.dto.TenantInput
-import io.mosaicboot.io.mosaicboot.core.repository.BaseRepository
 
-interface TenantRepositoryBase<T : Tenant> : BaseRepository<T, String> {
-    fun save(tenant: TenantInput): T
-    fun saveEntity(tenant: Tenant): T
-}
+interface TenantRepositoryBase<T : Tenant> : BaseRepository<Tenant, T, String>,
+    TenantMosaicRepository<T>

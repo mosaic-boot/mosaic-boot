@@ -3,62 +3,153 @@ package io.mosaicboot.mongodb.def.repository.impl
 import io.mosaicboot.core.user.entity.TenantUser
 import io.mosaicboot.core.user.dto.CurrentActiveUser
 import io.mosaicboot.core.user.dto.TenantUserInput
+import io.mosaicboot.core.user.enums.UserStatus
 import io.mosaicboot.mongodb.def.config.MongodbCollectionsProperties
-import io.mosaicboot.mongodb.def.dto.TenantUserDetailImpl
+import io.mosaicboot.mongodb.def.entity.TenantRoleEntity
 import io.mosaicboot.mongodb.def.entity.TenantUserEntity
+import io.mosaicboot.mongodb.def.entity.UserEntity
 import io.mosaicboot.mongodb.def.repository.TenantUserCustomRepository
+import org.springframework.data.annotation.Id
 import org.springframework.data.mongodb.core.MongoTemplate
 import org.springframework.data.mongodb.core.aggregation.Aggregation
+import org.springframework.data.mongodb.core.mapping.Field
 import org.springframework.data.mongodb.core.query.Criteria
 import org.springframework.data.mongodb.core.query.isEqualTo
+import org.springframework.stereotype.Component
 import java.time.Instant
-import java.util.UUID
+import java.util.*
 
+@Component
 class TenantUserCustomRepositoryImpl(
     private val mongodbCollectionsProperties: MongodbCollectionsProperties,
     private val mongoTemplate: MongoTemplate,
 ) : TenantUserCustomRepository {
-    override fun save(tenantUser: TenantUserInput): TenantUser {
+    private val ROLE_LOOKUP = Aggregation.lookup()
+        .from(mongodbCollectionsProperties.tenantRoles.collection)
+        .localField("roleIds")
+        .foreignField("_id")
+        .`as`("roles")
+
+    private val USER_LOOKUP = Aggregation.lookup()
+        .from(mongodbCollectionsProperties.user.collection)
+        .localField("userId")
+        .foreignField("_id")
+        .`as`("user")
+
+    override fun findByTenantIdAndId(tenantId: String, id: String): TenantUserEntity? {
+        return mongoTemplate.aggregate(
+            Aggregation.newAggregation(
+                Aggregation.match(
+                    Criteria("tenantId").isEqualTo(tenantId)
+                        .and("_id").isEqualTo(id)
+                ),
+                ROLE_LOOKUP
+            ),
+            TenantUserEntity::class.java,
+            TenantUserEntityWithRole::class.java,
+        ).uniqueMappedResult
+    }
+
+    override fun save(input: TenantUserInput): TenantUser {
         val now = Instant.now()
         return mongoTemplate.save(
             TenantUserEntity(
                 id = UUID.randomUUID().toString(),
-                tenantId = tenantUser.tenantId,
+                tenantId = input.tenantId,
                 createdAt = now,
                 updatedAt = now,
-                userId = tenantUser.userId,
-                nickname = tenantUser.nickname,
-                email = tenantUser.email,
-                status = tenantUser.status,
-                roles = tenantUser.roles.map { it.id },
+                userId = input.userId,
+                nickname = input.nickname,
+                email = input.email,
+                status = input.status,
+                roleIds = input.roles.map { it.id },
             )
         )
     }
 
-    override fun findByTenantIdAndUserId(tenantId: String, userId: String): TenantUserDetailImpl? {
-        val result = mongoTemplate.aggregate(
+    override fun findAllByUserId(userId: String): List<TenantUser> {
+        return mongoTemplate.aggregate(
+            Aggregation.newAggregation(
+                Aggregation.match(
+                    Criteria("userId").isEqualTo(userId)
+                ),
+                ROLE_LOOKUP
+            ),
+            TenantUserEntity::class.java,
+            TenantUserEntityWithRole::class.java,
+        ).mappedResults
+    }
+
+    override fun findWithUser(
+        userId: String,
+        tenantId: String,
+        tenantUserId: String,
+    ): CurrentActiveUser? {
+        return mongoTemplate.aggregate(
             Aggregation.newAggregation(
                 Aggregation.match(
                     Criteria("tenantId").isEqualTo(tenantId)
-                        .and("userId").isEqualTo(userId)
+                        .and("id").isEqualTo(tenantUserId)
                 ),
-                Aggregation.lookup()
-                    .from(mongodbCollectionsProperties.roles.collection)
-                    .localField("role")
-                    .foreignField("_id")
-                    .`as`("roles"),
+                USER_LOOKUP,
+                Aggregation.unwind("user"),
+                ROLE_LOOKUP,
             ),
             TenantUserEntity::class.java,
-            TenantUserDetailImpl::class.java,
-        )
-        return result.uniqueMappedResult
+            TenantUserEntityWithUser::class.java,
+        ).uniqueMappedResult?.let {
+            CurrentActiveUser(
+                user = it.user,
+                tenantUser = it,
+            )
+        }
     }
 
-    override fun findAllByUserId(userId: String): List<TenantUser> {
-        TODO("Not yet implemented")
-    }
+    open class TenantUserEntityWithRole(
+        @Id
+        override val id: String,
+        @Field("tenantId")
+        override val tenantId: String,
+        @Field("createdAt")
+        override val createdAt: Instant,
+        @Field("userId")
+        override val userId: String,
+        @Field("updatedAt")
+        override var updatedAt: Instant,
+        @Field("nickname")
+        override var nickname: String,
+        @Field("email")
+        override var email: String?,
+        @Field("status")
+        override var status: UserStatus,
+        @Field("rolesIds")
+        override var roleIds: List<String>,
+        @Field("roles")
+        override var roles: List<TenantRoleEntity>,
+    ) : TenantUserEntity(id, tenantId, createdAt, userId, updatedAt, nickname, email, status, roleIds)
 
-    override fun findCurrentActiveUserById(tenantUserId: String): CurrentActiveUser? {
-        TODO("Not yet implemented")
-    }
+    open class TenantUserEntityWithUser(
+        @Id
+        override val id: String,
+        @Field("tenantId")
+        override val tenantId: String,
+        @Field("createdAt")
+        override val createdAt: Instant,
+        @Field("userId")
+        override val userId: String,
+        @Field("updatedAt")
+        override var updatedAt: Instant,
+        @Field("nickname")
+        override var nickname: String,
+        @Field("email")
+        override var email: String?,
+        @Field("status")
+        override var status: UserStatus,
+        @Field("rolesIds")
+        override var roleIds: List<String>,
+        @Field("roles")
+        override var roles: List<TenantRoleEntity>,
+        @Field("user")
+        val user: UserEntity,
+    ) : TenantUserEntityWithRole(id, tenantId, createdAt, userId, updatedAt, nickname, email, status, roleIds, roles)
 }

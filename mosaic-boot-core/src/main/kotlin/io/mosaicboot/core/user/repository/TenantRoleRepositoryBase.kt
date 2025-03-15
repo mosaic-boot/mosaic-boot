@@ -16,9 +16,7 @@
 
 package io.mosaicboot.core.user.repository
 
-import io.mosaicboot.core.entity.BaseTenantEntity
-import io.mosaicboot.io.mosaicboot.core.repository.BaseRepository
+import io.mosaicboot.core.repository.BaseRepository
+import io.mosaicboot.core.user.entity.TenantRole
 
-interface BaseTenantRepository<T : BaseTenantEntity<ID>, ID> : BaseRepository<T, ID> {
-    fun findByTenantIdAndId(tenantId: String, id: String): T?
-}
+interface TenantRoleRepositoryBase<T : TenantRole> : BaseRepository<TenantRole, T, String>

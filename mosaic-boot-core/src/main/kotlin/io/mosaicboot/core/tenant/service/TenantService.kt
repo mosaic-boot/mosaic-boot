@@ -51,14 +51,6 @@ class TenantService(
         return tenantRepository.findById(tenantId).get()
     }
 
-    fun hasAccessByUser(
-        userId: String,
-        tenantId: String,
-        permission: String?,
-    ): TenantUser? {
-        return tenantUserRepository.findByTenantIdAndUserId(tenantId, userId)
-    }
-
     fun update(tenant: Tenant): Tenant {
         return tenantRepository.saveEntity(tenant)
     }

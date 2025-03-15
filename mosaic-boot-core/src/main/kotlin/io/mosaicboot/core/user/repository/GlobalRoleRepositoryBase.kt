@@ -14,15 +14,9 @@
  * limitations under the License.
  */
 
-package io.mosaicboot.core.user.dto
+package io.mosaicboot.core.user.repository
 
 import io.mosaicboot.core.user.entity.GlobalRole
-import io.mosaicboot.core.user.enums.UserStatus
+import io.mosaicboot.core.repository.BaseRepository
 
-data class UserInput(
-    var timeZone: String,
-    var name: String,
-    var email: String,
-    var status: UserStatus,
-    var roles: Set<GlobalRole>,
-)
+interface GlobalRoleRepositoryBase<T : GlobalRole> : BaseRepository<GlobalRole, T, String>

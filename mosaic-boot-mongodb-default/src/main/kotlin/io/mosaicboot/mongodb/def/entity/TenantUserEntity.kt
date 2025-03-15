@@ -16,6 +16,7 @@
 
 package io.mosaicboot.mongodb.def.entity
 
+import io.mosaicboot.core.user.entity.TenantRole
 import io.mosaicboot.core.user.entity.TenantUser
 import io.mosaicboot.core.user.enums.UserStatus
 import org.springframework.data.annotation.Id
@@ -29,7 +30,7 @@ import java.time.Instant
 @CompoundIndexes(value = [
     CompoundIndex(def = "{'tenantId': 1, 'userId': 1}", unique = true)
 ])
-data class TenantUserEntity(
+open class TenantUserEntity(
     @Id
     override val id: String,
     @Field("tenantId")
@@ -46,6 +47,9 @@ data class TenantUserEntity(
     override var email: String?,
     @Field("status")
     override var status: UserStatus,
-    @Field("roles")
-    var roles: List<String>,
-) : TenantUser
+    @Field("roleIds")
+    open var roleIds: List<String>,
+) : TenantUser {
+    override val roles: List<TenantRole>
+        get() = throw NotImplementedError()
+}

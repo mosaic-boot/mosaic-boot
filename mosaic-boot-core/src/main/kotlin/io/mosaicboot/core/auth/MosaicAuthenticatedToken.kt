@@ -16,6 +16,7 @@
 
 package io.mosaicboot.core.auth
 
+import io.mosaicboot.core.auth.controller.dto.AuthTokenData
 import io.mosaicboot.core.user.controller.model.ActiveTenantUser
 import org.springframework.security.authentication.AbstractAuthenticationToken
 import org.springframework.security.core.GrantedAuthority
@@ -24,6 +25,7 @@ class MosaicAuthenticatedToken(
     val token: String,
     val userId: String,
     val authenticationId: String,
+    val tenants: Map<String, AuthTokenData.TenantItem>,
     authorities: MutableCollection<out GrantedAuthority>?,
 ) : AbstractAuthenticationToken(authorities) {
     var activeTenantUser: ActiveTenantUser? = null

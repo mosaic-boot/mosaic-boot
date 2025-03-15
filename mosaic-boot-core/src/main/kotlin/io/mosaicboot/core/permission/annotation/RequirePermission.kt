@@ -14,15 +14,12 @@
  * limitations under the License.
  */
 
-package io.mosaicboot.core.user.dto
+package io.mosaicboot.core.permission.annotation
 
-import io.mosaicboot.core.user.entity.GlobalRole
-import io.mosaicboot.core.user.enums.UserStatus
-
-data class UserInput(
-    var timeZone: String,
-    var name: String,
-    var email: String,
-    var status: UserStatus,
-    var roles: Set<GlobalRole>,
+@Repeatable
+@Target(AnnotationTarget.FUNCTION)
+@Retention(AnnotationRetention.RUNTIME)
+annotation class RequirePermission(
+    val permission: String = "",
+    val tenantSpecific: Boolean = false
 )

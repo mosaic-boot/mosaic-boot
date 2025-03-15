@@ -16,9 +16,14 @@
 
 package io.mosaicboot.core.user.entity
 
-import io.mosaicboot.core.entity.BaseTenantEntity
+import io.mosaicboot.core.entity.UpdatableEntity
 
-interface TenantRole : BaseTenantEntity<String> {
+interface TenantRole : UpdatableEntity<String> {
+    /**
+     * null is system role
+     */
+    val tenantId: String?
+
     val name: String
 
     /**

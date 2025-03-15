@@ -19,6 +19,7 @@ package io.mosaicboot.core.user.config
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.mosaicboot.core.auth.service.CredentialService
 import io.mosaicboot.core.auth.repository.AuthenticationRepositoryBase
+import io.mosaicboot.core.permission.service.PermissionService
 import io.mosaicboot.core.user.repository.TenantUserRepositoryBase
 import io.mosaicboot.core.user.repository.UserAuditLogRepositoryBase
 import io.mosaicboot.core.user.repository.UserRepositoryBase
@@ -62,6 +63,17 @@ class MosaicUserConfig(
             authenticationRepository = authenticationRepository,
             auditService = auditService,
             objectMapper = objectMapper,
+        )
+    }
+
+    @Bean
+    fun permissionService(
+        userRepositoryBase: UserRepositoryBase<*>,
+        tenantUserRepositoryBase: TenantUserRepositoryBase<*>,
+    ): PermissionService {
+        return PermissionService(
+            userRepositoryBase = userRepositoryBase,
+            tenantUserRepositoryBase = tenantUserRepositoryBase,
         )
     }
 

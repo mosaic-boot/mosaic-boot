@@ -16,7 +16,14 @@
 
 package io.mosaicboot.core.user.repository
 
-import io.mosaicboot.core.user.entity.SiteRole
-import io.mosaicboot.io.mosaicboot.core.repository.BaseRepository
+import io.mosaicboot.core.user.entity.UserAuditLog
+import io.mosaicboot.core.user.dto.UserAuditLogDetail
+import io.mosaicboot.core.user.dto.UserAuditLogInput
+import io.mosaicboot.core.repository.BaseRepository
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.Pageable
 
-interface RoleRepositoryBase<T : SiteRole> : BaseRepository<T, String>
+interface UserAuditLogMosaicRepository<T : UserAuditLog<ID>, ID : Any> {
+    fun save(input: UserAuditLogInput): T
+    fun saveAll(input: List<UserAuditLogInput>): List<T>
+}

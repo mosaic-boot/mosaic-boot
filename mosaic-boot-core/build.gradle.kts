@@ -20,6 +20,12 @@ kotlin {
     jvmToolchain(17)
 }
 
+tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().all {
+    kotlinOptions {
+        freeCompilerArgs = listOf("-Xjvm-default=all-compatibility")
+    }
+}
+
 dependencies {
     // Spring Boot
     api("org.springframework.data:spring-data-commons")

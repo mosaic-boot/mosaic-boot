@@ -16,35 +16,24 @@
 
 package io.mosaicboot.mongodb.def.entity
 
-import io.mosaicboot.core.user.entity.GlobalRole
-import io.mosaicboot.core.user.entity.User
-import io.mosaicboot.core.user.enums.UserStatus
+import io.mosaicboot.core.user.entity.TenantRole
 import org.springframework.data.annotation.Id
-import org.springframework.data.mongodb.core.index.Indexed
 import org.springframework.data.mongodb.core.mapping.Document
 import org.springframework.data.mongodb.core.mapping.Field
 import java.time.Instant
 
-@Document(collection = "\${mosaic.datasource.mongodb.collections.user.collection:users}")
-open class UserEntity(
+@Document(collection = "\${mosaic.datasource.mongodb.collections.tenant-role.collection:tenantRoles}")
+data class TenantRoleEntity(
     @Id
     override val id: String,
     @Field("createdAt")
     override val createdAt: Instant,
     @Field("updatedAt")
     override var updatedAt: Instant,
+    @Field("tenantId")
+    override var tenantId: String?,
     @Field("name")
-    override var name: String,
-    @Field("email")
-    @Indexed(unique = true)
-    override var email: String,
-    @Field("status")
-    override var status: UserStatus,
-    @Field("timeZone")
-    override var timeZone: String,
-    @Field("roleIds")
-    open var roleIds: List<String>,
-) : User {
-    override val roles: List<GlobalRole>
-        get() = throw NotImplementedError()
-}
+    override val name: String,
+    @Field("permissions")
+    override val permissions: List<String>,
+) : TenantRole

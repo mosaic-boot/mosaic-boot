@@ -16,9 +16,10 @@
 
 package io.mosaicboot.core.entity
 
+import java.io.Serializable
 import java.time.Instant
 
-interface BaseEntity<ID> {
+interface BaseEntity<ID> : Serializable {
     val id: ID
     val createdAt: Instant
 }

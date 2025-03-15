@@ -16,24 +16,22 @@
 
 package io.mosaicboot.mongodb.def.entity
 
-import io.mosaicboot.core.user.entity.SiteRole
+import io.mosaicboot.core.user.entity.GlobalRole
 import org.springframework.data.annotation.Id
 import org.springframework.data.mongodb.core.mapping.Document
 import org.springframework.data.mongodb.core.mapping.Field
 import java.time.Instant
 
-@Document(collection = "\${mosaic.datasource.mongodb.collections.role.collection:roles}")
-data class RoleEntity(
+@Document(collection = "\${mosaic.datasource.mongodb.collections.global-role.collection:globalRoles}")
+data class GlobalRoleEntity(
     @Id
     override val id: String,
     @Field("createdAt")
     override val createdAt: Instant,
     @Field("updatedAt")
     override var updatedAt: Instant,
-    @Field("tenantId")
-    override var tenantId: String?,
     @Field("name")
     override val name: String,
     @Field("permissions")
     override val permissions: List<String>,
-) : SiteRole
+) : GlobalRole

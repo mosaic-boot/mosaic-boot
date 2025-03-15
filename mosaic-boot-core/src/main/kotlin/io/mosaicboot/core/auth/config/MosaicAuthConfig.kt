@@ -12,6 +12,7 @@ import io.mosaicboot.core.auth.repository.AuthenticationRepositoryBase
 import io.mosaicboot.core.user.repository.TenantUserRepositoryBase
 import io.mosaicboot.core.user.repository.UserRepositoryBase
 import io.mosaicboot.core.auth.MosaicCredentialHandler
+import io.mosaicboot.core.user.repository.GlobalRoleRepositoryBase
 import io.mosaicboot.core.user.service.AuditService
 import io.mosaicboot.core.user.service.MosaicOAuth2UserService
 import io.mosaicboot.core.user.service.UserService
@@ -73,6 +74,7 @@ class MosaicAuthConfig(
         authenticationRepository: AuthenticationRepositoryBase<*>,
         userRepository: UserRepositoryBase<*>,
         tenantUserRepository: TenantUserRepositoryBase<*>,
+        globalRoleRepositoryBase: GlobalRoleRepositoryBase<*>,
         credentialService: CredentialService,
         auditService: AuditService,
         objectMapper: ObjectMapper,
@@ -81,6 +83,7 @@ class MosaicAuthConfig(
             authenticationRepository = authenticationRepository,
             userRepository = userRepository,
             tenantUserRepository = tenantUserRepository,
+            globalRoleRepositoryBase = globalRoleRepositoryBase,
             credentialService = credentialService,
             auditService = auditService,
             objectMapper = objectMapper,

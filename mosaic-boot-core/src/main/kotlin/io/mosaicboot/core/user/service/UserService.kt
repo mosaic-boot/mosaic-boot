@@ -43,7 +43,11 @@ class UserService(
      */
     fun getCurrentActiveUser(userId: String, tenantUser: ActiveTenantUser?): CurrentActiveUser {
         return if (tenantUser != null) {
-            tenantUserRepository.findCurrentActiveUserById(tenantUser.tenantUserId)
+            tenantUserRepository.findWithUser(
+                userId = userId,
+                tenantId = tenantUser.tenantId,
+                tenantUserId = tenantUser.tenantUserId,
+            )
                 ?.takeIf { it.user.id == userId }
         } else {
             userRepository.findById(userId).getOrNull()?.let { user ->

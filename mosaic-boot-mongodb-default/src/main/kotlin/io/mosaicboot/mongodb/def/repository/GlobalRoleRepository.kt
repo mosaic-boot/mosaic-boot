@@ -16,10 +16,13 @@
 
 package io.mosaicboot.mongodb.def.repository
 
-import io.mosaicboot.core.user.repository.UserMosaicRepository
-import io.mosaicboot.mongodb.def.entity.UserEntity
-import java.util.Optional
+import io.mosaicboot.core.user.repository.GlobalRoleRepositoryBase
+import io.mosaicboot.mongodb.def.entity.GlobalRoleEntity
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
+import org.springframework.data.mongodb.repository.MongoRepository
+import org.springframework.stereotype.Repository
 
-interface UserCustomRepository : UserMosaicRepository<UserEntity> {
-    fun findById(id: String): Optional<UserEntity>
-}
+@Repository
+@ConditionalOnProperty(prefix = "mosaic.datasource.mongodb.collections.global-role", name = ["customized"], havingValue = "false", matchIfMissing = true)
+interface GlobalRoleRepository : MongoRepository<GlobalRoleEntity, String>,
+    GlobalRoleRepositoryBase<GlobalRoleEntity>

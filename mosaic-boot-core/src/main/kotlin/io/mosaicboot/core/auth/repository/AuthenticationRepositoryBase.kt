@@ -19,13 +19,7 @@ package io.mosaicboot.core.auth.repository
 import io.mosaicboot.core.auth.entity.Authentication
 import io.mosaicboot.core.auth.dto.AuthenticationDetail
 import io.mosaicboot.core.auth.dto.AuthenticationInput
-import io.mosaicboot.io.mosaicboot.core.repository.BaseRepository
+import io.mosaicboot.core.repository.BaseRepository
 
-interface AuthenticationRepositoryBase<T : Authentication> : BaseRepository<T, String> {
-    fun saveEntity(input: Authentication): T
-    fun save(input: AuthenticationInput): T
-    fun findByMethodAndUsername(method: String, username: String): AuthenticationDetail?
-    fun findByMethodAndEmail(method: String, email: String): AuthenticationDetail?
-//    fun appendUserToAuthentication(authentication: Authentication, userId: String): T
-//    fun removeUserFromAuthentication(authentication: Authentication, userId: String): T
-}
+interface AuthenticationRepositoryBase<T : Authentication> : BaseRepository<Authentication, T, String>,
+    AuthenticationMosaicRepository<T>

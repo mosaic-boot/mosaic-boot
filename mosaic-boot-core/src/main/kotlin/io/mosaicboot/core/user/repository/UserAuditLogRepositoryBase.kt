@@ -19,13 +19,9 @@ package io.mosaicboot.core.user.repository
 import io.mosaicboot.core.user.entity.UserAuditLog
 import io.mosaicboot.core.user.dto.UserAuditLogDetail
 import io.mosaicboot.core.user.dto.UserAuditLogInput
-import io.mosaicboot.io.mosaicboot.core.repository.BaseRepository
+import io.mosaicboot.core.repository.BaseRepository
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 
-interface UserAuditLogRepositoryBase<T : UserAuditLog<ID>, ID : Any> : BaseRepository<T, ID> {
-    fun save(input: UserAuditLogInput): T
-    fun saveAll(input: List<UserAuditLogInput>): List<T>
-    fun findByUserId(tenantId: String, userId: String, searchInput: SearchInput, pageable: Pageable): Page<UserAuditLogDetail<ID>>
-    fun findByTenantId(tenantId: String, searchInput: SearchInput, pageable: Pageable): Page<UserAuditLogDetail<ID>>
-}
+interface UserAuditLogRepositoryBase<T : UserAuditLog<ID>, ID : Any> : BaseRepository<UserAuditLog<ID>, T, ID>,
+    UserAuditLogMosaicRepository<T, ID>

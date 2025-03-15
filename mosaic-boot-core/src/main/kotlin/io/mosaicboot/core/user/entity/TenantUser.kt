@@ -21,7 +21,8 @@ import io.mosaicboot.core.entity.BaseTenantEntity
 
 interface TenantUser : BaseTenantEntity<String> {
     val userId: String
-    val nickname: String
-    val email: String?
-    val status: UserStatus
+    var nickname: String
+    var email: String?
+    var status: UserStatus
+    val roles: List<TenantRole>
 }

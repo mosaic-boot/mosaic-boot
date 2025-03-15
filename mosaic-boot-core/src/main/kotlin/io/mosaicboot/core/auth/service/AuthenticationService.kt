@@ -36,6 +36,7 @@ import io.mosaicboot.core.user.dto.UserAuditLoginActionDetail
 import io.mosaicboot.core.user.dto.UserAuditRegisterActionDetail
 import io.mosaicboot.core.user.dto.UserInput
 import io.mosaicboot.core.user.controller.model.TenantLoginStatus
+import io.mosaicboot.core.user.repository.GlobalRoleRepositoryBase
 import io.mosaicboot.core.user.service.AuditService
 import io.mosaicboot.core.util.UnreachableException
 import io.mosaicboot.core.util.WebClientInfo
@@ -47,6 +48,7 @@ class AuthenticationService(
     private val authenticationRepository: AuthenticationRepositoryBase<*>,
     private val userRepository: UserRepositoryBase<*>,
     private val tenantUserRepository: TenantUserRepositoryBase<*>,
+    private val globalRoleRepositoryBase: GlobalRoleRepositoryBase<*>,
     private val credentialService: CredentialService,
     private val auditService: AuditService,
     private val objectMapper: ObjectMapper,
@@ -179,6 +181,9 @@ class AuthenticationService(
             }
 
             // Create new user
+            userTemplate.roles = setOf(
+                globalRoleRepositoryBase.findById("system.general-user").get(),
+            )
             val user = userRepository.save(userTemplate)
 
             // Create authentication

@@ -25,12 +25,12 @@ import io.mosaicboot.mongodb.def.entity.UserAuditLogEntity
 import io.mosaicboot.mongodb.def.repository.UserAuditLogCustomRepository
 import org.bson.types.ObjectId
 import org.springframework.data.annotation.Id
-import org.springframework.data.domain.Page
-import org.springframework.data.domain.Pageable
 import org.springframework.data.mongodb.core.MongoTemplate
 import org.springframework.data.mongodb.core.mapping.Field
+import org.springframework.stereotype.Component
 import java.time.Instant
 
+@Component
 class UserAuditLogCustomRepositoryImpl(
     private val mongoTemplate: MongoTemplate,
 ) : UserAuditLogCustomRepository {
@@ -41,23 +41,23 @@ class UserAuditLogCustomRepositoryImpl(
     override fun saveAll(input: List<UserAuditLogInput>): List<UserAuditLogEntity> {
         return input.map { mongoTemplate.save(it.toEntity()) }
     }
-
-    override fun findByUserId(
-        tenantId: String,
-        userId: String,
-        searchInput: SearchInput,
-        pageable: Pageable
-    ): Page<UserAuditLogDetail<ObjectId>> {
-        TODO("Not yet implemented")
-    }
-
-    override fun findByTenantId(
-        tenantId: String,
-        searchInput: SearchInput,
-        pageable: Pageable
-    ): Page<UserAuditLogDetail<ObjectId>> {
-        TODO("Not yet implemented")
-    }
+//
+//    override fun findByUserId(
+//        tenantId: String,
+//        userId: String,
+//        searchInput: SearchInput,
+//        pageable: Pageable
+//    ): Page<UserAuditLogDetail<ObjectId>> {
+//        TODO("Not yet implemented")
+//    }
+//
+//    override fun findByTenantId(
+//        tenantId: String,
+//        searchInput: SearchInput,
+//        pageable: Pageable
+//    ): Page<UserAuditLogDetail<ObjectId>> {
+//        TODO("Not yet implemented")
+//    }
 
     class UserAuditLogDetailImpl(
         @Id

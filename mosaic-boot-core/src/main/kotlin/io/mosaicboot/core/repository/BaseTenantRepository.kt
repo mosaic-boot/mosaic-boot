@@ -14,15 +14,10 @@
  * limitations under the License.
  */
 
-package io.mosaicboot.mongodb.def.repository
+package io.mosaicboot.core.repository
 
-import io.mosaicboot.core.user.repository.RoleRepositoryBase
-import io.mosaicboot.mongodb.def.entity.RoleEntity
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
-import org.springframework.data.mongodb.repository.MongoRepository
-import org.springframework.stereotype.Repository
+import io.mosaicboot.core.entity.BaseTenantEntity
 
-@Repository
-@ConditionalOnProperty(prefix = "mosaic.datasource.mongodb.collections.role", name = ["customized"], havingValue = "false", matchIfMissing = true)
-interface RoleRepository : MongoRepository<RoleEntity, String>,
-    RoleRepositoryBase<RoleEntity>
+interface BaseTenantRepository<B : BaseTenantEntity<ID>, T : BaseTenantEntity<ID>, ID> : BaseRepository<B, T, ID> {
+    fun findByTenantIdAndId(tenantId: String, id: String): T?
+}

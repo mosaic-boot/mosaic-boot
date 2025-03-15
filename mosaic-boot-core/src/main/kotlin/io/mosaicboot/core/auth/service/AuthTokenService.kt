@@ -99,6 +99,14 @@ class AuthTokenService(
             token = token,
             userId = user.id,
             authenticationId = authentication.id,
+            tenants = tenantUsers.associate {
+                it.first.tenantId to
+                    AuthTokenData.TenantItem(
+                        id = it.first.tenantId,
+                        userId = it.first.id,
+                        status = it.second,
+                    )
+            },
             authorities = null,
         )
     }
@@ -112,6 +120,7 @@ class AuthTokenService(
             token = token,
             userId = data.userId,
             authenticationId = data.authId,
+            tenants = data.tenants.associateBy { it.id },
             authorities = null,
         )
     }

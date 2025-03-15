@@ -32,8 +32,14 @@ data class AuthTokenData(
     val tenants: List<TenantItem>,
 ) {
     data class TenantItem(
+        /**
+         * tenantId
+         */
         @field:JsonProperty("id")
         val id: String,
+        /**
+         * tenantUserId
+         */
         @field:JsonProperty("userId")
         val userId: String,
         @field:JsonProperty("status")

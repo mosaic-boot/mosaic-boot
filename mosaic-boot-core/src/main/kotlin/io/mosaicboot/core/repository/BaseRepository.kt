@@ -14,9 +14,15 @@
  * limitations under the License.
  */
 
-package io.mosaicboot.io.mosaicboot.core.repository
+package io.mosaicboot.core.repository
 
 import io.mosaicboot.core.entity.BaseEntity
 import org.springframework.data.repository.CrudRepository
 
-interface BaseRepository<T : BaseEntity<ID>, ID> : CrudRepository<T, ID>
+@JvmDefaultWithoutCompatibility
+interface BaseRepository<B : BaseEntity<ID>, T : BaseEntity<ID>, ID> : CrudRepository<T, ID> {
+    @Suppress("UNCHECKED_CAST")
+    fun saveEntity(entity: B): T {
+        return save(entity as T)
+    }
+}

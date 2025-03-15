@@ -18,8 +18,7 @@ package io.mosaicboot.core.user.repository
 
 import io.mosaicboot.core.user.entity.User
 import io.mosaicboot.core.user.dto.UserInput
-import io.mosaicboot.io.mosaicboot.core.repository.BaseRepository
+import io.mosaicboot.core.repository.BaseRepository
 
-interface UserRepositoryBase<T : User> : BaseRepository<T, String> {
-    fun save(input: UserInput): T
-}
+interface UserRepositoryBase<T : User> : BaseRepository<User, T, String>,
+    UserMosaicRepository<T>

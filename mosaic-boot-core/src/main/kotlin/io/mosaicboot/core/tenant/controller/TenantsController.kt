@@ -6,6 +6,8 @@ import io.mosaicboot.core.tenant.config.MosaicTenantProperties
 import io.mosaicboot.core.tenant.controller.dto.*
 import io.mosaicboot.core.tenant.service.TenantService
 import io.mosaicboot.core.auth.MosaicAuthenticatedToken
+import io.mosaicboot.core.permission.annotation.RequirePermission
+import io.mosaicboot.core.permission.aspect.PermissionInterceptor
 import io.swagger.v3.oas.annotations.Operation
 import org.springframework.context.ApplicationContext
 import org.springframework.http.HttpStatus
@@ -22,8 +24,12 @@ class TenantsController(
         return mosaicTenantProperties.api.path
     }
 
-    @Operation(summary = "Create new tenant")
     @PostMapping("/")
+    @RequirePermission(
+        permission = "tenant.create",
+        tenantSpecific = false,
+    )
+    @Operation(summary = "Create new tenant")
     fun createTenant(
         authentication: Authentication,
         @RequestBody request: CreateTenantRequest
@@ -49,21 +55,21 @@ class TenantsController(
         )
     }
 
-    @Operation(summary = "Get tenant details")
     @GetMapping("/{tenantId}")
+    @RequirePermission(
+        permission = "global.admin",
+        tenantSpecific = false,
+    )
+    @RequirePermission(
+        permission = "",
+        tenantSpecific = true,
+    )
+    @Operation(summary = "Get tenant details")
     fun getTenant(
         authentication: Authentication,
         @PathVariable("tenantId") tenantId: String,
     ): ResponseEntity<TenantResponse> {
-        if (authentication !is MosaicAuthenticatedToken) {
-            return ResponseEntity
-                .status(HttpStatus.UNAUTHORIZED)
-                .build()
-        }
-
-        if (tenantService.hasAccessByUser(authentication.userId, tenantId) != null) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build()
-        }
+        PermissionInterceptor.mustAuthorized()
 
         val tenant = tenantService.getTenant(tenantId)
 
@@ -77,22 +83,18 @@ class TenantsController(
         )
     }
 
-    @Operation(summary = "Update tenant")
     @PutMapping("/{tenantId}")
+    @RequirePermission(
+        permission = "tenant.admin",
+        tenantSpecific = true,
+    )
+    @Operation(summary = "Update tenant")
     fun updateTenant(
         authentication: Authentication,
         @PathVariable tenantId: String,
         @RequestBody request: UpdateTenantRequest,
     ): ResponseEntity<TenantResponse> {
-        if (authentication !is MosaicAuthenticatedToken) {
-            return ResponseEntity
-                .status(HttpStatus.UNAUTHORIZED)
-                .build()
-        }
-
-        if (tenantService.hasAccessByUser(authentication.userId, tenantId) != null) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build()
-        }
+        PermissionInterceptor.mustAuthorized()
 
         var tenant = tenantService.getTenant(tenantId)
         tenant.name = request.name
@@ -110,22 +112,18 @@ class TenantsController(
         )
     }
 
+    @PostMapping("/{tenantId}/invite")
+    @RequirePermission(
+        permission = "tenant.invite",
+        tenantSpecific = true,
+    )
     @Operation(summary = "Invite user to tenant")
-    @PostMapping("/{tenantId}/invites")
     fun inviteUser(
         authentication: Authentication,
         @PathVariable tenantId: String,
         @RequestBody request: InviteUserRequest,
     ): ResponseEntity<InviteResponse> {
-        if (authentication !is MosaicAuthenticatedToken) {
-            return ResponseEntity
-                .status(HttpStatus.UNAUTHORIZED)
-                .build()
-        }
-
-        if (tenantService.hasAccessByUser(authentication.userId, tenantId) != null) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build()
-        }
+        PermissionInterceptor.mustAuthorized()
 
 //        tenantService.inviteUser()
 

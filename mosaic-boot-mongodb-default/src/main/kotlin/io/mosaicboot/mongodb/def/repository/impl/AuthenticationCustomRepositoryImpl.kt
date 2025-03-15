@@ -17,7 +17,6 @@
 package io.mosaicboot.mongodb.def.repository.impl
 
 import com.fasterxml.uuid.Generators
-import io.mosaicboot.core.auth.entity.Authentication
 import io.mosaicboot.core.auth.dto.AuthenticationDetail
 import io.mosaicboot.core.auth.dto.AuthenticationInput
 import io.mosaicboot.mongodb.def.config.MongodbCollectionsProperties
@@ -30,19 +29,14 @@ import org.springframework.data.mongodb.core.aggregation.Aggregation
 import org.springframework.data.mongodb.core.aggregation.LookupOperation
 import org.springframework.data.mongodb.core.mapping.Field
 import org.springframework.data.mongodb.core.query.Criteria
-import org.springframework.data.mongodb.core.query.Query
-import org.springframework.data.mongodb.core.query.Update
+import org.springframework.stereotype.Component
 import java.time.Instant
 
+@Component
 class AuthenticationCustomRepositoryImpl(
     private val mongodbCollectionsProperties: MongodbCollectionsProperties,
     private val mongoTemplate: MongoTemplate,
 ) : AuthenticationCustomRepository {
-    override fun saveEntity(input: Authentication): AuthenticationEntity {
-        input as AuthenticationEntity
-        return mongoTemplate.save(input)
-    }
-
     override fun save(input: AuthenticationInput): AuthenticationEntity {
         val now = Instant.now()
         return mongoTemplate.save(AuthenticationEntity(
@@ -113,33 +107,33 @@ class AuthenticationCustomRepositoryImpl(
         return result.uniqueMappedResult
     }
 
-    override fun appendUserToAuthentication(authentication: Authentication, userId: String): AuthenticationEntity {
-        TODO()
-        val query = Query().addCriteria(Criteria.where("id").`is`(authentication.id))
-        val update = Update()
-            .set("updatedAt", Instant.now())
-            .addToSet("userId", userId)
-
-        return mongoTemplate.findAndModify(
-            query,
-            update,
-            AuthenticationEntity::class.java
-        ) ?: throw IllegalStateException("Authentication not found with id: ${authentication.id}")
-    }
-
-    override fun removeUserFromAuthentication(authentication: Authentication, userId: String): AuthenticationEntity {
-        TODO()
-        val query = Query().addCriteria(Criteria.where("id").`is`(authentication.id))
-        val update = Update()
-            .set("updatedAt", Instant.now())
-            .pull("userId", userId)
-
-        return mongoTemplate.findAndModify(
-            query,
-            update,
-            AuthenticationEntity::class.java
-        ) ?: throw IllegalStateException("Authentication not found with id: ${authentication.id}")
-    }
+//    override fun appendUserToAuthentication(authentication: Authentication, userId: String): AuthenticationEntity {
+//        TODO()
+//        val query = Query().addCriteria(Criteria.where("id").`is`(authentication.id))
+//        val update = Update()
+//            .set("updatedAt", Instant.now())
+//            .addToSet("userId", userId)
+//
+//        return mongoTemplate.findAndModify(
+//            query,
+//            update,
+//            AuthenticationEntity::class.java
+//        ) ?: throw IllegalStateException("Authentication not found with id: ${authentication.id}")
+//    }
+//
+//    override fun removeUserFromAuthentication(authentication: Authentication, userId: String): AuthenticationEntity {
+//        TODO()
+//        val query = Query().addCriteria(Criteria.where("id").`is`(authentication.id))
+//        val update = Update()
+//            .set("updatedAt", Instant.now())
+//            .pull("userId", userId)
+//
+//        return mongoTemplate.findAndModify(
+//            query,
+//            update,
+//            AuthenticationEntity::class.java
+//        ) ?: throw IllegalStateException("Authentication not found with id: ${authentication.id}")
+//    }
 
     data class AuthenticationDetailImpl(
         @Id

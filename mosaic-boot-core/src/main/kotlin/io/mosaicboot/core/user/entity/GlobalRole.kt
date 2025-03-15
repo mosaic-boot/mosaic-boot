@@ -18,9 +18,7 @@ package io.mosaicboot.core.user.entity
 
 import io.mosaicboot.core.entity.UpdatableEntity
 
-interface SiteRole : UpdatableEntity<String> {
-    val tenantId: String?
-
+interface GlobalRole : UpdatableEntity<String> {
     val name: String
 
     /**
