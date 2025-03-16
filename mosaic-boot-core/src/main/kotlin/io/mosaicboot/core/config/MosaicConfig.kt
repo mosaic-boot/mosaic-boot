@@ -17,17 +17,15 @@
 package io.mosaicboot.core.config
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.datatype.jsr310.JSR310Module
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.jsonMapper
 import com.fasterxml.jackson.module.kotlin.kotlinModule
 import io.mosaicboot.core.auth.config.MosaicAuthConfig
-import io.mosaicboot.core.auth.controller.AuthController
 import io.mosaicboot.core.http.BaseMosaicController
 import io.mosaicboot.core.http.MosaicOpenAPIService
 import io.mosaicboot.core.http.MosaicRequestMappingHandlerMapping
 import io.mosaicboot.core.provision.config.ProvisionConfig
+import io.mosaicboot.core.swagger.AddNullableTypeOpenApiCustomizer
 import io.mosaicboot.core.tenant.config.MosaicTenantConfig
 import io.mosaicboot.core.user.config.MosaicUserConfig
 import io.mosaicboot.core.util.WebClientInfo
@@ -41,7 +39,6 @@ import org.springdoc.core.service.OpenAPIService
 import org.springdoc.core.service.SecurityService
 import org.springdoc.core.utils.PropertyResolverUtils
 import org.springdoc.core.utils.SpringDocUtils
-import org.springframework.boot.autoconfigure.condition.ConditionalOnBean
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.ApplicationContext
@@ -80,6 +77,11 @@ class MosaicConfig {
             addModule(kotlinModule())
             addModule(JavaTimeModule())
         }
+    }
+
+    @Bean
+    fun addNullableTypeOpenApiCustomizer(): AddNullableTypeOpenApiCustomizer {
+        return AddNullableTypeOpenApiCustomizer()
     }
 
     @Bean

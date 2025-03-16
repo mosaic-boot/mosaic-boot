@@ -38,7 +38,7 @@ class UserController(
         )
     ])
     @GetMapping("/current")
-    fun getCurrent(
+    fun getCurrentUser(
         authentication: Authentication,
     ): ResponseEntity<CurrentUserResponse> {
         if (authentication !is MosaicAuthenticatedToken) {
@@ -72,7 +72,7 @@ class UserController(
         )
     ])
     @GetMapping("/current/tenants")
-    fun getTenants(): List<MyTenant> {
+    fun getCurrentTenants(): List<MyTenant> {
         throw RuntimeException("not impl")
     }
 

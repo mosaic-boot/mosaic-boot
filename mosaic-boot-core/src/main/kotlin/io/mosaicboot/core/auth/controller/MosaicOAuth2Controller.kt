@@ -69,7 +69,7 @@ class MosaicOAuth2Controller(
         )
     ])
     @GetMapping("/register-info")
-    fun getRegisterInfo(): ResponseEntity<OAuth2BasicInfo> {
+    fun getOAuth2RegisterInfo(): ResponseEntity<OAuth2BasicInfo> {
         val authentication = SecurityContextHolder.getContext().authentication
         if (authentication !is MosaicOAuth2RegisterToken) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
@@ -108,7 +108,7 @@ class MosaicOAuth2Controller(
         )
     ])
     @PostMapping("/register")
-    fun registerOauth2(
+    fun registerByOAuth2(
         request: HttpServletRequest,
         @Parameter(hidden = true) webClientInfo: WebClientInfo,
         @RequestBody body: RegisterRequest.OAuth2,
