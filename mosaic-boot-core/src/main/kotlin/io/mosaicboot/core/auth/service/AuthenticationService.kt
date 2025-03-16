@@ -116,6 +116,7 @@ class AuthenticationService(
             Pair(tenantUser, checkTenantUser(tenantUser, webClientInfo))
         }
         logSuccessfulLogin(
+            userId = authDetail.userId,
             tenantUserResults = tenantUserResults,
             auditActionDetail = auditActionDetail,
             webClientInfo = webClientInfo,
@@ -367,11 +368,13 @@ class AuthenticationService(
     }
 
     private fun logSuccessfulLogin(
+        userId: String,
         tenantUserResults: List<Pair<TenantUser, UserAuditLogStatus>>,
         auditActionDetail: UserAuditLoginActionDetail,
         webClientInfo: WebClientInfo
     ) {
         addAuditLogs(
+            userId = userId,
             action = UserAuditAction.LOGIN,
             status = UserAuditLogStatus.SUCCESS,
             tenantUsers = tenantUserResults,
