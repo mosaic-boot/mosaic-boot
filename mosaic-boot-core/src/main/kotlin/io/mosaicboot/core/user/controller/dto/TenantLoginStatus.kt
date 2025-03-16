@@ -14,12 +14,10 @@
  * limitations under the License.
  */
 
-package io.mosaicboot.core.user.controller.model
+package io.mosaicboot.core.user.controller.dto
 
-enum class LoginFailureReason {
-    NO_USER,
-    WRONG_CREDENTIAL,
-    INVALID,
+enum class TenantLoginStatus {
+    SUCCESS,
     BLOCKED_USER,
     BLOCKED_IP,
 }

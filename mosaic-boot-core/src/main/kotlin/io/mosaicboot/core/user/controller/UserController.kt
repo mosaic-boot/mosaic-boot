@@ -4,8 +4,8 @@ import io.mosaicboot.core.http.BaseMosaicController
 import io.mosaicboot.core.http.MosaicController
 import io.mosaicboot.core.auth.MosaicAuthenticatedToken
 import io.mosaicboot.core.user.config.MosaicUserProperties
-import io.mosaicboot.core.user.controller.model.CurrentUserResponse
-import io.mosaicboot.core.user.controller.model.MyTenant
+import io.mosaicboot.core.user.controller.dto.CurrentUserResponse
+import io.mosaicboot.core.user.controller.dto.MyTenant
 import io.mosaicboot.core.user.service.UserService
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.media.Content
@@ -72,7 +72,13 @@ class UserController(
         )
     ])
     @GetMapping("/current/tenants")
-    fun getCurrentTenants(): List<MyTenant> {
+    fun getCurrentTenants(
+        authentication: Authentication,
+    ): ResponseEntity<List<MyTenant>> {
+        if (authentication !is MosaicAuthenticatedToken) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
+        }
+
         throw RuntimeException("not impl")
     }
 

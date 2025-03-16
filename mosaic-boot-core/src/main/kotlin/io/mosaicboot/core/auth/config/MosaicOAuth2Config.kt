@@ -92,9 +92,13 @@ class MosaicOAuth2Config(
     @Bean
     fun mosaicOAuth2Controller(
         mosaicOAuth2UserService: MosaicOAuth2UserService,
+        authTokenService: AuthTokenService,
+        mosaicAuthenticationHandler: MosaicAuthenticationHandler,
     ): MosaicOAuth2Controller {
         return MosaicOAuth2Controller(
-            mosaicOAuth2UserService
+            mosaicOAuth2UserService,
+            authTokenService,
+            mosaicAuthenticationHandler,
         )
     }
 

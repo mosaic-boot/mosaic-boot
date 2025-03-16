@@ -19,8 +19,8 @@ package io.mosaicboot.core.user.service
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.mosaicboot.core.auth.config.MosaicAuthProperties
 import io.mosaicboot.core.auth.repository.AuthenticationRepositoryBase
-import io.mosaicboot.core.user.controller.model.OAuth2AccessTokenJson
-import io.mosaicboot.core.user.controller.model.OAuth2RefreshTokenJson
+import io.mosaicboot.core.user.controller.dto.OAuth2AccessTokenJson
+import io.mosaicboot.core.user.controller.dto.OAuth2RefreshTokenJson
 import io.mosaicboot.core.auth.oauth2.OAuth2AccessTokenRepository
 import io.mosaicboot.core.util.ServerSideCrypto
 import org.springframework.security.oauth2.client.ClientAuthorizationException

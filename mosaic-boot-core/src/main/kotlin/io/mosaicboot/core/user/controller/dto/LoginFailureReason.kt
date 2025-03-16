@@ -14,13 +14,12 @@
  * limitations under the License.
  */
 
-package io.mosaicboot.core.user.controller.model
+package io.mosaicboot.core.user.controller.dto
 
-import com.fasterxml.jackson.annotation.JsonProperty
-
-data class ActiveTenantUser(
-    @field:JsonProperty("tenantId")
-    val tenantId: String,
-    @field:JsonProperty("tenantUserId")
-    val tenantUserId: String,
-)
+enum class LoginFailureReason {
+    NO_USER,
+    WRONG_CREDENTIAL,
+    INVALID,
+    BLOCKED_USER,
+    BLOCKED_IP,
+}

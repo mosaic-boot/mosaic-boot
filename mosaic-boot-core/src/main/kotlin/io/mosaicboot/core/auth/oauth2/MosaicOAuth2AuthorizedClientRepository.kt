@@ -17,8 +17,8 @@
 package io.mosaicboot.core.auth.oauth2
 
 import io.mosaicboot.core.auth.MosaicCookieAuthFilter
-import io.mosaicboot.core.user.controller.model.OAuth2AccessTokenJson
-import io.mosaicboot.core.user.controller.model.OAuth2RefreshTokenJson
+import io.mosaicboot.core.user.controller.dto.OAuth2AccessTokenJson
+import io.mosaicboot.core.user.controller.dto.OAuth2RefreshTokenJson
 import io.mosaicboot.core.auth.service.AuthTokenService
 import io.mosaicboot.core.user.service.MosaicOAuth2TokenService
 import jakarta.servlet.http.HttpServletRequest

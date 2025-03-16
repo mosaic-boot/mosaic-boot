@@ -22,7 +22,7 @@ import io.mosaicboot.core.auth.repository.AuthenticationRepositoryBase
 import io.mosaicboot.core.user.dto.CurrentActiveUser
 import io.mosaicboot.core.user.repository.TenantUserRepositoryBase
 import io.mosaicboot.core.user.repository.UserRepositoryBase
-import io.mosaicboot.core.user.controller.model.ActiveTenantUser
+import io.mosaicboot.core.user.controller.dto.ActiveTenantUser
 import org.springframework.stereotype.Service
 import kotlin.jvm.optionals.getOrNull
 

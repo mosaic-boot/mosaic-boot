@@ -28,6 +28,7 @@ import io.mosaicboot.core.http.MosaicController
 import io.mosaicboot.core.util.WebClientInfo
 import io.mosaicboot.core.auth.dto.LoginResult
 import io.mosaicboot.core.auth.MosaicAuthenticationHandler
+import io.mosaicboot.core.auth.dto.RegisterResult
 import io.mosaicboot.core.auth.service.AuthTokenService
 import io.mosaicboot.core.auth.service.AuthenticationService
 import io.mosaicboot.core.user.controller.toResponseEntity
@@ -151,6 +152,7 @@ class AuthController(
     @PostMapping("/register")
     fun register(
         request: HttpServletRequest,
+        response: HttpServletResponse,
         @Parameter(hidden = true) webClientInfo: WebClientInfo,
         @RequestBody body: RegisterRequest.Plain,
     ): ResponseEntity<RegisterResponse> {
@@ -170,6 +172,21 @@ class AuthController(
             credential = body.credential,
             webClientInfo = webClientInfo,
         )
+
+        if (result is RegisterResult.Success) {
+            val authenticatedToken = authTokenService.issueAuthenticatedToken(
+                webClientInfo,
+                result.user,
+                result.authentication,
+                result.tenantUsers
+            )
+            mosaicAuthenticationHandler.onAuthenticationSuccess(
+                request,
+                response,
+                authenticatedToken
+            )
+        }
+
         return result.toResponseEntity()
     }
 }

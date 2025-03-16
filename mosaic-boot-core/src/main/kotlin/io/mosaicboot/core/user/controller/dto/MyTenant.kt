@@ -14,10 +14,15 @@
  * limitations under the License.
  */
 
-package io.mosaicboot.core.user.controller.model
+package io.mosaicboot.core.user.controller.dto
 
-enum class TenantLoginStatus {
-    SUCCESS,
-    BLOCKED_USER,
-    BLOCKED_IP,
-}
+import com.fasterxml.jackson.annotation.JsonProperty
+
+data class MyTenant(
+    @field:JsonProperty("tenantId")
+    val tenantId: String,
+    @field:JsonProperty("tenantUserId")
+    val tenantUserId: String,
+    @field:JsonProperty("name")
+    val name: String,
+)

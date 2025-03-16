@@ -19,8 +19,8 @@ package io.mosaicboot.core.auth.dto
 import io.mosaicboot.core.auth.entity.Authentication
 import io.mosaicboot.core.user.entity.TenantUser
 import io.mosaicboot.core.user.entity.User
-import io.mosaicboot.core.user.controller.model.LoginFailureReason
-import io.mosaicboot.core.user.controller.model.TenantLoginStatus
+import io.mosaicboot.core.user.controller.dto.LoginFailureReason
+import io.mosaicboot.core.user.controller.dto.TenantLoginStatus
 
 sealed class LoginResult {
     data class Success(

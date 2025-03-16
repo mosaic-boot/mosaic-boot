@@ -104,11 +104,11 @@ class TenantsController(
 
         return ResponseEntity.ok(
             TenantResponse(
-            id = tenant.id,
-            name = tenant.name,
-            status = tenant.status,
-            timeZone = tenant.timeZone,
-        )
+                id = tenant.id,
+                name = tenant.name,
+                status = tenant.status,
+                timeZone = tenant.timeZone,
+            )
         )
     }
 

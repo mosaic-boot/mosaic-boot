@@ -19,11 +19,15 @@ package io.mosaicboot.core.auth.dto
 import io.mosaicboot.core.auth.entity.Authentication
 import io.mosaicboot.core.user.entity.User
 import io.mosaicboot.core.auth.controller.dto.RegisterFailureReason
+import io.mosaicboot.core.user.controller.dto.TenantLoginStatus
+import io.mosaicboot.core.user.entity.TenantUser
 
 sealed class RegisterResult {
     class Success(
         val user: User,
         val authentication: Authentication,
+        // TODO: fill it
+        val tenantUsers: List<Pair<TenantUser, TenantLoginStatus>> = emptyList(),
     ) : RegisterResult()
     class Failure(
         val reason: RegisterFailureReason

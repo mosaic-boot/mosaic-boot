@@ -1,4 +1,4 @@
-package io.mosaicboot.core.user.controller.model
+package io.mosaicboot.core.user.controller.dto
 
 enum class SystemPermission(
     val id: String,

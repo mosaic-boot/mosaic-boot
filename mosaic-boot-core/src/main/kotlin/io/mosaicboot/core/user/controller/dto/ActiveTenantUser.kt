@@ -14,25 +14,13 @@
  * limitations under the License.
  */
 
-package io.mosaicboot.core.user.controller.model
+package io.mosaicboot.core.user.controller.dto
 
 import com.fasterxml.jackson.annotation.JsonProperty
-import io.swagger.v3.oas.annotations.media.Schema
 
-data class CurrentUserResponse(
-    @field:JsonProperty("userId")
-    val userId: String,
-    @field:Schema(nullable = true)
-    @field:JsonProperty("activeTenantId")
-    val activeTenantId: String?,
-    @field:Schema(nullable = true)
-    @field:JsonProperty("activeTenantUserId")
-    val activeTenantUserId: String?,
-    @field:JsonProperty("name")
-    val name: String,
-    @field:Schema(nullable = true)
-    @field:JsonProperty("email")
-    val email: String?,
-    @field:JsonProperty("permissions")
-    val permissions: List<String>,
+data class ActiveTenantUser(
+    @field:JsonProperty("tenantId")
+    val tenantId: String,
+    @field:JsonProperty("tenantUserId")
+    val tenantUserId: String,
 )

@@ -29,13 +29,13 @@ import io.mosaicboot.core.user.repository.TenantUserRepositoryBase
 import io.mosaicboot.core.user.repository.UserRepositoryBase
 import io.mosaicboot.core.auth.dto.LoginResult
 import io.mosaicboot.core.auth.dto.RegisterResult
-import io.mosaicboot.core.user.controller.model.LoginFailureReason
+import io.mosaicboot.core.user.controller.dto.LoginFailureReason
 import io.mosaicboot.core.auth.controller.dto.RegisterFailureReason
 import io.mosaicboot.core.user.dto.UserAuditLogInput
 import io.mosaicboot.core.user.dto.UserAuditLoginActionDetail
 import io.mosaicboot.core.user.dto.UserAuditRegisterActionDetail
 import io.mosaicboot.core.user.dto.UserInput
-import io.mosaicboot.core.user.controller.model.TenantLoginStatus
+import io.mosaicboot.core.user.controller.dto.TenantLoginStatus
 import io.mosaicboot.core.user.repository.GlobalRoleRepositoryBase
 import io.mosaicboot.core.user.service.AuditService
 import io.mosaicboot.core.util.UnreachableException

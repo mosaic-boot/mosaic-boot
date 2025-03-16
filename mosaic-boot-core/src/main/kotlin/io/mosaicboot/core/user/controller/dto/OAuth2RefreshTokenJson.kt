@@ -14,19 +14,16 @@
  * limitations under the License.
  */
 
-package io.mosaicboot.core.user.controller.model
+package io.mosaicboot.core.user.controller.dto
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.annotation.JsonProperty
 import io.mosaicboot.core.jwt.JwtContentType
-import org.springframework.security.oauth2.core.OAuth2AccessToken
+import org.springframework.security.oauth2.core.OAuth2RefreshToken
 
-@JwtContentType("oauth2.access-token")
+@JwtContentType("oauth2.refresh-token")
 @JsonIgnoreProperties(ignoreUnknown = true)
-data class OAuth2AccessTokenJson(
-    @JsonProperty("type")
-    @field:JsonProperty("type")
-    val type: String,
+data class OAuth2RefreshTokenJson(
     @JsonProperty("value")
     @field:JsonProperty("value")
     val value: String,
@@ -36,18 +33,13 @@ data class OAuth2AccessTokenJson(
     @JsonProperty("expiresAt")
     @field:JsonProperty("expiresAt")
     val expiresAt: Long?,
-    @JsonProperty("scopes")
-    @field:JsonProperty("scopes")
-    val scopes: Set<String>,
 ) {
     companion object {
-        fun copyFrom(token: OAuth2AccessToken): OAuth2AccessTokenJson {
-            return OAuth2AccessTokenJson(
-                type = token.tokenType.value,
+        fun copyFrom(token: OAuth2RefreshToken): OAuth2RefreshTokenJson {
+            return OAuth2RefreshTokenJson(
                 value = token.tokenValue,
                 issuedAt = token.issuedAt?.epochSecond,
                 expiresAt = token.expiresAt?.epochSecond,
-                scopes = token.scopes,
             )
         }
     }

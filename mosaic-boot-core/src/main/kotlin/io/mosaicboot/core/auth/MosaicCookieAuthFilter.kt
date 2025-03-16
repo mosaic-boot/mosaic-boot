@@ -20,7 +20,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import io.mosaicboot.core.auth.config.MosaicAuthProperties
 import io.mosaicboot.core.auth.oauth2.MosaicOAuth2RegisterToken
 import io.mosaicboot.core.auth.service.AuthTokenService
-import io.mosaicboot.core.user.controller.model.ActiveTenantUser
+import io.mosaicboot.core.user.controller.dto.ActiveTenantUser
 import jakarta.servlet.FilterChain
 import jakarta.servlet.http.Cookie
 import jakarta.servlet.http.HttpServletRequest

@@ -16,6 +16,7 @@
 
 package io.mosaicboot.core.auth.controller
 
+import io.mosaicboot.core.auth.MosaicAuthenticationHandler
 import io.mosaicboot.core.auth.config.MosaicAuthProperties
 import io.mosaicboot.core.user.enums.UserStatus
 import io.mosaicboot.core.user.dto.UserInput
@@ -23,8 +24,10 @@ import io.mosaicboot.core.http.BaseMosaicController
 import io.mosaicboot.core.http.MosaicController
 import io.mosaicboot.core.auth.controller.dto.RegisterRequest
 import io.mosaicboot.core.auth.controller.dto.RegisterResponse
+import io.mosaicboot.core.auth.dto.RegisterResult
 import io.mosaicboot.core.auth.oauth2.MosaicOAuth2RegisterToken
 import io.mosaicboot.core.auth.oauth2.OAuth2BasicInfo
+import io.mosaicboot.core.auth.service.AuthTokenService
 import io.mosaicboot.core.user.controller.toResponseEntity
 import io.mosaicboot.core.user.service.MosaicOAuth2UserService
 import io.mosaicboot.core.util.WebClientInfo
@@ -35,6 +38,7 @@ import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.responses.ApiResponses
 import jakarta.servlet.http.HttpServletRequest
+import jakarta.servlet.http.HttpServletResponse
 import org.springframework.context.ApplicationContext
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -46,6 +50,8 @@ import org.springframework.web.bind.annotation.RequestBody
 @MosaicController
 class MosaicOAuth2Controller(
     private val mosaicOAuth2UserService: MosaicOAuth2UserService,
+    private val authTokenService: AuthTokenService,
+    private val mosaicAuthenticationHandler: MosaicAuthenticationHandler,
 ) : BaseMosaicController {
     override fun getBaseUrl(applicationContext: ApplicationContext): String {
         val mosaicAuthProperties = applicationContext.getBean(MosaicAuthProperties::class.java)
@@ -110,6 +116,7 @@ class MosaicOAuth2Controller(
     @PostMapping("/register")
     fun registerByOAuth2(
         request: HttpServletRequest,
+        response: HttpServletResponse,
         @Parameter(hidden = true) webClientInfo: WebClientInfo,
         @RequestBody body: RegisterRequest.OAuth2,
     ): ResponseEntity<RegisterResponse> {
@@ -129,6 +136,21 @@ class MosaicOAuth2Controller(
             webClientInfo = webClientInfo,
             data = authentication.data,
         )
+
+        if (result is RegisterResult.Success) {
+            val authenticatedToken = authTokenService.issueAuthenticatedToken(
+                webClientInfo,
+                result.user,
+                result.authentication,
+                result.tenantUsers
+            )
+            mosaicAuthenticationHandler.onAuthenticationSuccess(
+                request,
+                response,
+                authenticatedToken
+            )
+        }
+
         return result.toResponseEntity()
     }
 }

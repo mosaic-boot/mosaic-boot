@@ -17,7 +17,7 @@
 package io.mosaicboot.core.auth
 
 import io.mosaicboot.core.auth.controller.dto.AuthTokenData
-import io.mosaicboot.core.user.controller.model.ActiveTenantUser
+import io.mosaicboot.core.user.controller.dto.ActiveTenantUser
 import org.springframework.security.authentication.AbstractAuthenticationToken
 import org.springframework.security.core.GrantedAuthority
 
