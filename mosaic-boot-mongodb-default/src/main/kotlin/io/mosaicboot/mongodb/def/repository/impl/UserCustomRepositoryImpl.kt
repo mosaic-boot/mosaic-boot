@@ -59,7 +59,7 @@ class UserCustomRepositoryImpl(
         val now = Instant.now()
         return mongoTemplate.save(
             UserEntity(
-                id = Generators.timeBasedEpochGenerator().generate().toString(),
+                id = UUID.randomUUID().toString(),
                 createdAt = now,
                 updatedAt = now,
                 timeZone = input.timeZone,

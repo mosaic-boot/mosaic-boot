@@ -113,7 +113,7 @@ class AuthenticationService(
         }
 
         val tenantUserResults = tenantUsers.map { tenantUser ->
-            Pair(tenantUser, loginTenantUsers(tenantUser, webClientInfo))
+            Pair(tenantUser, checkTenantUser(tenantUser, webClientInfo))
         }
         logSuccessfulLogin(
             tenantUserResults = tenantUserResults,
@@ -227,12 +227,39 @@ class AuthenticationService(
             throw e
         }
     }
+
+    fun refresh(
+        userId: String,
+        authenticationId: String,
+        webClientInfo: WebClientInfo,
+    ): LoginResult.Success {
+        val authDetail = authenticationRepository.findByUserIdAndAuthenticationId(
+            userId,
+            authenticationId
+        )!!
+        val tenantUsers = getTenantUsers(authDetail.userId)
+        val tenantUserResults = tenantUsers.map { tenantUser ->
+            Pair(tenantUser, checkTenantUser(tenantUser, webClientInfo))
+        }
+        return LoginResult.Success(
+            user = authDetail.user,
+            authentication = authDetail,
+            tenantUsers = tenantUserResults.map {
+                Pair(it.first, when (it.second) {
+                    UserAuditLogStatus.SUCCESS -> TenantLoginStatus.SUCCESS
+                    UserAuditLogStatus.BLOCKED_USER -> TenantLoginStatus.BLOCKED_USER
+                    UserAuditLogStatus.BLOCKED_IP -> TenantLoginStatus.BLOCKED_IP
+                    else -> throw UnreachableException()
+                })
+            },
+        )
+    }
+
     private fun getTenantUsers(userId: String): List<TenantUser> =
         tenantUserRepository.findAllByUserId(userId)
-            .filter { it.status == UserStatus.DELETED }
+            .filter { it.status == UserStatus.ACTIVE }
 
-
-    private fun loginTenantUsers(
+    private fun checkTenantUser(
         tenantUser: TenantUser,
         webClientInfo: WebClientInfo,
     ): UserAuditLogStatus {

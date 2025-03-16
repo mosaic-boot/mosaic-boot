@@ -5,6 +5,7 @@ import io.mosaicboot.core.auth.dto.AuthenticationInput
 
 interface AuthenticationMosaicRepository<T> {
     fun save(input: AuthenticationInput): T
+    fun findByUserIdAndAuthenticationId(userId: String, id: String): AuthenticationDetail?
     fun findByMethodAndUsername(method: String, username: String): AuthenticationDetail?
     fun findByMethodAndEmail(method: String, email: String): AuthenticationDetail?
 }

@@ -8,6 +8,7 @@ import java.util.*
 data class MosaicTenantProperties(
     var enabled: Boolean = true,
     var api: Api = Api(),
+    var adminRoles: List<String> = listOf("system.tenant-owner")
 ) {
     data class Api(
         var enabled: Boolean = true,

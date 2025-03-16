@@ -6,9 +6,15 @@ import io.mosaicboot.core.tenant.config.MosaicTenantProperties
 import io.mosaicboot.core.tenant.controller.dto.*
 import io.mosaicboot.core.tenant.service.TenantService
 import io.mosaicboot.core.auth.MosaicAuthenticatedToken
+import io.mosaicboot.core.auth.controller.AuthController
+import io.mosaicboot.core.auth.controller.AuthControllerHelper
 import io.mosaicboot.core.permission.annotation.RequirePermission
 import io.mosaicboot.core.permission.aspect.PermissionInterceptor
+import io.mosaicboot.core.user.controller.dto.ActiveTenantUser
+import io.mosaicboot.core.util.WebClientInfo
 import io.swagger.v3.oas.annotations.Operation
+import jakarta.servlet.http.HttpServletRequest
+import jakarta.servlet.http.HttpServletResponse
 import org.springframework.context.ApplicationContext
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -19,6 +25,7 @@ import org.springframework.web.bind.annotation.*
 class TenantsController(
     private val mosaicTenantProperties: MosaicTenantProperties,
     private val tenantService: TenantService,
+    private val authControllerHelper: AuthControllerHelper,
 ) : BaseMosaicController {
     override fun getBaseUrl(applicationContext: ApplicationContext): String {
         return mosaicTenantProperties.api.path
@@ -31,8 +38,11 @@ class TenantsController(
     )
     @Operation(summary = "Create new tenant")
     fun createTenant(
+        request: HttpServletRequest,
+        response: HttpServletResponse,
+        webClientInfo: WebClientInfo,
         authentication: Authentication,
-        @RequestBody request: CreateTenantRequest
+        @RequestBody requestBody: CreateTenantRequest
     ): ResponseEntity<TenantResponse> {
         if (authentication !is MosaicAuthenticatedToken) {
             return ResponseEntity
@@ -40,11 +50,17 @@ class TenantsController(
                 .build()
         }
 
-        val tenant = tenantService.createTenant(
+        val (tenant, _) = tenantService.createTenant(
+            webClientInfo = webClientInfo,
             userId = authentication.userId,
-            name = request.name,
-            timeZone = request.timeZone,
+            name = requestBody.name,
+            timeZone = requestBody.timeZone,
         )
+        authentication.activeTenantId = tenant.id
+        authControllerHelper.refresh(
+            request, response, webClientInfo, authentication
+        )
+
         return ResponseEntity.ok(
             TenantResponse(
                 id = tenant.id,

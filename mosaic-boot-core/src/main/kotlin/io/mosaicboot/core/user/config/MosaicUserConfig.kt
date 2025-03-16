@@ -17,6 +17,8 @@
 package io.mosaicboot.core.user.config
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import io.mosaicboot.core.auth.controller.AuthController
+import io.mosaicboot.core.auth.controller.AuthControllerHelper
 import io.mosaicboot.core.auth.service.CredentialService
 import io.mosaicboot.core.auth.repository.AuthenticationRepositoryBase
 import io.mosaicboot.core.permission.service.PermissionService
@@ -83,10 +85,12 @@ class MosaicUserConfig(
     fun mosaicUserController(
         userService: UserService,
         tenantService: TenantService,
+        authControllerHelper: AuthControllerHelper,
     ): UserController {
         return UserController(
             userService = userService,
             tenantService = tenantService,
+            authControllerHelper = authControllerHelper,
         )
     }
 

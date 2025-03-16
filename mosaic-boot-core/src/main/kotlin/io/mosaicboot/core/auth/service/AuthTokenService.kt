@@ -32,6 +32,7 @@ import io.mosaicboot.core.auth.MosaicAuthenticatedToken
 import io.mosaicboot.core.auth.oauth2.MosaicOAuth2RegisterToken
 import io.mosaicboot.core.auth.oauth2.OAuth2BasicInfo
 import io.mosaicboot.core.auth.oauth2.OAuth2RegisterTokenData
+import io.mosaicboot.core.permission.exception.PermissionDeniedException
 import io.mosaicboot.core.user.controller.dto.ActiveTenantUser
 import io.mosaicboot.core.user.controller.dto.OAuth2AccessTokenJson
 import io.mosaicboot.core.user.controller.dto.OAuth2RefreshTokenJson
@@ -113,7 +114,7 @@ class AuthTokenService(
 
     fun verifyAuthenticatedToken(
         token: String,
-        activeTenantUser: ActiveTenantUser?,
+        activeTenantId: String?,
     ): MosaicAuthenticatedToken {
         val data = jwtTokenHelper.decode(token, AuthTokenData::class.java)
         return MosaicAuthenticatedToken(
@@ -122,6 +123,9 @@ class AuthTokenService(
             authenticationId = data.authId,
             tenants = data.tenants.associateBy { it.id },
             authorities = null,
+            activeTenantId = activeTenantId?.takeIf { tenantId ->
+                data.tenants.find { it.id == tenantId } != null
+            },
         )
     }
 

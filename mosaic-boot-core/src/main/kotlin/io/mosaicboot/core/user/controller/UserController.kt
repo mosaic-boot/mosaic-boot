@@ -3,28 +3,38 @@ package io.mosaicboot.core.user.controller
 import io.mosaicboot.core.http.BaseMosaicController
 import io.mosaicboot.core.http.MosaicController
 import io.mosaicboot.core.auth.MosaicAuthenticatedToken
+import io.mosaicboot.core.auth.controller.AuthController
+import io.mosaicboot.core.auth.controller.AuthControllerHelper
 import io.mosaicboot.core.tenant.service.TenantService
 import io.mosaicboot.core.user.config.MosaicUserProperties
+import io.mosaicboot.core.user.controller.dto.ActiveTenantUser
 import io.mosaicboot.core.user.controller.dto.CurrentUserResponse
 import io.mosaicboot.core.user.controller.dto.MyTenant
+import io.mosaicboot.core.user.controller.dto.SwitchActiveTenantRequest
 import io.mosaicboot.core.user.service.UserService
+import io.mosaicboot.core.util.WebClientInfo
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.media.ArraySchema
 import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.responses.ApiResponses
+import jakarta.servlet.http.HttpServletRequest
+import jakarta.servlet.http.HttpServletResponse
 import org.slf4j.LoggerFactory
 import org.springframework.context.ApplicationContext
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.security.core.Authentication
 import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.RequestBody
 
 @MosaicController
 class UserController(
     private val userService: UserService,
     private val tenantService: TenantService,
+    private val authControllerHelper: AuthControllerHelper,
 ) : BaseMosaicController {
     companion object {
         private val log = LoggerFactory.getLogger(UserController::class.java)
@@ -54,13 +64,17 @@ class UserController(
         }
         val currentActiveUser = userService.getCurrentActiveUser(
             authentication.userId,
-            authentication.activeTenantUser,
+            authentication.activeTenantId?.let { activeTenantId ->
+                ActiveTenantUser(
+                    tenantId = activeTenantId,
+                    tenantUserId = authentication.tenants[activeTenantId]!!.userId,
+                )
+            },
         )
         return ResponseEntity.ok(
             CurrentUserResponse(
                 userId = authentication.userId,
-                activeTenantId = authentication.activeTenantUser?.tenantId,
-                activeTenantUserId = authentication.activeTenantUser?.tenantUserId,
+                activeTenantId = authentication.activeTenantId,
                 name = currentActiveUser.user.name,
                 email = currentActiveUser.user.email,
                 permissions = emptyList(),
@@ -110,6 +124,30 @@ class UserController(
                     .getOrNull()
             }
         )
+    }
+
+    @Operation(
+        summary = "switch active tenant"
+    )
+    @PostMapping("/current/tenant")
+    fun switchActiveTenant(
+        request: HttpServletRequest,
+        response: HttpServletResponse,
+        webClientInfo: WebClientInfo,
+        authentication: Authentication,
+        @RequestBody requestBody: SwitchActiveTenantRequest,
+    ): ResponseEntity<Any> {
+        if (authentication !is MosaicAuthenticatedToken) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
+        }
+        if (authentication.tenants[requestBody.tenantId] == null) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build()
+        }
+        authentication.activeTenantId = requestBody.tenantId
+        authControllerHelper.refresh(
+            request, response, webClientInfo, authentication
+        )
+        return ResponseEntity.ok().build()
     }
 
     override fun getBaseUrl(applicationContext: ApplicationContext): String {

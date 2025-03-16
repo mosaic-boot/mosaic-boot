@@ -12,6 +12,8 @@ import io.mosaicboot.core.auth.repository.AuthenticationRepositoryBase
 import io.mosaicboot.core.user.repository.TenantUserRepositoryBase
 import io.mosaicboot.core.user.repository.UserRepositoryBase
 import io.mosaicboot.core.auth.MosaicCredentialHandler
+import io.mosaicboot.core.auth.controller.AuthControllerHelper
+import io.mosaicboot.core.tenant.config.MosaicTenantProperties
 import io.mosaicboot.core.user.repository.GlobalRoleRepositoryBase
 import io.mosaicboot.core.user.service.AuditService
 import io.mosaicboot.core.user.service.MosaicOAuth2UserService
@@ -107,6 +109,19 @@ class MosaicAuthConfig(
     }
 
     @Bean
+    fun authControllerHelper(
+        authenticationService: AuthenticationService,
+        authTokenService: AuthTokenService,
+        mosaicAuthenticationHandler: MosaicAuthenticationHandler,
+    ): AuthControllerHelper {
+        return AuthControllerHelper(
+            authenticationService,
+            authTokenService,
+            mosaicAuthenticationHandler,
+        )
+    }
+
+    @Bean
     @ConditionalOnProperty(prefix = "mosaic.auth.api", name = ["enabled"], havingValue = "true", matchIfMissing = true)
     fun authController(
         authenticationService: AuthenticationService,
@@ -136,12 +151,16 @@ class MosaicAuthConfig(
     @Configuration(proxyBeanMethods = true)
     class WebConfig(
         private val mosaicAuthProperties: MosaicAuthProperties,
+        private val mosaicTenantProperties: MosaicTenantProperties,
         private val mosaicAuthenticationHandler: MosaicAuthenticationHandler,
     ) : WebMvcConfigurer {
         @Bean
         fun mosaicAuthSecurityFilterChain(http: HttpSecurity): SecurityFilterChain {
             http
-                .securityMatcher("${mosaicAuthProperties.api.path}/**")
+                .securityMatcher(
+                    "${mosaicAuthProperties.api.path}/**",
+                    "${mosaicTenantProperties.api.path}/**"
+                )
                 .sessionManagement { it.disable() }
                 .securityContext { it.disable() }
                 .anonymous { it.disable() }
@@ -150,7 +169,10 @@ class MosaicAuthConfig(
                 .csrf { it.disable() }
                 .oauth2Login { it.disable() }
                 .authorizeHttpRequests { authorizeHttpRequests ->
-                    authorizeHttpRequests.requestMatchers("${mosaicAuthProperties.api.path}/current").authenticated()
+                    authorizeHttpRequests
+                        .requestMatchers("${mosaicAuthProperties.api.path}/login").permitAll()
+                        .requestMatchers("${mosaicAuthProperties.api.path}/register").permitAll()
+                        .anyRequest().authenticated()
                 }
                 .logout { logout ->
                     logout.logoutUrl("${mosaicAuthProperties.api.path}/logout")

@@ -45,6 +45,7 @@ enum class UserAuditAction {
     PERMISSION_REVOKED,
 
     // 기타
+    TENANT_CREATED,
     TOKEN_REFRESHED,
     API_ACCESS,
     SETTINGS_UPDATED

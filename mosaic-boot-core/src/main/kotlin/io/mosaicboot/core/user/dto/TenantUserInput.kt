@@ -1,6 +1,6 @@
 package io.mosaicboot.core.user.dto
 
-import io.mosaicboot.core.user.entity.GlobalRole
+import io.mosaicboot.core.user.entity.TenantRole
 import io.mosaicboot.core.user.enums.UserStatus
 
 class TenantUserInput(
@@ -9,5 +9,5 @@ class TenantUserInput(
     val nickname: String,
     val email: String?,
     val status: UserStatus,
-    val roles: Set<GlobalRole>,
+    val roles: List<TenantRole>,
 )

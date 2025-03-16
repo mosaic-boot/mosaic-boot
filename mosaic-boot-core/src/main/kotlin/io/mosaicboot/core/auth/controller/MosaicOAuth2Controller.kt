@@ -28,7 +28,6 @@ import io.mosaicboot.core.auth.dto.RegisterResult
 import io.mosaicboot.core.auth.oauth2.MosaicOAuth2RegisterToken
 import io.mosaicboot.core.auth.oauth2.OAuth2BasicInfo
 import io.mosaicboot.core.auth.service.AuthTokenService
-import io.mosaicboot.core.user.controller.toResponseEntity
 import io.mosaicboot.core.user.service.MosaicOAuth2UserService
 import io.mosaicboot.core.util.WebClientInfo
 import io.swagger.v3.oas.annotations.Operation

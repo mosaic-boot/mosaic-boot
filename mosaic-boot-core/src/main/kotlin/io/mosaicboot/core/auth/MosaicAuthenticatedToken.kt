@@ -27,9 +27,8 @@ class MosaicAuthenticatedToken(
     val authenticationId: String,
     val tenants: Map<String, AuthTokenData.TenantItem>,
     authorities: MutableCollection<out GrantedAuthority>?,
+    var activeTenantId: String? = null,
 ) : AbstractAuthenticationToken(authorities) {
-    var activeTenantUser: ActiveTenantUser? = null
-
     init {
         isAuthenticated = true
     }

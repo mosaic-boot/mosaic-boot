@@ -44,7 +44,7 @@ class MosaicCookieAuthFilter(
 
     private val authRedirectUrl = mosaicAuthProperties.cookie.prefix + "auth-redirect-url"
     private val authTokenCookieName = mosaicAuthProperties.cookie.prefix + "auth-token"
-    private val activeTenantCookieName = mosaicAuthProperties.cookie.prefix + "active-tenant-user"
+    private val activeTenantCookieName = mosaicAuthProperties.cookie.prefix + "active-tenant-id"
     private val oauth2RegisterTokenCookieName = mosaicAuthProperties.cookie.prefix + "oauth2-register-token"
     private val oauth2AuthorizationRequestCookieName = mosaicAuthProperties.cookie.prefix + "oauth2-authorization-request"
 
@@ -60,8 +60,8 @@ class MosaicCookieAuthFilter(
         authentication: MosaicAuthenticatedToken,
     ) {
         setCookie(request, response, authTokenCookieName, authentication.token)
-        authentication.activeTenantUser?.let { activeTenantUser ->
-            setCookie(request, response, activeTenantCookieName, objectMapper.writeValueAsString(activeTenantUser))
+        authentication.activeTenantId?.let { activeTenantId ->
+            setCookie(request, response, activeTenantCookieName, activeTenantId)
         }
     }
 
@@ -149,13 +149,12 @@ class MosaicCookieAuthFilter(
         filterChain: FilterChain,
     ) {
         try {
-            val activeTenantUser = request.cookies?.find { it.name == activeTenantCookieName }
-                ?.let { cookie -> objectMapper.readValue(cookie.value, ActiveTenantUser::class.java) }
+            val activeTenantId = request.cookies?.find { it.name == activeTenantCookieName }?.value
 
             request.cookies?.find { it.name == authTokenCookieName }
                 ?.let { cookie ->
                     runCatching {
-                        authTokenService.verifyAuthenticatedToken(cookie.value, activeTenantUser)
+                        authTokenService.verifyAuthenticatedToken(cookie.value, activeTenantId)
                     }.onFailure { ex ->
                         log.debug("auth token verification failed (token={})", cookie.value, ex)
                     }.getOrNull()

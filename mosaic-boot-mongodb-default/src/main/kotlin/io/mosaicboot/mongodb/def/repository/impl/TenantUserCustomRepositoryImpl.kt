@@ -36,7 +36,7 @@ class TenantUserCustomRepositoryImpl(
         .foreignField("_id")
         .`as`("user")
 
-    override fun findByTenantIdAndId(tenantId: String, id: String): TenantUserEntity? {
+    override fun findByTenantIdAndId(tenantId: String, id: String): TenantUser? {
         return mongoTemplate.aggregate(
             Aggregation.newAggregation(
                 Aggregation.match(
@@ -106,7 +106,7 @@ class TenantUserCustomRepositoryImpl(
     }
 
     open class TenantUserEntityWithRole(
-        @Id
+        @Field("_id")
         override val id: String,
         @Field("tenantId")
         override val tenantId: String,
@@ -122,11 +122,11 @@ class TenantUserCustomRepositoryImpl(
         override var email: String?,
         @Field("status")
         override var status: UserStatus,
-        @Field("rolesIds")
-        override var roleIds: List<String>,
+        @Field("roleIds")
+        var roleIds: List<String>,
         @Field("roles")
         override var roles: List<TenantRoleEntity>,
-    ) : TenantUserEntity(id, tenantId, createdAt, userId, updatedAt, nickname, email, status, roleIds)
+    ) : TenantUser
 
     open class TenantUserEntityWithUser(
         @Id
@@ -145,11 +145,11 @@ class TenantUserCustomRepositoryImpl(
         override var email: String?,
         @Field("status")
         override var status: UserStatus,
-        @Field("rolesIds")
-        override var roleIds: List<String>,
+        @Field("roleIds")
+        var roleIds: List<String>,
         @Field("roles")
         override var roles: List<TenantRoleEntity>,
         @Field("user")
         val user: UserEntity,
-    ) : TenantUserEntityWithRole(id, tenantId, createdAt, userId, updatedAt, nickname, email, status, roleIds, roles)
+    ) : TenantUser
 }

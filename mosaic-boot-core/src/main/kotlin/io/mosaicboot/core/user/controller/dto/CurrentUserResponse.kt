@@ -26,8 +26,6 @@ data class CurrentUserResponse(
     @field:JsonProperty("activeTenantId")
     val activeTenantId: String?,
     @field:Schema(nullable = true)
-    @field:JsonProperty("activeTenantUserId")
-    val activeTenantUserId: String?,
     @field:JsonProperty("name")
     val name: String,
     @field:Schema(nullable = true)

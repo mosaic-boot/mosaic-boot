@@ -7,6 +7,7 @@ import io.mosaicboot.mongodb.def.repository.TenantCustomRepository
 import org.springframework.data.mongodb.core.MongoTemplate
 import org.springframework.stereotype.Component
 import java.time.Instant
+import java.util.*
 
 @Component
 class TenantCustomRepositoryImpl(
@@ -16,7 +17,7 @@ class TenantCustomRepositoryImpl(
         val now = Instant.now()
         return mongoTemplate.save(
             TenantEntity(
-                id = Generators.timeBasedEpochGenerator().generate().toString(),
+                id = UUID.randomUUID().toString(),
                 createdAt = now,
                 updatedAt = now,
                 timeZone = tenant.timeZone,

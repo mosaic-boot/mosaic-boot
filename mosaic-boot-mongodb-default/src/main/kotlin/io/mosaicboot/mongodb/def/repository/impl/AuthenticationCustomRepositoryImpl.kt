@@ -31,16 +31,23 @@ import org.springframework.data.mongodb.core.mapping.Field
 import org.springframework.data.mongodb.core.query.Criteria
 import org.springframework.stereotype.Component
 import java.time.Instant
+import java.util.*
 
 @Component
 class AuthenticationCustomRepositoryImpl(
     private val mongodbCollectionsProperties: MongodbCollectionsProperties,
     private val mongoTemplate: MongoTemplate,
 ) : AuthenticationCustomRepository {
+    private val USER_LOOKUP = LookupOperation.newLookup()
+        .from(mongodbCollectionsProperties.user.collection)
+        .localField("userId")
+        .foreignField("_id")
+        .`as`("user")
+
     override fun save(input: AuthenticationInput): AuthenticationEntity {
         val now = Instant.now()
         return mongoTemplate.save(AuthenticationEntity(
-            id = Generators.timeBasedEpochGenerator().generate().toString(),
+            id = UUID.randomUUID().toString(),
             createdAt = now,
             updatedAt = now,
             userId = input.userId,
@@ -86,6 +93,22 @@ class AuthenticationCustomRepositoryImpl(
         return result.uniqueMappedResult
     }
 
+    override fun findByUserIdAndAuthenticationId(userId: String, id: String): AuthenticationDetail? {
+        val result = mongoTemplate.aggregate(
+            Aggregation.newAggregation(
+                Aggregation.match(
+                    Criteria.where("userId").`is`(userId)
+                        .and("_id").`is`(id)
+                ),
+                USER_LOOKUP,
+                Aggregation.unwind("user"),
+            ),
+            AuthenticationEntity::class.java,
+            AuthenticationDetailImpl::class.java
+        )
+        return result.uniqueMappedResult
+    }
+
     override fun findByMethodAndUsername(method: String, username: String): AuthenticationDetail? {
         val result = mongoTemplate.aggregate(
             Aggregation.newAggregation(
@@ -93,12 +116,7 @@ class AuthenticationCustomRepositoryImpl(
                     Criteria.where("method").`is`(method)
                         .and("username").`is`(username)
                 ),
-                LookupOperation.newLookup()
-                    .from(mongodbCollectionsProperties.user.collection)
-                    .localField("userId")
-                    .foreignField("_id")
-                    .`as`("user")
-                ,
+                USER_LOOKUP,
                 Aggregation.unwind("user"),
             ),
             AuthenticationEntity::class.java,

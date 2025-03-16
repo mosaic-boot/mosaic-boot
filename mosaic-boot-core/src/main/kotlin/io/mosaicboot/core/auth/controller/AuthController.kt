@@ -16,6 +16,7 @@
 
 package io.mosaicboot.core.auth.controller
 
+import io.mosaicboot.core.auth.MosaicAuthenticatedToken
 import io.mosaicboot.core.auth.config.MosaicAuthProperties
 import io.mosaicboot.core.auth.controller.dto.LoginRequest
 import io.mosaicboot.core.auth.controller.dto.LoginResponse
@@ -31,7 +32,6 @@ import io.mosaicboot.core.auth.MosaicAuthenticationHandler
 import io.mosaicboot.core.auth.dto.RegisterResult
 import io.mosaicboot.core.auth.service.AuthTokenService
 import io.mosaicboot.core.auth.service.AuthenticationService
-import io.mosaicboot.core.user.controller.toResponseEntity
 import io.mosaicboot.core.user.service.MosaicOAuth2UserService
 import io.mosaicboot.core.util.UnreachableException
 import io.swagger.v3.oas.annotations.Operation
