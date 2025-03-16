@@ -3,15 +3,18 @@ package io.mosaicboot.core.user.controller
 import io.mosaicboot.core.http.BaseMosaicController
 import io.mosaicboot.core.http.MosaicController
 import io.mosaicboot.core.auth.MosaicAuthenticatedToken
+import io.mosaicboot.core.tenant.service.TenantService
 import io.mosaicboot.core.user.config.MosaicUserProperties
 import io.mosaicboot.core.user.controller.dto.CurrentUserResponse
 import io.mosaicboot.core.user.controller.dto.MyTenant
 import io.mosaicboot.core.user.service.UserService
 import io.swagger.v3.oas.annotations.Operation
+import io.swagger.v3.oas.annotations.media.ArraySchema
 import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.responses.ApiResponses
+import org.slf4j.LoggerFactory
 import org.springframework.context.ApplicationContext
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -21,7 +24,12 @@ import org.springframework.web.bind.annotation.GetMapping
 @MosaicController
 class UserController(
     private val userService: UserService,
+    private val tenantService: TenantService,
 ) : BaseMosaicController {
+    companion object {
+        private val log = LoggerFactory.getLogger(UserController::class.java)
+    }
+
     @Operation(
         summary = "Get current user information",
         description = "Retrieve information about the currently authenticated user"
@@ -68,7 +76,11 @@ class UserController(
         ApiResponse(
             responseCode = "200",
             description = "Tenant list retrieved successfully",
-            content = [Content(mediaType = "application/json", schema = Schema(implementation = List::class))]
+            content = [
+                Content(mediaType = "application/json", array = ArraySchema(
+                    schema = Schema(implementation = MyTenant::class)
+                ))
+            ]
         )
     ])
     @GetMapping("/current/tenants")
@@ -79,7 +91,25 @@ class UserController(
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
         }
 
-        throw RuntimeException("not impl")
+        val tenants = tenantService.getTenants(authentication.tenants.values.map { it.id })
+            .associateBy { it.id }
+
+        return ResponseEntity.ok(
+            authentication.tenants.values.mapNotNull {
+                runCatching {
+                    MyTenant(
+                        tenantId = it.id,
+                        tenantUserId = it.userId,
+                        tenantName = tenants[it.id]!!.name,
+                        status = it.status,
+                    )
+                }
+                    .onFailure { ex ->
+                        log.error("error", ex)
+                    }
+                    .getOrNull()
+            }
+        )
     }
 
     override fun getBaseUrl(applicationContext: ApplicationContext): String {

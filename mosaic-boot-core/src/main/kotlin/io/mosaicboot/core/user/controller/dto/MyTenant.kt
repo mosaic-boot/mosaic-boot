@@ -23,6 +23,8 @@ data class MyTenant(
     val tenantId: String,
     @field:JsonProperty("tenantUserId")
     val tenantUserId: String,
-    @field:JsonProperty("name")
-    val name: String,
+    @field:JsonProperty("tenantName")
+    val tenantName: String,
+    @field:JsonProperty("status")
+    val status: TenantLoginStatus,
 )

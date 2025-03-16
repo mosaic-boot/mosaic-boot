@@ -54,4 +54,8 @@ class TenantService(
     fun update(tenant: Tenant): Tenant {
         return tenantRepository.saveEntity(tenant)
     }
+
+    fun getTenants(tenantIds: Collection<String>): List<Tenant> {
+        return tenantRepository.findAllById(tenantIds).toList()
+    }
 }

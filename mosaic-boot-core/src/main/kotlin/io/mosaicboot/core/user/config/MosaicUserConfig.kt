@@ -20,6 +20,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import io.mosaicboot.core.auth.service.CredentialService
 import io.mosaicboot.core.auth.repository.AuthenticationRepositoryBase
 import io.mosaicboot.core.permission.service.PermissionService
+import io.mosaicboot.core.tenant.service.TenantService
 import io.mosaicboot.core.user.repository.TenantUserRepositoryBase
 import io.mosaicboot.core.user.repository.UserAuditLogRepositoryBase
 import io.mosaicboot.core.user.repository.UserRepositoryBase
@@ -81,9 +82,11 @@ class MosaicUserConfig(
     @ConditionalOnProperty(prefix = "mosaic.user.api", name = ["enabled"], havingValue = "true", matchIfMissing = true)
     fun mosaicUserController(
         userService: UserService,
+        tenantService: TenantService,
     ): UserController {
         return UserController(
             userService = userService,
+            tenantService = tenantService,
         )
     }
 
