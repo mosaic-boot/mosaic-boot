@@ -17,6 +17,7 @@
 package io.mosaicboot.core.permission.service
 
 import io.mosaicboot.core.auth.MosaicAuthenticatedToken
+import io.mosaicboot.core.user.enums.UserStatus
 import io.mosaicboot.core.user.repository.TenantUserRepositoryBase
 import io.mosaicboot.core.user.repository.UserRepositoryBase
 import org.springframework.stereotype.Service
@@ -33,6 +34,9 @@ class PermissionService(
     ): Boolean {
         val permissions = if (tenantId == null) {
             val user = userRepositoryBase.findById(authentication.userId).get()
+            if (user.status != UserStatus.ACTIVE) {
+                return false
+            }
             user.roles.flatMap { it.permissions }
         } else {
             val tenantLogon = authentication.tenants[tenantId] ?: return false
@@ -40,6 +44,9 @@ class PermissionService(
                 tenantLogon.id,
                 tenantLogon.userId,
             )!!
+            if (tenantUser.status != UserStatus.ACTIVE) {
+                return false
+            }
             tenantUser.roles.flatMap { it.permissions }
         }
         return permission == "" || permissions.contains(permission)
