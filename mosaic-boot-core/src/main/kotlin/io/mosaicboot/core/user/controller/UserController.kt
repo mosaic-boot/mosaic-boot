@@ -5,6 +5,7 @@ import io.mosaicboot.core.http.MosaicController
 import io.mosaicboot.core.auth.MosaicAuthenticatedToken
 import io.mosaicboot.core.auth.controller.AuthController
 import io.mosaicboot.core.auth.controller.AuthControllerHelper
+import io.mosaicboot.core.tenant.controller.dto.TenantResponse
 import io.mosaicboot.core.tenant.service.TenantService
 import io.mosaicboot.core.user.config.MosaicUserProperties
 import io.mosaicboot.core.user.controller.dto.ActiveTenantUser
@@ -14,6 +15,7 @@ import io.mosaicboot.core.user.controller.dto.SwitchActiveTenantRequest
 import io.mosaicboot.core.user.service.UserService
 import io.mosaicboot.core.util.WebClientInfo
 import io.swagger.v3.oas.annotations.Operation
+import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.media.ArraySchema
 import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.media.Schema
@@ -126,14 +128,22 @@ class UserController(
         )
     }
 
+    @PostMapping("/current/tenant")
     @Operation(
         summary = "switch active tenant"
     )
-    @PostMapping("/current/tenant")
+    @ApiResponses(
+        value = [
+            ApiResponse(
+                responseCode = "200",
+                description = "successfully",
+            ),
+        ]
+    )
     fun switchActiveTenant(
         request: HttpServletRequest,
         response: HttpServletResponse,
-        webClientInfo: WebClientInfo,
+        @Parameter(hidden = true) webClientInfo: WebClientInfo,
         authentication: Authentication,
         @RequestBody requestBody: SwitchActiveTenantRequest,
     ): ResponseEntity<Any> {

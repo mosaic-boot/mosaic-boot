@@ -38,6 +38,10 @@ class UserService(
         return userRepository.findById(userId).get()
     }
 
+    fun findUserByEmail(email: String): User? {
+        return userRepository.findByEmail(email)
+    }
+
     /**
      * TODO: caching
      */

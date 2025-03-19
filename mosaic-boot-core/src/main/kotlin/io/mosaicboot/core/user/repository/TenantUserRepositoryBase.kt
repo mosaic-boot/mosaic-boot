@@ -18,6 +18,12 @@ package io.mosaicboot.core.user.repository
 
 import io.mosaicboot.core.repository.BaseTenantRepository
 import io.mosaicboot.core.user.entity.TenantUser
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.Pageable
 
 interface TenantUserRepositoryBase<T : TenantUser> : BaseTenantRepository<TenantUser, T, String>,
     TenantUserMosaicRepository
+{
+    fun findByTenantIdAndUserId(tenantId: String, userId: String): TenantUser?
+    fun findAllByTenantId(tenantId: String, pageable: Pageable): Page<out TenantUser>
+}

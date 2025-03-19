@@ -21,6 +21,7 @@ import io.mosaicboot.mongodb.def.entity.UserEntity
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.data.mongodb.repository.MongoRepository
 import org.springframework.stereotype.Repository
+import java.util.*
 
 @Repository
 @ConditionalOnProperty(prefix = "mosaic.datasource.mongodb.collections.user", name = ["customized"], havingValue = "false", matchIfMissing = true)

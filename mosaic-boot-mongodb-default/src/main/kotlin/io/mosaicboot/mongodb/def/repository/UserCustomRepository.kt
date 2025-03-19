@@ -20,6 +20,4 @@ import io.mosaicboot.core.user.repository.UserMosaicRepository
 import io.mosaicboot.mongodb.def.entity.UserEntity
 import java.util.Optional
 
-interface UserCustomRepository : UserMosaicRepository<UserEntity> {
-    fun findById(id: String): Optional<UserEntity>
-}
+interface UserCustomRepository : UserMosaicRepository<UserEntity>

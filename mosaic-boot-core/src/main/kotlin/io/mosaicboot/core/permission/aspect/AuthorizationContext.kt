@@ -28,6 +28,12 @@ class AuthorizationContext {
 
     private var cachedAuthentication: MosaicAuthenticatedToken? = null
 
+    fun mustAuthorized() {
+        if (!authorized) {
+            throw PermissionDeniedException("no authorized")
+        }
+    }
+
     fun getAuthentication(): MosaicAuthenticatedToken {
         return cachedAuthentication ?: let {
             val authentication = SecurityContextHolder.getContext().authentication as? MosaicAuthenticatedToken

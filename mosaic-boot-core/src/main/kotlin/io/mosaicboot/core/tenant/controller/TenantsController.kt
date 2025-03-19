@@ -6,13 +6,20 @@ import io.mosaicboot.core.tenant.config.MosaicTenantProperties
 import io.mosaicboot.core.tenant.controller.dto.*
 import io.mosaicboot.core.tenant.service.TenantService
 import io.mosaicboot.core.auth.MosaicAuthenticatedToken
-import io.mosaicboot.core.auth.controller.AuthController
 import io.mosaicboot.core.auth.controller.AuthControllerHelper
 import io.mosaicboot.core.permission.annotation.RequirePermission
+import io.mosaicboot.core.permission.aspect.AuthorizationContext
 import io.mosaicboot.core.permission.aspect.PermissionInterceptor
-import io.mosaicboot.core.user.controller.dto.ActiveTenantUser
+import io.mosaicboot.core.tenant.dto.InviteResult
+import io.mosaicboot.core.tenant.service.TenantUserService
+import io.mosaicboot.core.user.service.UserService
 import io.mosaicboot.core.util.WebClientInfo
 import io.swagger.v3.oas.annotations.Operation
+import io.swagger.v3.oas.annotations.Parameter
+import io.swagger.v3.oas.annotations.media.Content
+import io.swagger.v3.oas.annotations.media.Schema
+import io.swagger.v3.oas.annotations.responses.ApiResponse
+import io.swagger.v3.oas.annotations.responses.ApiResponses
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
 import org.springframework.context.ApplicationContext
@@ -25,22 +32,32 @@ import org.springframework.web.bind.annotation.*
 class TenantsController(
     private val mosaicTenantProperties: MosaicTenantProperties,
     private val tenantService: TenantService,
+    private val tenantUserService: TenantUserService,
     private val authControllerHelper: AuthControllerHelper,
 ) : BaseMosaicController {
     override fun getBaseUrl(applicationContext: ApplicationContext): String {
         return mosaicTenantProperties.api.path
     }
 
-    @PostMapping("/")
+    @Operation(summary = "Create new tenant")
+    @ApiResponses(
+        value = [
+            ApiResponse(
+                responseCode = "200",
+                description = "successfully",
+                content = [Content(mediaType = "application/json", schema = Schema(implementation = TenantResponse::class))]
+            ),
+        ]
+    )
     @RequirePermission(
         permission = "tenant.create",
         tenantSpecific = false,
     )
-    @Operation(summary = "Create new tenant")
+    @PostMapping("/")
     fun createTenant(
         request: HttpServletRequest,
         response: HttpServletResponse,
-        webClientInfo: WebClientInfo,
+        @Parameter(hidden = true) webClientInfo: WebClientInfo,
         authentication: Authentication,
         @RequestBody requestBody: CreateTenantRequest
     ): ResponseEntity<TenantResponse> {
@@ -138,23 +155,95 @@ class TenantsController(
         authentication: Authentication,
         @PathVariable tenantId: String,
         @RequestBody request: InviteUserRequest,
+        authorizationContext: AuthorizationContext,
     ): ResponseEntity<InviteResponse> {
         PermissionInterceptor.mustAuthorized()
+        authentication as MosaicAuthenticatedToken
 
-//        tenantService.inviteUser()
+        val tenantUser = authentication.tenants[tenantId]?.let {
+            tenantUserService.findTenantUser(
+                tenantId,
+                it.userId,
+            )
+        } ?: return ResponseEntity.badRequest().build()
 
-        // 여기에 초대 로직 구현
-        // 1. 초대 코드 생성
-        // 2. 이메일 발송
-        // 3. 초대 정보 저장
+        val result = tenantUserService.inviteUser(
+            tenantUser,
+            request.email,
+            listOf(),
+        )
+        return when (result) {
+            is InviteResult.Success -> ResponseEntity.ok(
+                InviteResponse(result = InviteResultCode.SUCCESS)
+            )
+            InviteResult.UserNotExists -> ResponseEntity.ok(
+                InviteResponse(result = InviteResultCode.USER_NOT_EXISTS)
+            )
+            is InviteResult.AlreadyExists -> ResponseEntity.ok(
+                InviteResponse(result = InviteResultCode.ALREADY_EXISTS)
+            )
+        }
+    }
+
+    @GetMapping("/{tenantId}/users")
+    @RequirePermission(
+        permission = "tenant.users.view",
+        tenantSpecific = true,
+    )
+    @Operation(summary = "Get tenant users with pagination")
+    @ApiResponses(
+        value = [
+            ApiResponse(
+                responseCode = "200",
+                description = "Successfully retrieved tenant users",
+                content = [Content(
+                    mediaType = "application/json",
+                    schema = Schema(implementation = TenantUserListResponse::class)
+                )]
+            ),
+        ]
+    )
+    fun getTenantUsers(
+        authentication: Authentication,
+        @PathVariable tenantId: String,
+        @RequestParam(defaultValue = "0") page: Int,
+        @RequestParam(defaultValue = "20") size: Int
+    ): ResponseEntity<TenantUserListResponse> {
+        PermissionInterceptor.mustAuthorized()
+        authentication as MosaicAuthenticatedToken
+
+        val tenantUser = authentication.tenants[tenantId]?.let {
+            tenantUserService.findTenantUser(
+                tenantId,
+                it.userId,
+            )
+        } ?: return ResponseEntity.badRequest().build()
+
+        // 페이지네이션된 테넌트 사용자 목록 조회
+        val users = tenantUserService.getTenantUsers(
+            tenantId = tenantId,
+            page = page,
+            size = size
+        )
 
         return ResponseEntity.ok(
-            InviteResponse(
-            inviteCode = "generated-code",
-            email = request.email
-        )
+            TenantUserListResponse(
+                items = users.items.map { user ->
+                    TenantUserResponse(
+                        userId = user.userId,
+                        nickname = user.nickname,
+                        email = user.email ?: "",
+                        status = user.status,
+                        roles = user.roles.map { it.name }
+                    )
+                },
+                total = users.total.toInt(),
+                page = page,
+                size = size
+            )
         )
     }
+
 //
 //    private fun hasAccess(authentication: Authentication, tenantId: String): Boolean {
 //        if (authentication !is MosaicAuthenticatedToken) return false

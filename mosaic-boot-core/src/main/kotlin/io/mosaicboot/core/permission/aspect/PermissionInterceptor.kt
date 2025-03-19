@@ -17,28 +17,37 @@
 package io.mosaicboot.core.permission.aspect
 
 import io.mosaicboot.core.permission.annotation.RequirePermission
+import io.mosaicboot.core.permission.annotation.RequirePermissions
 import io.mosaicboot.core.permission.exception.PermissionDeniedException
 import io.mosaicboot.core.permission.service.PermissionService
 import org.aspectj.lang.ProceedingJoinPoint
+import org.aspectj.lang.annotation.Around
 import org.aspectj.lang.annotation.Aspect
 import org.aspectj.lang.annotation.Before
 import org.aspectj.lang.reflect.MethodSignature
+import org.springframework.core.Ordered
 import org.springframework.core.annotation.AnnotatedElementUtils
-import org.springframework.stereotype.Component
 import org.springframework.web.context.request.RequestAttributes
 import org.springframework.web.context.request.RequestContextHolder
 import org.springframework.web.servlet.HandlerMapping
 
 @Aspect
-@Component
 class PermissionInterceptor(
     private val permissionService: PermissionService,
-) {
-    @Before("@annotation(io.mosaicboot.core.permission.annotation.RequirePermission)")
-    fun checkPermission(joinPoint: ProceedingJoinPoint) {
+) : Ordered {
+    override fun getOrder(): Int {
+        return -100
+    }
+
+    @Around("@annotation(io.mosaicboot.core.permission.annotation.RequirePermission) || @annotation(io.mosaicboot.core.permission.annotation.RequirePermissions)")
+    fun checkPermission(joinPoint: ProceedingJoinPoint): Any? {
         val signature = joinPoint.signature as MethodSignature
         val method = signature.method
-        val annotations = AnnotatedElementUtils.getMergedRepeatableAnnotations(method, RequirePermission::class.java)
+        val annotations = if (method.isAnnotationPresent(RequirePermissions::class.java)) {
+            method.getAnnotation(RequirePermissions::class.java).value
+        } else {
+            arrayOf(method.getAnnotation(RequirePermission::class.java))
+        }
         if (annotations.isEmpty()) {
             throw IllegalStateException("RequirePermission annotation not found")
         }
@@ -59,7 +68,7 @@ class PermissionInterceptor(
             )
             val alreadyAuthorized = authorizationContext.authorizeCache.contains(cacheKey)
             if (alreadyAuthorized) {
-                return
+                return joinPoint.proceed()
             }
 
             val hasPermissionCurrent = permissionService.checkPermission(
@@ -76,6 +85,7 @@ class PermissionInterceptor(
         if (!hasPermission) {
             throw PermissionDeniedException("permission denied")
         }
+        return joinPoint.proceed()
     }
 
     /**

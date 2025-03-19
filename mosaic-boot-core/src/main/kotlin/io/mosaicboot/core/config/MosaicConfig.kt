@@ -24,10 +24,12 @@ import io.mosaicboot.core.auth.config.MosaicAuthConfig
 import io.mosaicboot.core.http.BaseMosaicController
 import io.mosaicboot.core.http.MosaicOpenAPIService
 import io.mosaicboot.core.http.MosaicRequestMappingHandlerMapping
+import io.mosaicboot.core.permission.aspect.AuthorizationContext
 import io.mosaicboot.core.provision.config.ProvisionConfig
 import io.mosaicboot.core.swagger.AddNullableTypeOpenApiCustomizer
 import io.mosaicboot.core.tenant.config.MosaicTenantConfig
 import io.mosaicboot.core.user.config.MosaicUserConfig
+import io.mosaicboot.core.util.AuthorizationContextResolver
 import io.mosaicboot.core.util.WebClientInfo
 import io.mosaicboot.core.util.WebClientInfoResolver
 import io.swagger.v3.oas.models.OpenAPI
@@ -44,6 +46,7 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.ApplicationContext
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.context.annotation.EnableAspectJAutoProxy
 import org.springframework.context.annotation.Import
 import org.springframework.context.annotation.Lazy
 import org.springframework.core.annotation.Order
@@ -54,9 +57,10 @@ import org.springframework.web.util.pattern.PathPatternParser
 import java.util.*
 import java.util.function.Predicate
 
-@Configuration(proxyBeanMethods = true)
+@Configuration(proxyBeanMethods = false)
 @EnableConfigurationProperties(MosaicComponentsProperties::class)
 @EnableTransactionManagement
+@EnableAspectJAutoProxy
 @Import(value = [
     MosaicUserConfig::class,
     MosaicAuthConfig::class,
@@ -64,10 +68,16 @@ import java.util.function.Predicate
     ProvisionConfig::class,
 ])
 class MosaicConfig {
-    companion object {
-        init {
-            SpringDocUtils.getConfig().addJavaTypeToIgnore(WebClientInfo::class.java)
-        }
+    init {
+        SpringDocUtils.getConfig()
+            .addRequestWrapperToIgnore(
+                WebClientInfo::class.java,
+                AuthorizationContext::class.java,
+            )
+            .addFluxWrapperToIgnore(WebClientInfo::class.java)
+            .addFluxWrapperToIgnore(AuthorizationContext::class.java)
+            .addJavaTypeToIgnore(WebClientInfo::class.java)
+            .addJavaTypeToIgnore(AuthorizationContext::class.java)
     }
 
     @Bean
@@ -116,8 +126,8 @@ class MosaicConfig {
         val requestMappingHandlerMapping = MosaicRequestMappingHandlerMapping()
         val urlMap = HashMap<String, Predicate<Class<*>>>()
         controllers.forEach { controller ->
-            urlMap[controller.getBaseUrl(applicationContext)] = Predicate<Class<*>> {
-                    it: Class<*> -> it == controller.javaClass
+            urlMap[controller.getBaseUrl(applicationContext)] = Predicate<Class<*>> { it: Class<*> ->
+                it == controller.javaClass
             }
         }
         requestMappingHandlerMapping.order = -1
@@ -126,10 +136,11 @@ class MosaicConfig {
         return requestMappingHandlerMapping
     }
 
-    @Configuration(proxyBeanMethods = true)
+    @Configuration(proxyBeanMethods = false)
     class WebConfig : WebMvcConfigurer {
         override fun addArgumentResolvers(resolvers: MutableList<HandlerMethodArgumentResolver>) {
             resolvers.add(WebClientInfoResolver())
+            resolvers.add(AuthorizationContextResolver())
         }
     }
 }

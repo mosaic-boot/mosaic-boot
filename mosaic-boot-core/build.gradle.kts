@@ -8,6 +8,14 @@ plugins {
     kotlin("plugin.spring") version Version.KOTLIN
     id("org.springframework.boot") version Version.SPRING_BOOT
     id("io.spring.dependency-management") version "1.1.0"
+    kotlin("plugin.allopen") version Version.KOTLIN
+}
+
+allOpen {
+    annotations(
+        "io.mosaicboot.core.http.MosaicController",
+        "org.aspectj.lang.annotation.Aspect",
+    )
 }
 
 java {

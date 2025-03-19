@@ -16,7 +16,9 @@
 
 package io.mosaicboot.core.permission.annotation
 
-@Repeatable
+import java.lang.annotation.Repeatable
+
+@Repeatable(value = RequirePermissions::class)
 @Target(AnnotationTarget.FUNCTION)
 @Retention(AnnotationRetention.RUNTIME)
 annotation class RequirePermission(

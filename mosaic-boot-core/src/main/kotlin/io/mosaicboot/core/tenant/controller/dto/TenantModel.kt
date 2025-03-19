@@ -2,6 +2,7 @@ package io.mosaicboot.core.tenant.controller.dto
 
 import com.fasterxml.jackson.annotation.JsonProperty
 import io.mosaicboot.core.tenant.enums.TenantStatus
+import io.mosaicboot.core.user.enums.UserStatus
 
 data class TenantResponse(
     @field:JsonProperty("id")
@@ -21,8 +22,17 @@ data class TenantUserResponse(
     @field:JsonProperty("userId")
     val userId: String,
 
-    @field:JsonProperty("role")
-    val role: String
+    @field:JsonProperty("nickname")
+    val nickname: String,
+
+    @field:JsonProperty("email")
+    val email: String,
+
+    @field:JsonProperty("status")
+    val status: UserStatus,
+
+    @field:JsonProperty("roles")
+    val roles: List<String>,
 )
 
 data class CreateTenantRequest(
@@ -49,10 +59,13 @@ data class InviteUserRequest(
     val role: String
 )
 
-data class InviteResponse(
-    @field:JsonProperty("inviteCode")
-    val inviteCode: String,
+enum class InviteResultCode {
+    SUCCESS,
+    ALREADY_EXISTS,
+    USER_NOT_EXISTS,
+}
 
-    @field:JsonProperty("email")
-    val email: String
+data class InviteResponse(
+    @field:JsonProperty("result")
+    val result: InviteResultCode,
 )

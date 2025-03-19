@@ -19,6 +19,10 @@ package io.mosaicboot.core.user.repository
 import io.mosaicboot.core.user.entity.User
 import io.mosaicboot.core.user.dto.UserInput
 import io.mosaicboot.core.repository.BaseRepository
+import java.util.*
 
 interface UserRepositoryBase<T : User> : BaseRepository<User, T, String>,
     UserMosaicRepository<T>
+{
+    fun findByEmail(email: String): User?
+}

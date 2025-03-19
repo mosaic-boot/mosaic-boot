@@ -17,12 +17,13 @@
 package io.mosaicboot.core.user.config
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import io.mosaicboot.core.auth.controller.AuthController
 import io.mosaicboot.core.auth.controller.AuthControllerHelper
 import io.mosaicboot.core.auth.service.CredentialService
 import io.mosaicboot.core.auth.repository.AuthenticationRepositoryBase
+import io.mosaicboot.core.permission.aspect.PermissionInterceptor
 import io.mosaicboot.core.permission.service.PermissionService
 import io.mosaicboot.core.tenant.service.TenantService
+import io.mosaicboot.core.tenant.service.TenantUserService
 import io.mosaicboot.core.user.repository.TenantUserRepositoryBase
 import io.mosaicboot.core.user.repository.UserAuditLogRepositoryBase
 import io.mosaicboot.core.user.repository.UserRepositoryBase
@@ -72,11 +73,20 @@ class MosaicUserConfig(
     @Bean
     fun permissionService(
         userRepositoryBase: UserRepositoryBase<*>,
-        tenantUserRepositoryBase: TenantUserRepositoryBase<*>,
+        tenantUserService: TenantUserService,
     ): PermissionService {
         return PermissionService(
             userRepositoryBase = userRepositoryBase,
-            tenantUserRepositoryBase = tenantUserRepositoryBase,
+            tenantUserService = tenantUserService,
+        )
+    }
+
+    @Bean
+    fun permissionInterceptor(
+        permissionService: PermissionService,
+    ): PermissionInterceptor {
+        return PermissionInterceptor(
+            permissionService,
         )
     }
 
@@ -94,7 +104,7 @@ class MosaicUserConfig(
         )
     }
 
-    @Configuration(proxyBeanMethods = true)
+    @Configuration(proxyBeanMethods = false)
     class WebConfig(
         private val mosaicUserProperties: MosaicUserProperties,
     ) : WebMvcConfigurer {

@@ -109,6 +109,8 @@ class AuthTokenService(
                     )
             },
             authorities = null,
+            activeTenantId = tenantUsers.takeIf { it.size == 1 }
+                ?.firstOrNull()?.first?.tenantId,
         )
     }
 

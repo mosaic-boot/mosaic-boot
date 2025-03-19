@@ -23,3 +23,6 @@ import io.mosaicboot.core.repository.BaseRepository
 
 interface AuthenticationRepositoryBase<T : Authentication> : BaseRepository<Authentication, T, String>,
     AuthenticationMosaicRepository<T>
+{
+    fun findByUserIdAndMethod(userId: String, method: String): T?
+}

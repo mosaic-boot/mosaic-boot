@@ -40,7 +40,7 @@ class UserCustomRepositoryImpl(
     private val mongodbCollectionsProperties: MongodbCollectionsProperties,
     private val mongoTemplate: MongoTemplate,
 ) : UserCustomRepository {
-    override fun findById(id: String): Optional<UserEntity> {
+    override fun getUserById(id: String): User {
         return mongoTemplate.aggregate(
             Aggregation.newAggregation(
                 Aggregation.match(Criteria("_id").isEqualTo(id)),
@@ -52,7 +52,7 @@ class UserCustomRepositoryImpl(
             ),
             UserEntity::class.java,
             UserEntityWithRole::class.java,
-        ).uniqueMappedResult.let { Optional.ofNullable(it) }
+        ).uniqueMappedResult!!
     }
 
     override fun save(input: UserInput): UserEntity {
@@ -87,9 +87,9 @@ class UserCustomRepositoryImpl(
         override var status: UserStatus,
         @Field("timeZone")
         override var timeZone: String,
-        @Field("rolesIds")
-        override var roleIds: List<String>,
+        @Field("roleIds")
+        var roleIds: List<String>,
         @Field("roles")
         override var roles: List<GlobalRoleEntity>,
-    ) : UserEntity(id, createdAt, updatedAt, name, email, status, timeZone, roleIds)
+    ) : User
 }

@@ -148,7 +148,7 @@ class MosaicAuthConfig(
         )
     }
 
-    @Configuration(proxyBeanMethods = true)
+    @Configuration(proxyBeanMethods = false)
     class WebConfig(
         private val mosaicAuthProperties: MosaicAuthProperties,
         private val mosaicTenantProperties: MosaicTenantProperties,

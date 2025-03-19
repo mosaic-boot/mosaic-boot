@@ -185,7 +185,7 @@ class MosaicCookieAuthFilter(
         authentication: Authentication
     ) {
         val context = this.securityContextHolderStrategy.createEmptyContext();
-        context.authentication = authentication;
+        context.authentication = authentication
         this.securityContextHolderStrategy.context = context;
         this.securityContextRepository.saveContext(context, request, response);
     }
