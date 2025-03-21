@@ -16,11 +16,26 @@
 
 package io.mosaicboot.core.http
 
+import jakarta.servlet.http.HttpServletRequest
 import org.springframework.core.annotation.AnnotatedElementUtils
+import org.springframework.web.servlet.mvc.method.RequestMappingInfo
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping
+import java.lang.reflect.Method
 
 class MosaicRequestMappingHandlerMapping : RequestMappingHandlerMapping() {
     override fun isHandler(beanType: Class<*>): Boolean {
         return AnnotatedElementUtils.hasAnnotation(beanType, MosaicController::class.java)
+    }
+
+    override fun getMatchingMapping(info: RequestMappingInfo, request: HttpServletRequest): RequestMappingInfo? {
+        return super.getMatchingMapping(info, request)
+    }
+
+    override fun registerMapping(mapping: RequestMappingInfo, handler: Any, method: Method) {
+        super.registerMapping(mapping, handler, method)
+    }
+
+    override fun registerHandlerMethod(handler: Any, method: Method, mapping: RequestMappingInfo) {
+        super.registerHandlerMethod(handler, method, mapping)
     }
 }

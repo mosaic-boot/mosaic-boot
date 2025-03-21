@@ -7,7 +7,6 @@ import io.mosaicboot.core.user.entity.TenantUser
 interface TenantUserMosaicRepository {
     fun save(input: TenantUserInput): TenantUser
     fun findByTenantIdAndId(tenantId: String, id: String): TenantUser?
-    fun findAllByUserId(userId: String): List<TenantUser>
     fun findWithUser(
         userId: String,
         tenantId: String,

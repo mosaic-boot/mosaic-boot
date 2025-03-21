@@ -108,11 +108,11 @@ class TenantsController(
 
         return ResponseEntity.ok(
             TenantResponse(
-            id = tenant.id,
-            name = tenant.name,
-            timeZone = tenant.timeZone,
-            status = tenant.status,
-        )
+                id = tenant.id,
+                name = tenant.name,
+                timeZone = tenant.timeZone,
+                status = tenant.status,
+            )
         )
     }
 
@@ -169,7 +169,8 @@ class TenantsController(
 
         val result = tenantUserService.inviteUser(
             tenantUser,
-            request.email,
+            request.
+            email,
             listOf(),
         )
         return when (result) {

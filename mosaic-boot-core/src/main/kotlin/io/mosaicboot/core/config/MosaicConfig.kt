@@ -127,7 +127,7 @@ class MosaicConfig {
         val urlMap = HashMap<String, Predicate<Class<*>>>()
         controllers.forEach { controller ->
             urlMap[controller.getBaseUrl(applicationContext)] = Predicate<Class<*>> { it: Class<*> ->
-                it == controller.javaClass
+                it.isAssignableFrom(controller.javaClass)
             }
         }
         requestMappingHandlerMapping.order = -1

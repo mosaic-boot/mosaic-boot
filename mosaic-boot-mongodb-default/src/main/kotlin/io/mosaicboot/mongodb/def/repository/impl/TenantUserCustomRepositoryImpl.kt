@@ -10,6 +10,8 @@ import io.mosaicboot.mongodb.def.entity.TenantUserEntity
 import io.mosaicboot.mongodb.def.entity.UserEntity
 import io.mosaicboot.mongodb.def.repository.TenantUserCustomRepository
 import org.springframework.data.annotation.Id
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.Pageable
 import org.springframework.data.mongodb.core.MongoTemplate
 import org.springframework.data.mongodb.core.aggregation.Aggregation
 import org.springframework.data.mongodb.core.mapping.Field
@@ -64,6 +66,20 @@ class TenantUserCustomRepositoryImpl(
                 status = input.status,
                 roleIds = input.roles.map { it.id },
             )
+        )
+    }
+
+    override fun findAllByTenantId(tenantId: String, pageable: Pageable): Page<out TenantUser> {
+        return mongoTemplate.pagedAggregation(
+            pageable,
+            Aggregation.newAggregation(
+                Aggregation.match(
+                    Criteria("tenantId").isEqualTo(tenantId)
+                ),
+                ROLE_LOOKUP
+            ),
+            TenantUserEntity::class.java,
+            PagedTenantUserEntityWithRole::class.java,
         )
     }
 
@@ -127,6 +143,13 @@ class TenantUserCustomRepositoryImpl(
         @Field("roles")
         override var roles: List<TenantRoleEntity>,
     ) : TenantUser
+
+    data class PagedTenantUserEntityWithRole(
+        @Field("total")
+        override val total: Long,
+        @Field("items")
+        override val items: List<TenantUserEntityWithRole>,
+    ) : Paged<TenantUserEntityWithRole>
 
     open class TenantUserEntityWithUser(
         @Id

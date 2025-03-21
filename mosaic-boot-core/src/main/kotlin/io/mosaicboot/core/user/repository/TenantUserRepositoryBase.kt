@@ -24,6 +24,7 @@ import org.springframework.data.domain.Pageable
 interface TenantUserRepositoryBase<T : TenantUser> : BaseTenantRepository<TenantUser, T, String>,
     TenantUserMosaicRepository
 {
-    fun findByTenantIdAndUserId(tenantId: String, userId: String): TenantUser?
     fun findAllByTenantId(tenantId: String, pageable: Pageable): Page<out TenantUser>
+    fun findAllByUserId(userId: String): List<TenantUser>
+    fun findByTenantIdAndUserId(tenantId: String, userId: String): TenantUser?
 }

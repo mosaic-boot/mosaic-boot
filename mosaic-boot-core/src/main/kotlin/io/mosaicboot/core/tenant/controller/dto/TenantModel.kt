@@ -54,9 +54,6 @@ data class UpdateTenantRequest(
 data class InviteUserRequest(
     @field:JsonProperty("email")
     val email: String,
-
-    @field:JsonProperty("role")
-    val role: String
 )
 
 enum class InviteResultCode {

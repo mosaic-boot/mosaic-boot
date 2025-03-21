@@ -85,6 +85,7 @@ class PermissionInterceptor(
         if (!hasPermission) {
             throw PermissionDeniedException("permission denied")
         }
+        authorizationContext.authorized = true
         return joinPoint.proceed()
     }
 
