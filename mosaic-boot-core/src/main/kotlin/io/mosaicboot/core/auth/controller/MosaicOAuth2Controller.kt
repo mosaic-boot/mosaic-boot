@@ -18,16 +18,16 @@ package io.mosaicboot.core.auth.controller
 
 import io.mosaicboot.core.auth.MosaicAuthenticationHandler
 import io.mosaicboot.core.auth.config.MosaicAuthProperties
-import io.mosaicboot.core.user.enums.UserStatus
-import io.mosaicboot.core.user.dto.UserInput
-import io.mosaicboot.core.http.BaseMosaicController
-import io.mosaicboot.core.http.MosaicController
 import io.mosaicboot.core.auth.controller.dto.RegisterRequest
 import io.mosaicboot.core.auth.controller.dto.RegisterResponse
 import io.mosaicboot.core.auth.dto.RegisterResult
 import io.mosaicboot.core.auth.oauth2.MosaicOAuth2RegisterToken
 import io.mosaicboot.core.auth.oauth2.OAuth2BasicInfo
 import io.mosaicboot.core.auth.service.AuthTokenService
+import io.mosaicboot.core.http.BaseMosaicController
+import io.mosaicboot.core.http.MosaicController
+import io.mosaicboot.core.user.dto.UserInput
+import io.mosaicboot.core.user.enums.UserStatus
 import io.mosaicboot.core.user.service.MosaicOAuth2UserService
 import io.mosaicboot.core.util.WebClientInfo
 import io.swagger.v3.oas.annotations.Operation
@@ -42,12 +42,18 @@ import org.springframework.context.ApplicationContext
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.security.core.context.SecurityContextHolder
+import org.springframework.security.oauth2.client.registration.ClientRegistration
+import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
+import org.springframework.web.server.ResponseStatusException
+import org.springframework.web.util.UriComponentsBuilder
 
 @MosaicController
 class MosaicOAuth2Controller(
+    private val clientRegistrationRepository: ClientRegistrationRepository,
+    private val authorizationRequestBaseUri: String,
     private val mosaicOAuth2UserService: MosaicOAuth2UserService,
     private val authTokenService: AuthTokenService,
     private val mosaicAuthenticationHandler: MosaicAuthenticationHandler,
@@ -152,4 +158,31 @@ class MosaicOAuth2Controller(
 
         return result.toResponseEntity()
     }
+
+//    @GetMapping("/authorize")
+//    fun oauth2Authorize(): String {
+//        val authentication = SecurityContextHolder.getContext().authentication
+//        if (authentication !is MosaicOAuth2RegisterToken) {
+//            throw ResponseStatusException(HttpStatus.UNAUTHORIZED)
+//        }
+//
+//        val clientRegistration: ClientRegistration = clientRegistrationRepository
+//            .findByRegistrationId(authentication.getAuthorizedClientRegistrationId())
+//
+//
+//        // 새로운 스코프 요청을 위한 OAuth2 엔드포인트 구성
+//        val baseUrl = clientRegistration.providerDetails.authorizationUri
+//        val clientId = clientRegistration.clientId
+//        val redirectUri = clientRegistration.redirectUri
+//        val additionalScopes = "additional_scope1 additional_scope2" // 필요한 추가 스코프
+//
+//        val authorizationUrl = UriComponentsBuilder.fromUriString(baseUrl)
+//            .queryParam("client_id", clientId)
+//            .queryParam("response_type", "code")
+//            .queryParam("redirect_uri", redirectUri)
+//            .queryParam("scope", additionalScopes)
+//            .toUriString()
+//
+//        return "redirect:${authorizationRequestBaseUri}/"
+//    }
 }
