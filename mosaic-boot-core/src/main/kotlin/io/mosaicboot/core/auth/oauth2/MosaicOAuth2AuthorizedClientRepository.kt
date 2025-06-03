@@ -49,11 +49,27 @@ class MosaicOAuth2AuthorizedClientRepository(
         response: HttpServletResponse
     ) {
         if (authentication !is OAuth2AuthenticationToken) {
-            throw RuntimeException("principal is not OAuth2AuthenticationToken: ${authentication.javaClass}")
+            throw RuntimeException("authentication is not OAuth2AuthenticationToken: ${authentication.javaClass}")
         }
 
         val principal = authentication.principal
         when (principal) {
+            is NewLinkOAuth2User -> {
+                mosaicOAuth2TokenService?.update(
+                    principal.userId,
+                    principal.authenticationId,
+                    authorizedClient,
+                )
+            }
+
+            is AuthenticatedOAuth2User -> {
+                mosaicOAuth2TokenService?.update(
+                    principal.authenticatedToken.userId,
+                    principal.authenticatedToken.authenticationId,
+                    authorizedClient,
+                )
+            }
+
             is TemporaryOAuth2User -> {
                 val token = authTokenService.issueSocialRegisterTokenData(
                     webClientInfo = principal.webClientInfo,
@@ -65,14 +81,6 @@ class MosaicOAuth2AuthorizedClientRepository(
                     request,
                     response,
                     token
-                )
-            }
-
-            is AuthenticatedOAuth2User -> {
-                mosaicOAuth2TokenService?.update(
-                    principal.authenticatedToken.userId,
-                    principal.authenticatedToken.authenticationId,
-                    authorizedClient,
                 )
             }
         }

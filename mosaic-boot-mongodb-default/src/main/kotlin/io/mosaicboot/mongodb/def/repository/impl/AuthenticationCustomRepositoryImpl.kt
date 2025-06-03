@@ -19,16 +19,23 @@ package io.mosaicboot.mongodb.def.repository.impl
 import com.fasterxml.uuid.Generators
 import io.mosaicboot.core.auth.dto.AuthenticationDetail
 import io.mosaicboot.core.auth.dto.AuthenticationInput
+import io.mosaicboot.core.auth.entity.Authentication
+import io.mosaicboot.core.auth.enums.AuthMethod
 import io.mosaicboot.mongodb.def.config.MongodbCollectionsProperties
 import io.mosaicboot.mongodb.def.entity.AuthenticationEntity
 import io.mosaicboot.mongodb.def.entity.UserEntity
 import io.mosaicboot.mongodb.def.repository.AuthenticationCustomRepository
 import org.springframework.data.annotation.Id
+import org.springframework.data.domain.Sort
+import org.springframework.data.mongodb.core.FindAndModifyOptions
 import org.springframework.data.mongodb.core.MongoTemplate
 import org.springframework.data.mongodb.core.aggregation.Aggregation
 import org.springframework.data.mongodb.core.aggregation.LookupOperation
 import org.springframework.data.mongodb.core.mapping.Field
 import org.springframework.data.mongodb.core.query.Criteria
+import org.springframework.data.mongodb.core.query.Query
+import org.springframework.data.mongodb.core.query.Update
+import org.springframework.data.mongodb.core.query.isEqualTo
 import org.springframework.stereotype.Component
 import java.time.Instant
 import java.util.*
@@ -55,6 +62,17 @@ class AuthenticationCustomRepositoryImpl(
             username = input.username,
             credential = input.credential
         ))
+    }
+
+    override fun findByUserIdAndMethod(userId: String, method: String): AuthenticationEntity? {
+        return mongoTemplate.findOne(
+            Query.query(
+                Criteria.where("userId").isEqualTo(userId)
+                    .and("method").isEqualTo(method)
+                    .and("deleted").ne(true)
+            ).with(Sort.by(Sort.Direction.DESC, "createdAt")).limit(1),
+            AuthenticationEntity::class.java,
+        )
     }
 
     override fun findByMethodAndEmail(method: String, email: String): AuthenticationDetail? {
@@ -125,6 +143,21 @@ class AuthenticationCustomRepositoryImpl(
         return result.uniqueMappedResult
     }
 
+    override fun softDelete(existing: Authentication): AuthenticationEntity {
+        val now = Instant.now()
+        return mongoTemplate.findAndModify(
+            Query.query(Criteria.where("_id").`is`(existing.id)),
+            Update()
+                .set("updatedAt", now)
+                .set("username", "${AuthMethod.PREFIX_DELETED}:${now.epochSecond}:${existing.username}")
+                .set("deleted", true)
+                .set("deletedAt", now),
+            FindAndModifyOptions()
+                .returnNew(true),
+            AuthenticationEntity::class.java,
+        )!!
+    }
+
 //    override fun appendUserToAuthentication(authentication: Authentication, userId: String): AuthenticationEntity {
 //        TODO()
 //        val query = Query().addCriteria(Criteria.where("id").`is`(authentication.id))
@@ -168,6 +201,10 @@ class AuthenticationCustomRepositoryImpl(
         override val username: String,
         @Field("credential")
         override var credential: String?,
+        @Field("deleted")
+        override var deleted: Boolean = false,
+        @Field("deletedAt")
+        override var deletedAt: Instant? = null,
         @Field("user")
         override val user: UserEntity,
     ) : AuthenticationDetail

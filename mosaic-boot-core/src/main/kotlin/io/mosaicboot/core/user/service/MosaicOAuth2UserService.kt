@@ -17,6 +17,8 @@
 package io.mosaicboot.core.user.service
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import io.mosaicboot.core.auth.MosaicAuthenticatedToken
+import io.mosaicboot.core.auth.AuthenticationRedirectException
 import io.mosaicboot.core.auth.config.MosaicAuthProperties
 import io.mosaicboot.core.auth.oauth2.*
 import io.mosaicboot.core.auth.service.AuthTokenService
@@ -30,6 +32,7 @@ import io.mosaicboot.core.util.UnreachableException
 import io.mosaicboot.core.util.WebClientInfo
 import io.mosaicboot.core.util.WebClientInfoResolver
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserService
@@ -38,6 +41,7 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.context.request.RequestContextHolder
 import org.springframework.web.context.request.ServletRequestAttributes
+import org.springframework.web.util.UriComponentsBuilder
 
 @Service
 class MosaicOAuth2UserService(
@@ -88,10 +92,56 @@ class MosaicOAuth2UserService(
         val oAuth2User = delegate.loadUser(userRequest)
         val attributes = RequestContextHolder.currentRequestAttributes() as ServletRequestAttributes
         val webClientInfo = WebClientInfoResolver.fromHttpServletRequest(attributes.request)
+        val state = serverSideCrypto.decrypt(attributes.request.getParameter("state"), OAuth2AuthorizeState::class.java)
 
         val basicInfo = oAuth2UserInfoHandlerMap[userRequest.clientRegistration.registrationId]
             ?.handle(oAuth2User)
             ?: readInfoFromOther(userRequest.clientRegistration.registrationId, oAuth2User)
+
+        if (state.requestType == OAuth2AuthorizeState.REQUEST_TYPE_LINK) {
+            val authentication = SecurityContextHolder.getContext().authentication as MosaicAuthenticatedToken
+            val existingAuthentication = authenticationService.findAuthenticationDetail(
+                "${AuthMethod.PREFIX_OAUTH2}:${basicInfo.provider}",
+                basicInfo.id,
+            )
+            if (existingAuthentication != null) {
+                if (authentication.userId == existingAuthentication.userId) {
+                    // 이미 가입되어
+                    throw AuthenticationRedirectException(
+                        message = "mosaic.auth.oauth2.link.already-linked-self",
+                        redirectUri = state.redirectUri?.let {
+                            UriComponentsBuilder.fromUriString(it)
+                                .replaceQueryParam("status", "error")
+                                .replaceQueryParam("error", "already-linked-self")
+                                .build().toString()
+                        }
+                    )
+                } else {
+                    throw AuthenticationRedirectException(
+                        message = "mosaic.auth.oauth2.link.already-linked-other-user",
+                        redirectUri = state.redirectUri?.let {
+                            UriComponentsBuilder.fromUriString(it)
+                                .replaceQueryParam("status", "error")
+                                .replaceQueryParam("error", "already-linked-other-user")
+                                .build().toString()
+                        }
+                    )
+                }
+            }
+            val newAuthentication = authenticationService.addLoginMethod(
+                authentication.userId,
+                "${AuthMethod.PREFIX_OAUTH2}:${basicInfo.provider}",
+                basicInfo.id,
+                null,
+                webClientInfo
+            )
+            return NewLinkOAuth2User(
+                webClientInfo,
+                basicInfo,
+                authentication.userId,
+                newAuthentication.id
+            )
+        }
 
         val result = authenticationService.login(
             "${AuthMethod.PREFIX_OAUTH2}:${basicInfo.provider}",

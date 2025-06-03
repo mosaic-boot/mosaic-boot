@@ -3,6 +3,7 @@ package io.mosaicboot.core.auth.oauth2
 import io.mosaicboot.core.auth.MosaicAuthenticatedToken
 import io.mosaicboot.core.auth.enums.AuthMethod
 import io.mosaicboot.core.auth.repository.AuthenticationRepositoryBase
+import io.mosaicboot.core.user.service.MosaicOAuth2UserService
 import jakarta.servlet.http.HttpServletRequest
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository
@@ -15,6 +16,7 @@ import org.springframework.web.util.UriComponentsBuilder
 class MosaicOAuth2AuthorizationRequestResolver(
     private val authorizationRequestBaseUri: String,
     private val authenticationRepository: AuthenticationRepositoryBase<*>,
+    private val mosaicOAuth2UserService: MosaicOAuth2UserService,
 ) : OAuth2AuthorizationRequestResolver {
     private lateinit var clientRegistrationRepository: ClientRegistrationRepository
     private lateinit var delegate: DefaultOAuth2AuthorizationRequestResolver
@@ -56,20 +58,29 @@ class MosaicOAuth2AuthorizationRequestResolver(
         queryParams["prompt"] = "consent"
         authEntity?.let { queryParams["login_hint"] = it.username }
 
+        val state = OAuth2AuthorizeState(
+            requestType = request.getParameter("request_type"),
+            redirectUri = request.getParameter("redirect_uri"),
+        )
+        val encryptedState = mosaicOAuth2UserService.serverSideCrypto.encrypt(state)
+
         val additionalParameters = HashMap(authorizationRequest.additionalParameters)
         additionalParameters.putAll(queryParams)
         val customAuthorizationRequestUri = UriComponentsBuilder
             .fromUriString(authorizationRequest.authorizationRequestUri)
             .also { builder ->
+                builder.replaceQueryParam("state", encryptedState)
                 queryParams.forEach { (k, v) ->
                     builder.queryParam(k, v)
                 }
             }
             .build(true)
             .toUriString()
+
         return OAuth2AuthorizationRequest.from(authorizationRequest)
             .additionalParameters(additionalParameters)
             .authorizationRequestUri(customAuthorizationRequestUri)
+            .state(encryptedState)
             .build()
     }
 }

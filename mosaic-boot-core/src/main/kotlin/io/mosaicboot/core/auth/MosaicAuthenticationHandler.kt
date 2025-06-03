@@ -17,23 +17,31 @@
 package io.mosaicboot.core.auth
 
 import io.mosaicboot.core.auth.config.MosaicAuthProperties
+import io.mosaicboot.core.auth.oauth2.AttributedOAuth2AuthenticationToken
 import io.mosaicboot.core.auth.oauth2.AuthenticatedOAuth2User
+import io.mosaicboot.core.auth.oauth2.NewLinkOAuth2User
 import io.mosaicboot.core.auth.oauth2.TemporaryOAuth2User
 import io.mosaicboot.core.util.UnreachableException
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
 import org.springframework.security.core.Authentication
-import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken
+import org.springframework.security.core.AuthenticationException
+import org.springframework.security.web.authentication.AuthenticationFailureHandler
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler
+import org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler
 import org.springframework.security.web.authentication.logout.LogoutHandler
+import org.springframework.web.util.UriComponentsBuilder
 
 class MosaicAuthenticationHandler(
     private val mosaicAuthProperties: MosaicAuthProperties,
     private val mosaicCookieAuthFilter: MosaicCookieAuthFilter,
 ) :
     AuthenticationSuccessHandler,
+    AuthenticationFailureHandler,
     LogoutHandler
 {
+    private val failureHandler = SimpleUrlAuthenticationFailureHandler()
+
     override fun onAuthenticationSuccess(
         request: HttpServletRequest,
         response: HttpServletResponse,
@@ -48,9 +56,16 @@ class MosaicAuthenticationHandler(
                     authentication,
                 )
             }
-            is OAuth2AuthenticationToken -> {
+            is AttributedOAuth2AuthenticationToken -> {
                 val principal = authentication.principal
                 when (principal) {
+                    is NewLinkOAuth2User -> {
+                        response.sendRedirect(
+                            UriComponentsBuilder.fromUriString(authRedirectUrl)
+                                .replaceQueryParam("status", "success")
+                                .build().toString()
+                        )
+                    }
                     is TemporaryOAuth2User -> {
                         response.sendRedirect(mosaicAuthProperties.oauth2.registerUrl)
                     }
@@ -73,5 +88,17 @@ class MosaicAuthenticationHandler(
             request,
             response,
         )
+    }
+
+    override fun onAuthenticationFailure(
+        request: HttpServletRequest,
+        response: HttpServletResponse,
+        exception: AuthenticationException
+    ) {
+        if (exception is AuthenticationRedirectException && exception.redirectUri != null) {
+            response.sendRedirect(exception.redirectUri)
+            return
+        }
+        failureHandler.onAuthenticationFailure(request, response, exception)
     }
 }

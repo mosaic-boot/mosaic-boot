@@ -14,12 +14,22 @@
  * limitations under the License.
  */
 
-package io.mosaicboot.core.auth.enums
+package io.mosaicboot.core.user.controller.dto
 
-object AuthMethod {
-    const val PREFIX_EMAIL = "email"
-    const val PREFIX_USERNAME = "username"
-    const val PREFIX_OAUTH2 = "oauth2"
-    const val PREFIX_DELETED = "#DELETED"
-    const val SUFFIX_MOSAIC_SHA256 = "mosaic-sha256"
-}
+import com.fasterxml.jackson.annotation.JsonProperty
+import io.swagger.v3.oas.annotations.media.Schema
+import java.time.Instant
+
+data class LinkedOAuth2Provider(
+    @Schema(description = "OAuth2 provider name")
+    @JsonProperty("provider")
+    val provider: String,
+    
+    @Schema(description = "OAuth2 username/ID from provider")
+    @JsonProperty("username")
+    val username: String,
+    
+    @Schema(description = "When this OAuth2 provider was linked (unit: seconds)")
+    @JsonProperty("linkedAt")
+    val linkedAt: Long,
+)

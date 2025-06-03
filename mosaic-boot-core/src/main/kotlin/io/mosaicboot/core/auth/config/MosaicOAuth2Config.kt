@@ -138,6 +138,7 @@ class MosaicOAuth2Config(
         private val mosaicOAuth2AuthorizationRequestResolver = MosaicOAuth2AuthorizationRequestResolver(
             oauth2AuthorizationRequestBaseUri,
             authenticationRepository,
+            mosaicOAuth2UserService,
         )
 
         @Autowired
@@ -182,18 +183,23 @@ class MosaicOAuth2Config(
                             endpoint.userService(mosaicOAuth2UserService)
                         }
                         .successHandler(mosaicAuthenticationHandler)
+                        .failureHandler(mosaicAuthenticationHandler)
                 }
             val output = http.build()
             val oAuth2LoginAuthenticationFilter = output.filters.find { it.javaClass == OAuth2LoginAuthenticationFilter::class.java }!!
                 as OAuth2LoginAuthenticationFilter
             oAuth2LoginAuthenticationFilter.setAuthenticationResultConverter { authenticationResult ->
-                val authentication = OAuth2AuthenticationToken(
-                    authenticationResult.principal, authenticationResult.authorities,
-                    authenticationResult.clientRegistration.registrationId
+                val authentication = AttributedOAuth2AuthenticationToken(
+                    authenticationResult.principal,
+                    authenticationResult.authorities,
+                    authenticationResult.clientRegistration.registrationId,
+                    authenticationResult.authorizationExchange.authorizationRequest.attributes
                 )
+
                 if (authenticationResult.principal is TemporaryOAuth2User) {
                     authentication.isAuthenticated = false
                 }
+
                 authentication
             }
             return output
