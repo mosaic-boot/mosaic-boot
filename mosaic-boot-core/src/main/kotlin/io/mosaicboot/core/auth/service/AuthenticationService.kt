@@ -31,11 +31,14 @@ import io.mosaicboot.core.auth.dto.LoginResult
 import io.mosaicboot.core.auth.dto.RegisterResult
 import io.mosaicboot.core.user.controller.dto.LoginFailureReason
 import io.mosaicboot.core.auth.controller.dto.RegisterFailureReason
+import io.mosaicboot.core.auth.entity.Authentication
 import io.mosaicboot.core.user.dto.UserAuditLogInput
 import io.mosaicboot.core.user.dto.UserAuditLoginActionDetail
 import io.mosaicboot.core.user.dto.UserAuditRegisterActionDetail
 import io.mosaicboot.core.user.dto.UserInput
 import io.mosaicboot.core.user.controller.dto.TenantLoginStatus
+import io.mosaicboot.core.user.dto.UserAuditOAuth2LinkActionDetail
+import io.mosaicboot.core.user.entity.User
 import io.mosaicboot.core.user.repository.GlobalRoleRepositoryBase
 import io.mosaicboot.core.user.service.AuditService
 import io.mosaicboot.core.util.UnreachableException
@@ -229,6 +232,58 @@ class AuthenticationService(
         }
     }
 
+    @Transactional
+    fun addLoginMethod(
+        userId: String,
+        method: String,
+        username: String,
+        credential: String?,
+        webClientInfo: WebClientInfo,
+    ): Authentication {
+        val user = userRepository.getUserById(userId)
+        try {
+            // Create authentication
+            val encodedCredential = credential?.let { credentialService.encodeCredential(method, username, it) }
+
+            val authentication = authenticationRepository.save(
+                AuthenticationInput(
+                    userId = user.id,
+                    method = method,
+                    username = username,
+                    credential = encodedCredential
+                )
+            )
+
+            logOAuth2Link(
+                userId = user.id,
+                isLinkOrUnlink = true,
+                status = UserAuditLogStatus.SUCCESS,
+                detail = UserAuditOAuth2LinkActionDetail(
+                    method = method,
+                    username = username,
+                    authenticationId = authentication.id,
+                ),
+                webClientInfo = webClientInfo
+            )
+
+            return authentication
+        } catch (e: Exception) {
+            logOAuth2Link(
+                userId = user.id,
+                isLinkOrUnlink = true,
+                status = UserAuditLogStatus.FAILURE,
+                detail = UserAuditOAuth2LinkActionDetail(
+                    method = method,
+                    username = username,
+                    failureReason = null,
+                ),
+                webClientInfo = webClientInfo,
+                errorMessage = e.message,
+            )
+            throw e
+        }
+    }
+
     fun refresh(
         userId: String,
         authenticationId: String,
@@ -394,6 +449,30 @@ class AuthenticationService(
             UserAuditLogInput(
                 userId = userId,
                 action = UserAuditAction.ACCOUNT_CREATED,
+                status = status,
+                actionDetail = objectMapper.convertValue(
+                    detail,
+                    object: TypeReference<Map<String, Any?>>() {},
+                ),
+                ipAddress = webClientInfo.ipAddress,
+                userAgent = webClientInfo.userAgent,
+                errorMessage = errorMessage,
+            )
+        )
+    }
+
+    private fun logOAuth2Link(
+        userId: String,
+        isLinkOrUnlink: Boolean,
+        status: UserAuditLogStatus,
+        detail: UserAuditOAuth2LinkActionDetail,
+        webClientInfo: WebClientInfo,
+        errorMessage: String? = null,
+    ) {
+        auditService.addLog(
+            UserAuditLogInput(
+                userId = userId,
+                action = if (isLinkOrUnlink) UserAuditAction.ACCOUNT_OAUTH2_LINK else UserAuditAction.ACCOUNT_OAUTH2_UNLINK,
                 status = status,
                 actionDetail = objectMapper.convertValue(
                     detail,

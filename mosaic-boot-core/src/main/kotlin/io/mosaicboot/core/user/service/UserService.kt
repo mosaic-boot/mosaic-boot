@@ -16,6 +16,7 @@
 
 package io.mosaicboot.core.user.service
 
+import com.fasterxml.jackson.core.type.TypeReference
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.mosaicboot.core.user.entity.User
 import io.mosaicboot.core.auth.repository.AuthenticationRepositoryBase
@@ -24,12 +25,16 @@ import io.mosaicboot.core.user.repository.TenantUserRepositoryBase
 import io.mosaicboot.core.user.repository.UserRepositoryBase
 import io.mosaicboot.core.user.controller.dto.ActiveTenantUser
 import io.mosaicboot.core.user.controller.dto.UpdateUserRequest
+import io.mosaicboot.core.user.controller.dto.LinkedOAuth2Provider
 import io.mosaicboot.core.user.dto.UserAuditLogInput
 import io.mosaicboot.core.user.enums.UserAuditAction
 import io.mosaicboot.core.user.enums.UserAuditLogStatus
 import io.mosaicboot.core.user.enums.UserStatus
 import io.mosaicboot.core.util.WebClientInfo
+import io.mosaicboot.core.auth.enums.AuthMethod
+import io.mosaicboot.core.user.dto.UserAuditOAuth2LinkActionDetail
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 import kotlin.jvm.optionals.getOrNull
 
 @Service
@@ -65,7 +70,8 @@ class UserService(
             }
         } ?: throw IllegalArgumentException("No current active user")
     }
-    
+
+    @Transactional
     fun updateUser(userId: String, updateRequest: UpdateUserRequest, webClientInfo: WebClientInfo) {
         val user = userRepository.findById(userId).orElseThrow {
             IllegalArgumentException("User not found")
@@ -108,7 +114,8 @@ class UserService(
             )
         )
     }
-    
+
+    @Transactional
     fun deleteUser(userId: String, webClientInfo: WebClientInfo) {
         val user = userRepository.findById(userId).orElseThrow {
             IllegalArgumentException("User not found")
@@ -130,6 +137,48 @@ class UserService(
                 status = UserAuditLogStatus.SUCCESS,
                 ipAddress = webClientInfo.ipAddress,
                 userAgent = webClientInfo.userAgent,
+            )
+        )
+    }
+    
+    fun getLinkedOAuth2Providers(userId: String): List<LinkedOAuth2Provider> {
+        return authenticationRepository.findAllByUserId(userId)
+            .filter { it.method.startsWith("${AuthMethod.PREFIX_OAUTH2}:") && !it.deleted }
+            .map { auth ->
+                LinkedOAuth2Provider(
+                    provider = auth.method.removePrefix("${AuthMethod.PREFIX_OAUTH2}:"),
+                    username = auth.username,
+                    linkedAt = auth.createdAt.epochSecond,
+                )
+            }
+    }
+
+    @Transactional
+    fun unlinkOAuth2Provider(userId: String, provider: String, webClientInfo: WebClientInfo) {
+        val method = "${AuthMethod.PREFIX_OAUTH2}:${provider}"
+        val authentication = authenticationRepository.findByUserIdAndMethod(userId, method)
+            ?: throw IllegalArgumentException("OAuth2 provider not linked")
+
+        val actionDetail = UserAuditOAuth2LinkActionDetail(
+            method = authentication.method,
+            username = authentication.username,
+            authenticationId = authentication.id,
+        )
+
+        authenticationRepository.softDelete(authentication)
+        
+        auditService.addLog(
+            UserAuditLogInput(
+                userId = userId,
+                performedBy = userId,
+                action = UserAuditAction.ACCOUNT_OAUTH2_UNLINK,
+                actionDetail = objectMapper.convertValue(
+                    actionDetail,
+                    object: TypeReference<Map<String, Any?>>(){},
+                ),
+                status = UserAuditLogStatus.SUCCESS,
+                ipAddress = webClientInfo.ipAddress,
+                userAgent = webClientInfo.userAgent
             )
         )
     }

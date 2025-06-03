@@ -48,6 +48,8 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer
 class MosaicOAuth2Config(
     private val mosaicAuthProperties: MosaicAuthProperties,
 ) {
+    private val oauth2AuthorizationRequestBaseUri = "${mosaicAuthProperties.api.path}/oauth2/request"
+
     @Bean
     fun mosaicOAuth2CredentialHandler(): MosaicOAuth2CredentialHandler {
         return MosaicOAuth2CredentialHandler()
@@ -91,11 +93,14 @@ class MosaicOAuth2Config(
 
     @Bean
     fun mosaicOAuth2Controller(
+        clientRegistrationRepository: ClientRegistrationRepository,
         mosaicOAuth2UserService: MosaicOAuth2UserService,
         authTokenService: AuthTokenService,
         mosaicAuthenticationHandler: MosaicAuthenticationHandler,
     ): MosaicOAuth2Controller {
         return MosaicOAuth2Controller(
+            clientRegistrationRepository,
+            oauth2AuthorizationRequestBaseUri,
             mosaicOAuth2UserService,
             authTokenService,
             mosaicAuthenticationHandler,
@@ -119,14 +124,28 @@ class MosaicOAuth2Config(
         )
     }
 
-    @Configuration(proxyBeanMethods = true)
+    @Configuration(proxyBeanMethods = false)
     class WebConfig(
         private val mosaicAuthProperties: MosaicAuthProperties,
         private val mosaicAuthenticationHandler: MosaicAuthenticationHandler,
         private val mosaicOAuth2UserService: MosaicOAuth2UserService,
         private val mosaicOAuth2AuthorizedClientRepository: MosaicOAuth2AuthorizedClientRepository,
         private val mosaicAuthFilter: FilterRegistrationBean<MosaicCookieAuthFilter>,
+        private val authenticationRepository: AuthenticationRepositoryBase<*>,
     ) : WebMvcConfigurer {
+        private val oauth2AuthorizationRequestBaseUri = "${mosaicAuthProperties.api.path}/oauth2/request"
+
+        private val mosaicOAuth2AuthorizationRequestResolver = MosaicOAuth2AuthorizationRequestResolver(
+            oauth2AuthorizationRequestBaseUri,
+            authenticationRepository,
+            mosaicOAuth2UserService,
+        )
+
+        @Autowired
+        fun setClientRegistrationRepository(clientRegistrationRepository: ClientRegistrationRepository) {
+            mosaicOAuth2AuthorizationRequestResolver.setClientRegistrationRepository(clientRegistrationRepository)
+        }
+
         @Bean
         @Order(-1)
         fun mosaicOAuth2SecurityFilterChain(http: HttpSecurity): SecurityFilterChain {
@@ -140,19 +159,22 @@ class MosaicOAuth2Config(
                 .logout { it.disable() }
                 .csrf { it.disable() }
                 .authorizeHttpRequests { authorizeHttpRequests ->
-                    authorizeHttpRequests.requestMatchers("${mosaicAuthProperties.api.path}/oauth2/**").permitAll()
+                    authorizeHttpRequests
+                        .requestMatchers("${mosaicAuthProperties.api.path}/oauth2/authorize").authenticated()
+                        .requestMatchers("${mosaicAuthProperties.api.path}/oauth2/**").permitAll()
                 }
                 .oauth2Login { oauth2Login ->
                     oauth2Login
                         .authorizedClientRepository(mosaicOAuth2AuthorizedClientRepository)
                         .authorizationEndpoint { endpoint ->
-                            endpoint.baseUri("${mosaicAuthProperties.api.path}/oauth2/request")
+                            endpoint.baseUri(oauth2AuthorizationRequestBaseUri)
                                 .authorizationRequestRepository(
                                     CookieAuthorizationRequestRepository(
                                         mosaicOAuth2UserService,
                                         mosaicAuthFilter.filter,
                                     )
                                 )
+                                .authorizationRequestResolver(mosaicOAuth2AuthorizationRequestResolver)
                         }
                         .redirectionEndpoint { endpoint ->
                             endpoint.baseUri("${mosaicAuthProperties.api.path}/oauth2/callback/*")
@@ -161,18 +183,23 @@ class MosaicOAuth2Config(
                             endpoint.userService(mosaicOAuth2UserService)
                         }
                         .successHandler(mosaicAuthenticationHandler)
+                        .failureHandler(mosaicAuthenticationHandler)
                 }
             val output = http.build()
             val oAuth2LoginAuthenticationFilter = output.filters.find { it.javaClass == OAuth2LoginAuthenticationFilter::class.java }!!
                 as OAuth2LoginAuthenticationFilter
             oAuth2LoginAuthenticationFilter.setAuthenticationResultConverter { authenticationResult ->
-                val authentication = OAuth2AuthenticationToken(
-                    authenticationResult.principal, authenticationResult.authorities,
-                    authenticationResult.clientRegistration.registrationId
+                val authentication = AttributedOAuth2AuthenticationToken(
+                    authenticationResult.principal,
+                    authenticationResult.authorities,
+                    authenticationResult.clientRegistration.registrationId,
+                    authenticationResult.authorizationExchange.authorizationRequest.attributes
                 )
+
                 if (authenticationResult.principal is TemporaryOAuth2User) {
                     authentication.isAuthenticated = false
                 }
+
                 authentication
             }
             return output

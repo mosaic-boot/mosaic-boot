@@ -21,7 +21,7 @@ import org.springframework.security.core.GrantedAuthority
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClient
 import org.springframework.security.oauth2.core.user.OAuth2User
 
-class TemporaryOAuth2User(
+open class TemporaryOAuth2User(
     val webClientInfo: WebClientInfo,
     val basicInfo: OAuth2BasicInfo,
 ) : OAuth2User {

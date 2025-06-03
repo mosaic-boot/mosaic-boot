@@ -14,12 +14,15 @@
  * limitations under the License.
  */
 
-package io.mosaicboot.core.user.controller.dto
+package io.mosaicboot.core.auth.oauth2
 
-enum class SystemPermission(
-    val id: String,
-) {
-    TENANT_OWNER("tenant.owner"),
-    TENANT_INVITE("tenant.invite")
-    ;
-}
+import org.springframework.security.core.GrantedAuthority
+import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken
+import org.springframework.security.oauth2.core.user.OAuth2User
+
+class AttributedOAuth2AuthenticationToken(
+    principal: OAuth2User,
+    authorities: Collection<out GrantedAuthority>,
+    authorizedClientRegistrationId: String,
+    val attributes: Map<String, Any>,
+) : OAuth2AuthenticationToken(principal, authorities, authorizedClientRegistrationId)

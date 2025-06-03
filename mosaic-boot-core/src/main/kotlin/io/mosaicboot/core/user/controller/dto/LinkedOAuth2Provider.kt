@@ -16,10 +16,20 @@
 
 package io.mosaicboot.core.user.controller.dto
 
-enum class SystemPermission(
-    val id: String,
-) {
-    TENANT_OWNER("tenant.owner"),
-    TENANT_INVITE("tenant.invite")
-    ;
-}
+import com.fasterxml.jackson.annotation.JsonProperty
+import io.swagger.v3.oas.annotations.media.Schema
+import java.time.Instant
+
+data class LinkedOAuth2Provider(
+    @Schema(description = "OAuth2 provider name")
+    @JsonProperty("provider")
+    val provider: String,
+    
+    @Schema(description = "OAuth2 username/ID from provider")
+    @JsonProperty("username")
+    val username: String,
+    
+    @Schema(description = "When this OAuth2 provider was linked (unit: seconds)")
+    @JsonProperty("linkedAt")
+    val linkedAt: Long,
+)

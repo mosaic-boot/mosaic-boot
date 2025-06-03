@@ -17,12 +17,10 @@
 package io.mosaicboot.core.auth.repository
 
 import io.mosaicboot.core.auth.entity.Authentication
-import io.mosaicboot.core.auth.dto.AuthenticationDetail
-import io.mosaicboot.core.auth.dto.AuthenticationInput
 import io.mosaicboot.core.repository.BaseRepository
 
 interface AuthenticationRepositoryBase<T : Authentication> : BaseRepository<Authentication, T, String>,
     AuthenticationMosaicRepository<T>
 {
-    fun findByUserIdAndMethod(userId: String, method: String): T?
+    fun findAllByUserId(userId: String): List<T>
 }

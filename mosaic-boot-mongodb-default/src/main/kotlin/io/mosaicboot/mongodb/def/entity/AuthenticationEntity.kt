@@ -43,4 +43,8 @@ data class AuthenticationEntity(
     override val username: String,
     @Field("credential")
     override var credential: String?,
+    @Field("deleted")
+    override var deleted: Boolean = false,
+    @Field("deletedAt")
+    override var deletedAt: Instant? = null,
 ) : Authentication

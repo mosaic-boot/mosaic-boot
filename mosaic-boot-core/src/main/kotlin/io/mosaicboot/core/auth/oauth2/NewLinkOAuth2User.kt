@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
-package io.mosaicboot.core.user.controller.dto
+package io.mosaicboot.core.auth.oauth2
 
-enum class SystemPermission(
-    val id: String,
-) {
-    TENANT_OWNER("tenant.owner"),
-    TENANT_INVITE("tenant.invite")
-    ;
-}
+import io.mosaicboot.core.util.WebClientInfo
+
+class NewLinkOAuth2User(
+    webClientInfo: WebClientInfo,
+    basicInfo: OAuth2BasicInfo,
+    val userId: String,
+    val authenticationId: String,
+) : TemporaryOAuth2User(webClientInfo, basicInfo)

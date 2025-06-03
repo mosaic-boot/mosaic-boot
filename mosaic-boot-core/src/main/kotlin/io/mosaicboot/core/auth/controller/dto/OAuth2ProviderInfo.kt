@@ -14,26 +14,25 @@
  * limitations under the License.
  */
 
-package io.mosaicboot.core.user.controller.dto
+package io.mosaicboot.core.auth.controller.dto
 
 import com.fasterxml.jackson.annotation.JsonProperty
 import io.swagger.v3.oas.annotations.media.Schema
 
-data class CurrentUserResponse(
-    @field:JsonProperty("userId")
-    val userId: String,
-    @field:Schema(nullable = true)
-    @field:JsonProperty("activeTenantId")
-    val activeTenantId: String?,
-    @field:Schema(nullable = true)
-    @field:JsonProperty("name")
-    val name: String,
-    @field:Schema(nullable = true)
-    @field:JsonProperty("email")
-    val email: String?,
-    @field:Schema(nullable = true)
-    @field:JsonProperty("timeZone")
-    val timeZone: String?,
-    @field:JsonProperty("permissions")
-    val permissions: List<String>,
+data class OAuth2ProviderInfo(
+    @Schema(description = "OAuth2 provider name")
+    @JsonProperty("provider")
+    val provider: String,
+    
+    @Schema(description = "Display name for the provider")
+    @JsonProperty("displayName")
+    val displayName: String,
+    
+    @Schema(description = "Whether this provider is available for registration")
+    @JsonProperty("availableForRegistration")
+    val availableForRegistration: Boolean,
+    
+    @Schema(description = "Whether this provider is available for linking to existing accounts")
+    @JsonProperty("availableForLinking")
+    val availableForLinking: Boolean,
 )

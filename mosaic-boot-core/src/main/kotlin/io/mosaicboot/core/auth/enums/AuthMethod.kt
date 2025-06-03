@@ -17,8 +17,9 @@
 package io.mosaicboot.core.auth.enums
 
 object AuthMethod {
-    val PREFIX_EMAIL = "email"
-    val PREFIX_USERNAME = "username"
-    val PREFIX_OAUTH2 = "oauth2"
-    val SUFFIX_MOSAIC_SHA256 = "mosaic-sha256"
+    const val PREFIX_EMAIL = "email"
+    const val PREFIX_USERNAME = "username"
+    const val PREFIX_OAUTH2 = "oauth2"
+    const val PREFIX_DELETED = "#DELETED"
+    const val SUFFIX_MOSAIC_SHA256 = "mosaic-sha256"
 }

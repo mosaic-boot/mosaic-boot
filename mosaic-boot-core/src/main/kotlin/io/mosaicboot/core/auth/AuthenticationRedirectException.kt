@@ -14,12 +14,25 @@
  * limitations under the License.
  */
 
-package io.mosaicboot.core.user.controller.dto
+package io.mosaicboot.core.auth
 
-enum class SystemPermission(
-    val id: String,
-) {
-    TENANT_OWNER("tenant.owner"),
-    TENANT_INVITE("tenant.invite")
-    ;
+import org.springframework.security.core.AuthenticationException
+
+class AuthenticationRedirectException : AuthenticationException {
+    val redirectUri: String?
+
+    constructor(
+        message: String,
+        redirectUri: String?,
+    ) : super(message) {
+        this.redirectUri = redirectUri
+    }
+
+    constructor(
+        message: String,
+        redirectUri: String?,
+        cause: Throwable
+    ) : super(message, cause) {
+        this.redirectUri = redirectUri
+    }
 }

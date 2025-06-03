@@ -17,6 +17,7 @@
 package io.mosaicboot.core.auth.entity
 
 import io.mosaicboot.core.entity.UpdatableEntity
+import java.time.Instant
 
 interface Authentication : UpdatableEntity<String> {
     val userId: String
@@ -31,4 +32,7 @@ interface Authentication : UpdatableEntity<String> {
      */
     val username: String
     var credential: String?
+
+    var deleted: Boolean
+    var deletedAt: Instant?
 }

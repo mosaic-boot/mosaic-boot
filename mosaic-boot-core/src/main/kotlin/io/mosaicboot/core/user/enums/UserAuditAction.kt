@@ -16,17 +16,26 @@
 
 package io.mosaicboot.core.user.enums
 
+import io.mosaicboot.core.user.dto.UserAuditRegisterActionDetail
+
 enum class UserAuditAction {
     // 인증 관련
 
+    /**
+     * [UserAuditLoginActionDetail]
+     */
     LOGIN,
     LOGOUT,
     PASSWORD_CHANGE_REQUESTED,
     PASSWORD_CHANGED,
 
     // 계정 관련
+    /**
+     * [UserAuditRegisterActionDetail]
+     */
     ACCOUNT_CREATED,
-    ACCOUNT_UPDATED,
+    ACCOUNT_OAUTH2_LINK,
+    ACCOUNT_OAUTH2_UNLINK,
     ACCOUNT_DELETED,
     ACCOUNT_LOCKED,
     ACCOUNT_UNLOCKED,
