@@ -14,7 +14,15 @@
  * limitations under the License.
  */
 
-package io.mosaicboot.mongodb.def.repository
+package io.mosaicboot.payment.db.repository
 
-class TenantRepository {
+import io.mosaicboot.core.repository.BaseRepository
+import io.mosaicboot.payment.db.dto.PaymentSubscriptionInput
+import io.mosaicboot.payment.db.entity.PaymentSubscription
+
+interface PaymentSubscriptionRepositoryBase<T : PaymentSubscription> :
+    BaseRepository<PaymentSubscription, T, String>,
+    PaymentSubscriptionMosaicRepository<T>
+{
+    fun save(input: PaymentSubscriptionInput): T
 }

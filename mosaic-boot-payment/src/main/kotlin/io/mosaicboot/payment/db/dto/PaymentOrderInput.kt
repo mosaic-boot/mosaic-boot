@@ -14,7 +14,21 @@
  * limitations under the License.
  */
 
-package io.mosaicboot.mongodb.def.repository
+package io.mosaicboot.payment.db.dto
 
-class UserRepository {
-}
+import java.math.BigDecimal
+import java.time.Instant
+
+data class PaymentOrderInput(
+    val userId: String,
+    val createdAt: Instant,
+    val goodsId: String,
+    val goodsName: String,
+    val subscriptionId: String,
+    val pg: String,
+    val orderId: String,
+    val status: OrderStatus,
+    val amount: BigDecimal,
+    var message: String?,
+    val data: Map<String, *>,
+)

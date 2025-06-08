@@ -14,7 +14,16 @@
  * limitations under the License.
  */
 
-package io.mosaicboot.mongodb.def.repository
+package io.mosaicboot.payment.db.dto
 
-class TenantRepository {
-}
+import com.fasterxml.jackson.databind.annotation.JsonSerialize
+import com.fasterxml.jackson.datatype.jsr310.ser.InstantSerializer
+import java.time.Instant
+
+data class VbankInfo(
+    val name: String,
+    val number: String,
+    @JsonSerialize(using = InstantSerializer::class)
+    val expire: Instant,
+    val holder: String,
+)

@@ -14,7 +14,20 @@
  * limitations under the License.
  */
 
-package io.mosaicboot.mongodb.def.repository
+package io.mosaicboot.payment.nicepay.config
 
-class UserRepository {
+import org.springframework.boot.context.properties.ConfigurationProperties
+
+@ConfigurationProperties(prefix = "mosaic.pg.nicepay")
+data class NicepayProperties(
+    var enabled: Boolean = true,
+    var apiUrl: String = "",
+    var clientId: String = "",
+    var secretKey: String = "",
+    var api: Api = Api(),
+) {
+    data class Api(
+        var enabled: Boolean = true,
+        var path: String = "/api/payment/nicepay/",
+    )
 }

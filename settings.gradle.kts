@@ -5,7 +5,7 @@ plugins {
 rootProject.name = "mosaic-boot"
 
 include("mosaic-boot-core")
-//include("mosaic-boot-payment")
+include("mosaic-boot-payment")
 include("mosaic-boot-mongodb-default")
-//include("mosaic-boot-payment-nicepaystart")
+include("mosaic-boot-payment-nicepaystart")
 include("sample-app")

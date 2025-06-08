@@ -18,6 +18,7 @@ package io.mosaicboot.core.user.service
 
 import com.fasterxml.jackson.core.type.TypeReference
 import com.fasterxml.jackson.databind.ObjectMapper
+import io.mosaicboot.core.auth.MosaicAuthenticatedToken
 import io.mosaicboot.core.user.entity.User
 import io.mosaicboot.core.auth.repository.AuthenticationRepositoryBase
 import io.mosaicboot.core.user.dto.CurrentActiveUser
@@ -33,6 +34,8 @@ import io.mosaicboot.core.user.enums.UserStatus
 import io.mosaicboot.core.util.WebClientInfo
 import io.mosaicboot.core.auth.enums.AuthMethod
 import io.mosaicboot.core.user.dto.UserAuditOAuth2LinkActionDetail
+import org.springframework.security.authentication.InsufficientAuthenticationException
+import org.springframework.security.core.Authentication
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import kotlin.jvm.optionals.getOrNull
@@ -45,6 +48,13 @@ class UserService(
     private val auditService: AuditService,
     private val objectMapper: ObjectMapper,
 ) {
+    fun getCurrentUser(authentication: Authentication): User {
+        if (authentication !is MosaicAuthenticatedToken) {
+            throw InsufficientAuthenticationException("unauthorized")
+        }
+        return getUser(authentication.userId)
+    }
+
     fun getUser(userId: String): User {
         return userRepository.findById(userId).get()
     }

@@ -21,6 +21,8 @@ import com.mongodb.MongoClientSettings
 import com.mongodb.MongoCredential
 import com.mongodb.ServerAddress
 import com.mongodb.connection.ClusterSettings
+import io.mosaicboot.mongodb.def.payment.repository.PaymentLogRepository
+import io.mosaicboot.mongodb.def.payment.repository.PaymentOrderRepository
 import io.mosaicboot.mongodb.def.repository.TenantRepository
 import io.mosaicboot.mongodb.def.repository.UserRepository
 import org.springframework.boot.autoconfigure.mongo.MongoClientSettingsBuilderCustomizer
@@ -40,6 +42,8 @@ import org.springframework.web.util.UriComponentsBuilder
     basePackageClasses = [
         TenantRepository::class,
         UserRepository::class,
+        PaymentLogRepository::class,
+        PaymentOrderRepository::class,
     ],
 )
 @EnableConfigurationProperties(MongodbCollectionsProperties::class)

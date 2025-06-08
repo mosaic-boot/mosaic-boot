@@ -14,7 +14,24 @@
  * limitations under the License.
  */
 
-package io.mosaicboot.mongodb.def.entity
+package io.mosaicboot.payment.db.entity
 
-class UserEntity {
+import io.mosaicboot.core.entity.BaseEntity
+
+/**
+ * ID : UUIDv7
+ */
+interface PaymentLog<ID> : BaseEntity<ID> {
+    /**
+     * pg name
+     */
+    val pg: String
+
+    /**
+     * "specific.webhook" - webhook raw data
+     * "specific.{sub_name}"
+     */
+    val type: String
+    val orderId: String
+    val data: Map<String, *>
 }
