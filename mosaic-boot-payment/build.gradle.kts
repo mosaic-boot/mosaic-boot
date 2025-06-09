@@ -26,6 +26,7 @@ tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().all {
 
 dependencies {
     api(project(":mosaic-boot-core"))
+    implementation("com.nimbusds:nimbus-jose-jwt:10.0.1")
 }
 
 tasks.test {

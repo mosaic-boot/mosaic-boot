@@ -16,13 +16,12 @@
 
 package io.mosaicboot.payment.db.repository
 
-import io.mosaicboot.payment.db.entity.PaymentTransaction
-import org.springframework.data.domain.Page
-import org.springframework.data.domain.Pageable
+import io.mosaicboot.core.repository.BaseRepository
+import io.mosaicboot.payment.db.dto.PaymentBillingInput
+import io.mosaicboot.payment.db.entity.PaymentBilling
 
-interface PaymentOrderMosaicRepository<T : PaymentTransaction> {
-    fun getOrderListByUserIdWithPaged(
-        userId: String,
-        pageable: Pageable,
-    ): Page<T>
+interface PaymentBillingRepositoryBase<T : PaymentBilling> :
+    BaseRepository<PaymentBilling, T, String>
+{
+    fun save(input: PaymentBillingInput): T
 }

@@ -26,6 +26,7 @@ import io.mosaicboot.core.auth.controller.MosaicOAuth2Controller
 import io.mosaicboot.core.user.service.MosaicOAuth2UserService
 import io.mosaicboot.core.auth.service.AuthTokenService
 import io.mosaicboot.core.auth.service.AuthenticationService
+import io.mosaicboot.core.encryption.ServerSideCrypto
 import io.mosaicboot.core.user.service.MosaicOAuth2TokenService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean
@@ -66,6 +67,7 @@ class MosaicOAuth2Config(
         authenticationService: AuthenticationService,
         authTokenService: AuthTokenService,
         oAuth2UserInfoHandlers: List<OAuth2UserInfoHandler>,
+        serverSideCrypto: ServerSideCrypto,
         @Autowired(required = false) mosaicOAuth2TokenService: MosaicOAuth2TokenService?,
     ): MosaicOAuth2UserService {
         return MosaicOAuth2UserService(
@@ -75,6 +77,7 @@ class MosaicOAuth2Config(
             authTokenService = authTokenService,
             oAuth2UserInfoHandlers = oAuth2UserInfoHandlers,
             mosaicOAuth2TokenService = mosaicOAuth2TokenService,
+            serverSideCrypto = serverSideCrypto,
         )
     }
 
@@ -114,6 +117,7 @@ class MosaicOAuth2Config(
         authenticationRepository: AuthenticationRepositoryBase<*>,
         oAuth2AccessTokenRepository: OAuth2AccessTokenRepository,
         clientRegistrationRepository: ClientRegistrationRepository,
+        serverSideCrypto: ServerSideCrypto,
     ): MosaicOAuth2TokenService {
         return MosaicOAuth2TokenService(
             mosaicAuthProperties = mosaicAuthProperties,
@@ -121,6 +125,7 @@ class MosaicOAuth2Config(
             authenticationRepository = authenticationRepository,
             oAuth2AccessTokenRepository = oAuth2AccessTokenRepository,
             clientRegistrationRepository = clientRegistrationRepository,
+            serverSideCrypto = serverSideCrypto,
         )
     }
 
@@ -132,6 +137,7 @@ class MosaicOAuth2Config(
         private val mosaicOAuth2AuthorizedClientRepository: MosaicOAuth2AuthorizedClientRepository,
         private val mosaicAuthFilter: FilterRegistrationBean<MosaicCookieAuthFilter>,
         private val authenticationRepository: AuthenticationRepositoryBase<*>,
+        private val serverSideCrypto: ServerSideCrypto,
     ) : WebMvcConfigurer {
         private val oauth2AuthorizationRequestBaseUri = "${mosaicAuthProperties.api.path}/oauth2/request"
 
@@ -139,6 +145,7 @@ class MosaicOAuth2Config(
             oauth2AuthorizationRequestBaseUri,
             authenticationRepository,
             mosaicOAuth2UserService,
+            serverSideCrypto,
         )
 
         @Autowired
@@ -172,6 +179,7 @@ class MosaicOAuth2Config(
                                     CookieAuthorizationRequestRepository(
                                         mosaicOAuth2UserService,
                                         mosaicAuthFilter.filter,
+                                        serverSideCrypto,
                                     )
                                 )
                                 .authorizationRequestResolver(mosaicOAuth2AuthorizationRequestResolver)

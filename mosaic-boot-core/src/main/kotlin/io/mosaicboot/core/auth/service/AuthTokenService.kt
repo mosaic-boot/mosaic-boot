@@ -32,6 +32,7 @@ import io.mosaicboot.core.auth.MosaicAuthenticatedToken
 import io.mosaicboot.core.auth.oauth2.MosaicOAuth2RegisterToken
 import io.mosaicboot.core.auth.oauth2.OAuth2BasicInfo
 import io.mosaicboot.core.auth.oauth2.OAuth2RegisterTokenData
+import io.mosaicboot.core.encryption.ServerSideCrypto
 import io.mosaicboot.core.permission.exception.PermissionDeniedException
 import io.mosaicboot.core.user.controller.dto.ActiveTenantUser
 import io.mosaicboot.core.user.controller.dto.OAuth2AccessTokenJson
@@ -46,6 +47,7 @@ class AuthTokenService(
     private val mosaicAuthProperties: MosaicAuthProperties,
     private val objectMapper: ObjectMapper,
     private val userService: UserService,
+    private val serverSideCrypto: ServerSideCrypto,
 ) {
     private val jwtConfig = mosaicAuthProperties.jwt
     private val jwtTokenHelper = let {
@@ -55,16 +57,6 @@ class AuthTokenService(
             jwkSecret = JwkHelper.loadSecret(algorithm, jwtConfig.secret),
             objectMapper = objectMapper,
             expirationSeconds = jwtConfig.expiration.toLong(),
-        )
-    }
-    private val jweConfig = mosaicAuthProperties.jwe
-    private val jweTokenHelper = let {
-        val algorithm = JWEAlgorithm.parse(jweConfig.algorithm.uppercase())
-        JweHelper(
-            algorithm = algorithm,
-            jwkSecret = JwkHelper.loadSecret(algorithm, jweConfig.secret),
-            objectMapper = objectMapper,
-            expirationSeconds = jweConfig.expiration.toLong(),
         )
     }
 
@@ -147,9 +139,9 @@ class AuthTokenService(
             accessToken = accessToken,
             refreshToken = refreshToken,
         )
-        val token = jweTokenHelper.encode(
+        val token = serverSideCrypto.encrypt(
+            data,
             claimsBuilder,
-            data
         )
         return MosaicOAuth2RegisterToken(
             token = token,
@@ -158,7 +150,7 @@ class AuthTokenService(
     }
 
     fun verifySocialRegisterTokenData(token: String): MosaicOAuth2RegisterToken {
-        val data = jweTokenHelper.decode(token, OAuth2RegisterTokenData::class.java)
+        val data = serverSideCrypto.decrypt(token, OAuth2RegisterTokenData::class.java)
         return MosaicOAuth2RegisterToken(token, data)
     }
 }

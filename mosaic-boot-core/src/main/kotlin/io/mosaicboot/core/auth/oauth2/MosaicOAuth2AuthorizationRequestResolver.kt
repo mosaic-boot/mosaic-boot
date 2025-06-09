@@ -19,6 +19,7 @@ package io.mosaicboot.core.auth.oauth2
 import io.mosaicboot.core.auth.MosaicAuthenticatedToken
 import io.mosaicboot.core.auth.enums.AuthMethod
 import io.mosaicboot.core.auth.repository.AuthenticationRepositoryBase
+import io.mosaicboot.core.encryption.ServerSideCrypto
 import io.mosaicboot.core.user.service.MosaicOAuth2UserService
 import jakarta.servlet.http.HttpServletRequest
 import org.springframework.security.core.context.SecurityContextHolder
@@ -33,6 +34,7 @@ class MosaicOAuth2AuthorizationRequestResolver(
     private val authorizationRequestBaseUri: String,
     private val authenticationRepository: AuthenticationRepositoryBase<*>,
     private val mosaicOAuth2UserService: MosaicOAuth2UserService,
+    private val serverSideCrypto: ServerSideCrypto,
 ) : OAuth2AuthorizationRequestResolver {
     private lateinit var clientRegistrationRepository: ClientRegistrationRepository
     private lateinit var delegate: DefaultOAuth2AuthorizationRequestResolver
@@ -78,7 +80,7 @@ class MosaicOAuth2AuthorizationRequestResolver(
             requestType = request.getParameter("request_type"),
             redirectUri = request.getParameter("redirect_uri"),
         )
-        val encryptedState = mosaicOAuth2UserService.serverSideCrypto.encrypt(state)
+        val encryptedState = serverSideCrypto.encrypt(state)
 
         val additionalParameters = HashMap(authorizationRequest.additionalParameters)
         additionalParameters.putAll(queryParams)

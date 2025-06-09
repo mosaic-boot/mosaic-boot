@@ -14,15 +14,19 @@
  * limitations under the License.
  */
 
-package io.mosaicboot.payment.db.repository
+package io.mosaicboot.core.encryption
 
-import io.mosaicboot.payment.db.entity.PaymentTransaction
-import org.springframework.data.domain.Page
-import org.springframework.data.domain.Pageable
+import com.nimbusds.jwt.JWTClaimsSet
 
-interface PaymentOrderMosaicRepository<T : PaymentTransaction> {
-    fun getOrderListByUserIdWithPaged(
-        userId: String,
-        pageable: Pageable,
-    ): Page<T>
+interface ServerSideCryptoProvider {
+    fun name(): String
+
+    fun support(clazz: Class<*>): Boolean
+
+    fun <T : Any> encrypt(
+        builder: JWTClaimsSet.Builder,
+        claims: T,
+    ): String
+
+    fun <T> decrypt(token: String, type: Class<T>): T
 }

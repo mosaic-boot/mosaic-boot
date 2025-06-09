@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-package io.mosaicboot.mongodb.def.payment.repository
+package io.mosaicboot.payment.service
 
-import io.mosaicboot.mongodb.def.payment.entity.PaymentOrderEntity
-import io.mosaicboot.payment.db.repository.PaymentOrderMosaicRepository
-import org.bson.types.ObjectId
+class SinglePgRouter(
+    val pgService: PgService,
+) : PgRouter {
 
-interface PaymentOrderCustomRepository : PaymentOrderMosaicRepository<PaymentOrderEntity>
+}

@@ -27,6 +27,7 @@ dependencies {
 
     api(project(":mosaic-boot-core"))
     api(project(":mosaic-boot-payment"))
+    implementation("com.nimbusds:nimbus-jose-jwt:10.0.1")
 }
 
 tasks.test {

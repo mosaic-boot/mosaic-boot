@@ -20,14 +20,21 @@ import org.bouncycastle.util.encoders.Hex
 import java.security.MessageDigest
 
 object ApiUtil {
+    fun makeSignature(
+        signatureData: String,
+        secretKey: String
+    ): String {
+        val sha256Hash = MessageDigest.getInstance("SHA-256")
+            .digest("${signatureData}${secretKey}".toByteArray())
+        return Hex.toHexString(sha256Hash).lowercase()
+    }
+
     fun verifySignature(
         signatureData: String,
         signature: String?,
         secretKey: String
     ): Boolean {
-        val sha256Hash = MessageDigest.getInstance("SHA-256")
-            .digest("${signatureData}${secretKey}".toByteArray())
-        val computedSignature = Hex.toHexString(sha256Hash).lowercase()
+        val computedSignature = makeSignature(signatureData, secretKey)
         return signature != null && computedSignature == signature.lowercase()
     }
 }

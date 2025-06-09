@@ -21,8 +21,11 @@ import com.mongodb.MongoClientSettings
 import com.mongodb.MongoCredential
 import com.mongodb.ServerAddress
 import com.mongodb.connection.ClusterSettings
+import io.mosaicboot.mongodb.def.payment.converter.OrderStatusConverters
+import io.mosaicboot.mongodb.def.payment.converter.TransactionTypeConverters
+import io.mosaicboot.mongodb.def.payment.repository.PaymentBillingRepository
 import io.mosaicboot.mongodb.def.payment.repository.PaymentLogRepository
-import io.mosaicboot.mongodb.def.payment.repository.PaymentOrderRepository
+import io.mosaicboot.mongodb.def.payment.repository.PaymentTransactionRepository
 import io.mosaicboot.mongodb.def.repository.TenantRepository
 import io.mosaicboot.mongodb.def.repository.UserRepository
 import org.springframework.boot.autoconfigure.mongo.MongoClientSettingsBuilderCustomizer
@@ -33,6 +36,7 @@ import org.springframework.context.annotation.Configuration
 import org.springframework.core.env.Environment
 import org.springframework.data.mongodb.MongoDatabaseFactory
 import org.springframework.data.mongodb.MongoTransactionManager
+import org.springframework.data.mongodb.core.convert.MongoCustomConversions
 import org.springframework.data.mongodb.repository.config.EnableMongoRepositories
 import org.springframework.transaction.PlatformTransactionManager
 import org.springframework.web.util.UriComponentsBuilder
@@ -43,7 +47,8 @@ import org.springframework.web.util.UriComponentsBuilder
         TenantRepository::class,
         UserRepository::class,
         PaymentLogRepository::class,
-        PaymentOrderRepository::class,
+        PaymentTransactionRepository::class,
+        PaymentBillingRepository::class,
     ],
 )
 @EnableConfigurationProperties(MongodbCollectionsProperties::class)
@@ -55,6 +60,17 @@ class DefaultMongodbDatasourceConfig {
     ): PlatformTransactionManager {
         return MongoTransactionManager(dbFactory)
     }
+
+    @Bean
+    fun mosaicMongoConversions(): MongoCustomConversions {
+        return MongoCustomConversions.create { configure ->
+            configure.registerConverter(TransactionTypeConverters.ToString())
+            configure.registerConverter(TransactionTypeConverters.FromString())
+            configure.registerConverter(OrderStatusConverters.ToString())
+            configure.registerConverter(OrderStatusConverters.FromString())
+        }
+    }
+
 
 //    @Bean
 //    fun mongoClientSettings(): MongoClientSettings {

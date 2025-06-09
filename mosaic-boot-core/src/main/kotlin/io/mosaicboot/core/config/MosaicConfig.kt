@@ -30,6 +30,9 @@ import io.mosaicboot.core.swagger.AddNullableTypeOpenApiCustomizer
 import io.mosaicboot.core.tenant.config.MosaicTenantConfig
 import io.mosaicboot.core.user.config.MosaicUserConfig
 import io.mosaicboot.core.util.AuthorizationContextResolver
+import io.mosaicboot.core.encryption.JweServerSideCryptoProvider
+import io.mosaicboot.core.encryption.ServerSideCrypto
+import io.mosaicboot.core.encryption.ServerSideCryptoProvider
 import io.mosaicboot.core.util.WebClientInfo
 import io.mosaicboot.core.util.WebClientInfoResolver
 import io.swagger.v3.oas.models.OpenAPI
@@ -42,6 +45,7 @@ import org.springdoc.core.service.SecurityService
 import org.springdoc.core.utils.PropertyResolverUtils
 import org.springdoc.core.utils.SpringDocUtils
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.ApplicationContext
 import org.springframework.context.annotation.Bean
@@ -58,7 +62,10 @@ import java.util.*
 import java.util.function.Predicate
 
 @Configuration(proxyBeanMethods = false)
-@EnableConfigurationProperties(MosaicComponentsProperties::class)
+@EnableConfigurationProperties(
+    MosaicComponentsProperties::class,
+    MosaicEncryptionProperties::class,
+)
 @EnableTransactionManagement
 @EnableAspectJAutoProxy
 @Import(value = [
@@ -142,5 +149,24 @@ class MosaicConfig {
             resolvers.add(WebClientInfoResolver())
             resolvers.add(AuthorizationContextResolver())
         }
+    }
+
+    @Bean
+    @ConditionalOnProperty(prefix = "mosaic.provision", name = ["type"], havingValue = "jwe", matchIfMissing = true)
+    fun jweServerSideCryptoProvider(
+        encryptionProperties: MosaicEncryptionProperties,
+        objectMapper: ObjectMapper,
+    ): JweServerSideCryptoProvider {
+        return JweServerSideCryptoProvider(
+            encryptionProperties.jwe,
+            objectMapper,
+        )
+    }
+
+    @Bean
+    fun serverSideCrypto(
+        providers: List<ServerSideCryptoProvider>
+    ): ServerSideCrypto {
+        return ServerSideCrypto(providers)
     }
 }

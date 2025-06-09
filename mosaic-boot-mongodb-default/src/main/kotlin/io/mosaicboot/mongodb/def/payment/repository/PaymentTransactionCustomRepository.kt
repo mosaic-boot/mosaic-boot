@@ -14,15 +14,9 @@
  * limitations under the License.
  */
 
-package io.mosaicboot.payment.db.repository
+package io.mosaicboot.mongodb.def.payment.repository
 
-import io.mosaicboot.payment.db.entity.PaymentTransaction
-import org.springframework.data.domain.Page
-import org.springframework.data.domain.Pageable
+import io.mosaicboot.mongodb.def.payment.entity.PaymentTransactionEntity
+import io.mosaicboot.payment.db.repository.PaymentOrderMosaicRepository
 
-interface PaymentOrderMosaicRepository<T : PaymentTransaction> {
-    fun getOrderListByUserIdWithPaged(
-        userId: String,
-        pageable: Pageable,
-    ): Page<T>
-}
+interface PaymentTransactionCustomRepository : PaymentOrderMosaicRepository<PaymentTransactionEntity>

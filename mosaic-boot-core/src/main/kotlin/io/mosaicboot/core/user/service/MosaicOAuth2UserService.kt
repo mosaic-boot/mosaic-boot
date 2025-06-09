@@ -27,7 +27,8 @@ import io.mosaicboot.core.auth.enums.AuthMethod
 import io.mosaicboot.core.user.dto.UserInput
 import io.mosaicboot.core.auth.dto.LoginResult
 import io.mosaicboot.core.auth.dto.RegisterResult
-import io.mosaicboot.core.util.ServerSideCrypto
+import io.mosaicboot.core.encryption.JweServerSideCryptoProvider
+import io.mosaicboot.core.encryption.ServerSideCrypto
 import io.mosaicboot.core.util.UnreachableException
 import io.mosaicboot.core.util.WebClientInfo
 import io.mosaicboot.core.util.WebClientInfoResolver
@@ -50,13 +51,9 @@ class MosaicOAuth2UserService(
     private val authenticationService: AuthenticationService,
     private val authTokenService: AuthTokenService,
     oAuth2UserInfoHandlers: List<OAuth2UserInfoHandler>,
+    private val serverSideCrypto: ServerSideCrypto,
     @Autowired(required = false) private val mosaicOAuth2TokenService: MosaicOAuth2TokenService?,
 ) : OAuth2UserService<OAuth2UserRequest, OAuth2User> {
-    val serverSideCrypto = ServerSideCrypto(
-        mosaicAuthProperties.jwe,
-        objectMapper = objectMapper,
-    )
-
     private val oAuth2UserInfoHandlerMap = oAuth2UserInfoHandlers.associateBy { it.getProviderName() }
 
     @Transactional

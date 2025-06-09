@@ -19,27 +19,32 @@ package io.mosaicboot.payment.controller.dto
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.annotation.JsonProperty
 import io.mosaicboot.payment.db.dto.OrderStatus
+import io.mosaicboot.payment.db.dto.TransactionType
 import java.math.BigDecimal
 import java.time.Instant
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-open class Order(
+open class Transaction(
+    @field:JsonProperty("id")
+    val id: String,
+
     @field:JsonProperty("createdAt")
     val createdAt: Instant?,
 
-    @field:JsonProperty("orderId")
-    val orderId: String,
+    @field:JsonProperty("type")
+    val type: TransactionType,
 
     @field:JsonProperty("goodsId")
-    val goodsId: String,
+    val goodsId: String?,
     @field:JsonProperty("goodsName")
-    val goodsName: String,
-
+    val goodsName: String?,
+    @field:JsonProperty("subscriptionId")
+    val subscriptionId: String?,
     @field:JsonProperty("amount")
-    val amount: BigDecimal,
+    val amount: BigDecimal?,
 
-    @field:JsonProperty("status")
-    val status: OrderStatus,
+    @field:JsonProperty("orderStatus")
+    val orderStatus: OrderStatus,
 
     @field:JsonProperty("paidAt")
     val paidAt: Instant?,

@@ -18,21 +18,24 @@ package io.mosaicboot.payment.db.entity
 
 import io.mosaicboot.core.entity.UpdatableEntity
 import io.mosaicboot.payment.db.dto.OrderStatus
+import io.mosaicboot.payment.db.dto.TransactionType
 import io.mosaicboot.payment.db.dto.VbankInfo
 import java.math.BigDecimal
 import java.time.Instant
 
-interface PaymentOrder : UpdatableEntity<String> {
+interface PaymentTransaction : UpdatableEntity<String> {
     val userId: String
-    val goodsId: String
-    val goodsName: String
-    val subscriptionId: String?
+    val type: TransactionType
     val pg: String
-    val orderId: String
-    val amount: BigDecimal
-    val data: Map<String, *>
+    val pgUniqueId: String
+    var pgData: Map<String, *>?
 
-    var status: OrderStatus
+    val goodsId: String?
+    val goodsName: String?
+    val subscriptionId: String?
+    val amount: BigDecimal?
+
+    var orderStatus: OrderStatus
     var paidAt: Instant?
     var cancelledAt: Instant?
     var message: String?

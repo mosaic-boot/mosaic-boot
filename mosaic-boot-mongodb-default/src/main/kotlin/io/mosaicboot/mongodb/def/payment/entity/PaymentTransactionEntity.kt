@@ -17,36 +17,36 @@
 package io.mosaicboot.mongodb.def.payment.entity
 
 import io.mosaicboot.payment.db.dto.OrderStatus
+import io.mosaicboot.payment.db.dto.TransactionType
 import io.mosaicboot.payment.db.dto.VbankInfo
-import io.mosaicboot.payment.db.entity.PaymentOrder
-import org.bson.types.ObjectId
+import io.mosaicboot.payment.db.entity.PaymentTransaction
 import org.springframework.data.annotation.Id
-import org.springframework.data.mongodb.core.index.CompoundIndex
-import org.springframework.data.mongodb.core.index.CompoundIndexes
 import org.springframework.data.mongodb.core.index.Indexed
 import org.springframework.data.mongodb.core.mapping.Document
 import java.math.BigDecimal
 import java.time.Instant
 
-@Document(collection = "\${mosaic.datasource.mongodb.collections.payment-order.collection:payment.orders}")
-class PaymentOrderEntity(
+@Document(collection = "\${mosaic.datasource.mongodb.collections.payment-transaction.collection:payment.transactions}")
+class PaymentTransactionEntity(
     @Id
     override val id: String,
     override val createdAt: Instant,
     override var updatedAt: Instant,
     override val userId: String,
-    override val goodsId: String,
-    override val goodsName: String,
-    override val subscriptionId: String?,
+    override val type: TransactionType,
     override val pg: String,
     @Indexed(unique = true)
-    override val orderId: String,
-    override val amount: BigDecimal,
-    override val data: Map<String, *>,
+    override val pgUniqueId: String,
+    override var pgData: Map<String, *>?,
 
-    override var status: OrderStatus,
+    override val goodsId: String?,
+    override val goodsName: String?,
+    override val subscriptionId: String?,
+    override val amount: BigDecimal?,
+
+    override var orderStatus: OrderStatus,
     override var paidAt: Instant? = null,
     override var cancelledAt: Instant? = null,
     override var message: String? = null,
     override var vbank: VbankInfo? = null,
-) : PaymentOrder
+) : PaymentTransaction

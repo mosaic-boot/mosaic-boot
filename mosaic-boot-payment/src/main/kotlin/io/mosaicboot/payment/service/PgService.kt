@@ -14,15 +14,16 @@
  * limitations under the License.
  */
 
-package io.mosaicboot.payment.db.repository
+package io.mosaicboot.payment.service
 
-import io.mosaicboot.payment.db.entity.PaymentTransaction
-import org.springframework.data.domain.Page
-import org.springframework.data.domain.Pageable
+import io.mosaicboot.core.auth.MosaicAuthenticatedToken
+import io.mosaicboot.payment.controller.dto.AddCardTypeKrRequest
 
-interface PaymentOrderMosaicRepository<T : PaymentTransaction> {
-    fun getOrderListByUserIdWithPaged(
-        userId: String,
-        pageable: Pageable,
-    ): Page<T>
+interface PgService {
+    fun billingAddCard(
+        authentication: MosaicAuthenticatedToken,
+        request: AddCardTypeKrRequest,
+    ) {
+        throw NotImplementedError("Not implemented this PG")
+    }
 }

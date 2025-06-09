@@ -19,16 +19,20 @@ package io.mosaicboot.payment.db.dto
 import java.math.BigDecimal
 import java.time.Instant
 
-data class PaymentOrderInput(
+data class PaymentTransactionInput(
+    val id: String? = null,
     val userId: String,
     val createdAt: Instant,
-    val goodsId: String,
-    val goodsName: String,
-    val subscriptionId: String,
+    val type: TransactionType,
     val pg: String,
-    val orderId: String,
-    val status: OrderStatus,
-    val amount: BigDecimal,
-    var message: String?,
-    val data: Map<String, *>,
+    val pgUniqueId: String,
+    var pgData: Map<String, *>? = null,
+
+    val goodsId: String? = null,
+    val goodsName: String? = null,
+    val subscriptionId: String? = null,
+    val amount: BigDecimal? = null,
+
+    var orderStatus: OrderStatus,
+    var message: String? = null,
 )

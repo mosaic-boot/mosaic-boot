@@ -16,8 +16,8 @@
 
 package io.mosaicboot.mongodb.def.payment.repository.impl
 
-import io.mosaicboot.mongodb.def.payment.entity.PaymentOrderEntity
-import io.mosaicboot.mongodb.def.payment.repository.PaymentOrderCustomRepository
+import io.mosaicboot.mongodb.def.payment.entity.PaymentTransactionEntity
+import io.mosaicboot.mongodb.def.payment.repository.PaymentTransactionCustomRepository
 import io.mosaicboot.mongodb.def.repository.impl.Paged
 import io.mosaicboot.mongodb.def.repository.impl.pagedAggregation
 import org.springframework.data.domain.Page
@@ -28,13 +28,13 @@ import org.springframework.data.mongodb.core.mapping.Field
 import org.springframework.data.mongodb.core.query.Criteria
 import org.springframework.data.mongodb.core.query.isEqualTo
 
-class PaymentOrderCustomRepositoryImpl(
+class PaymentTransactionCustomRepositoryImpl(
     private val mongoTemplate: MongoTemplate,
-) : PaymentOrderCustomRepository {
+) : PaymentTransactionCustomRepository {
     override fun getOrderListByUserIdWithPaged(
         userId: String,
         pageable: Pageable,
-    ): Page<PaymentOrderEntity> {
+    ): Page<PaymentTransactionEntity> {
         return mongoTemplate.pagedAggregation(
             pageable,
             Aggregation.newAggregation(
@@ -42,7 +42,7 @@ class PaymentOrderCustomRepositoryImpl(
                     Criteria("userId").isEqualTo(userId)
                 ),
             ),
-            PaymentOrderEntity::class.java,
+            PaymentTransactionEntity::class.java,
             PagedPaymentOrder::class.java,
         )
     }
@@ -51,6 +51,6 @@ class PaymentOrderCustomRepositoryImpl(
         @Field("total")
         override val total: Long,
         @Field("items")
-        override val items: List<PaymentOrderEntity>,
-    ) : Paged<PaymentOrderEntity>
+        override val items: List<PaymentTransactionEntity>,
+    ) : Paged<PaymentTransactionEntity>
 }

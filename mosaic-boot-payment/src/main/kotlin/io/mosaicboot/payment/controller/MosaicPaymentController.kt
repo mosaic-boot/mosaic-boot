@@ -20,12 +20,13 @@ import io.mosaicboot.core.auth.MosaicAuthenticatedToken
 import io.mosaicboot.core.http.BaseMosaicController
 import io.mosaicboot.core.http.MosaicController
 import io.mosaicboot.core.http.dto.PagedResponse
-import io.mosaicboot.core.util.PagedResult
 import io.mosaicboot.payment.config.PaymentProperties
-import io.mosaicboot.payment.controller.dto.Order
-import io.mosaicboot.payment.controller.dto.OrderDetail
-import io.mosaicboot.payment.db.repository.PaymentOrderRepositoryBase
+import io.mosaicboot.payment.controller.dto.Transaction
+import io.mosaicboot.payment.controller.dto.TransactionDetail
+import io.mosaicboot.payment.controller.dto.AddCardTypeKrRequest
+import io.mosaicboot.payment.db.repository.PaymentTransactionRepositoryBase
 import io.mosaicboot.payment.goods.GoodsRepository
+import io.mosaicboot.payment.service.PaymentService
 import org.springdoc.core.converters.models.PageableAsQueryParam
 import org.springframework.context.ApplicationContext
 import org.springframework.data.domain.PageRequest
@@ -36,6 +37,8 @@ import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.security.core.Authentication
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
+import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.client.HttpClientErrorException
 import java.nio.charset.StandardCharsets
 
@@ -43,38 +46,41 @@ import java.nio.charset.StandardCharsets
 class MosaicPaymentController(
     private val paymentProperties: PaymentProperties,
     private val goodsRepository: GoodsRepository,
-    private val paymentOrderRepository: PaymentOrderRepositoryBase<*>,
+    private val paymentTransactionRepository: PaymentTransactionRepositoryBase<*>,
+    private val paymentService: PaymentService,
 ) : BaseMosaicController {
     override fun getBaseUrl(applicationContext: ApplicationContext): String {
         return paymentProperties.api.path
     }
 
-    @GetMapping("/order/")
+    @GetMapping("/transactions/")
     @PreAuthorize("isAuthenticated()")
     @PageableAsQueryParam
-    fun getOrderList(
+    fun getTransactionList(
         authentication: Authentication,
         @Param("page") page: Int,
         @Param("size") size: Int,
-    ): PagedResponse<Order> {
+    ): PagedResponse<Transaction> {
         authentication as MosaicAuthenticatedToken
 
         val realPage = page.coerceAtLeast(0)
         val realSize = size.coerceAtMost(100)
 
-        val result = paymentOrderRepository.getOrderListByUserIdWithPaged(
+        val result = paymentTransactionRepository.getOrderListByUserIdWithPaged(
             authentication.userId,
             PageRequest.of(realPage, realSize)
         )
         return PagedResponse(
             items = result.content.map {
-                Order(
+                Transaction(
+                    id = it.id,
                     createdAt = it.createdAt,
-                    orderId = it.orderId,
+                    type = it.type,
                     goodsId = it.goodsId,
                     goodsName = it.goodsName,
+                    subscriptionId = it.subscriptionId,
                     amount = it.amount,
-                    status = it.status,
+                    orderStatus = it.orderStatus,
                     paidAt = it.paidAt,
                     cancelledAt = it.cancelledAt,
                 )
@@ -85,17 +91,17 @@ class MosaicPaymentController(
         )
     }
 
-    @GetMapping("/order/{orderId}")
+    @GetMapping("/transactions/{transactionId}")
     @PreAuthorize("isAuthenticated()")
-    fun getOrderDetail(
-        @PathVariable("orderId") orderId: String,
+    fun getTransactionDetail(
+        @PathVariable("transactionId") transactionId: String,
         authentication: Authentication,
-    ): OrderDetail {
+    ): TransactionDetail {
         authentication as MosaicAuthenticatedToken
 
-        val result = paymentOrderRepository.findByUserIdAndOrderId(
+        val result = paymentTransactionRepository.findByUserIdAndId(
             authentication.userId,
-            orderId,
+            transactionId,
         ) ?: throw HttpClientErrorException.create(
             HttpStatus.NOT_FOUND,
             "invalid order id",
@@ -104,17 +110,31 @@ class MosaicPaymentController(
             StandardCharsets.UTF_8
         )
 
-        return OrderDetail(
+        return TransactionDetail(
+            id = result.id,
             createdAt = result.createdAt,
-            orderId = result.orderId,
+            type = result.type,
             goodsId = result.goodsId,
             goodsName = result.goodsName,
+            subscriptionId = result.subscriptionId,
             amount = result.amount,
-            status = result.status,
+            orderStatus = result.orderStatus,
             paidAt = result.paidAt,
             cancelledAt = result.cancelledAt,
-            message = result.message,
             vbank = result.vbank,
+        )
+    }
+
+    @PostMapping("/cards/kr")
+    @PreAuthorize("isAuthenticated()")
+    fun cardAddKr(
+        authentication: Authentication,
+        @RequestBody body: AddCardTypeKrRequest,
+    ) {
+        authentication as MosaicAuthenticatedToken
+        paymentService.billingAddCard(
+            authentication,
+            body,
         )
     }
 }

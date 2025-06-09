@@ -17,6 +17,7 @@
 package io.mosaicboot.core.auth.oauth2
 
 import io.mosaicboot.core.auth.MosaicCookieAuthFilter
+import io.mosaicboot.core.encryption.ServerSideCrypto
 import io.mosaicboot.core.user.service.MosaicOAuth2UserService
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
@@ -27,6 +28,7 @@ import org.springframework.util.SerializationUtils
 class CookieAuthorizationRequestRepository(
     private val mosaicOAuth2UserService: MosaicOAuth2UserService,
     private val mosaicCookieAuthFilter: MosaicCookieAuthFilter,
+    private val serverSideCrypto: ServerSideCrypto,
 ) : AuthorizationRequestRepository<OAuth2AuthorizationRequest> {
     override fun loadAuthorizationRequest(request: HttpServletRequest): OAuth2AuthorizationRequest {
         val data = mosaicCookieAuthFilter.getOauth2AuthorizationRequest(request)
@@ -47,7 +49,7 @@ class CookieAuthorizationRequestRepository(
         request: HttpServletRequest,
         response: HttpServletResponse
     ) {
-        val data = mosaicOAuth2UserService.serverSideCrypto.encrypt(
+        val data = serverSideCrypto.encrypt(
             AuthorizationRequestJson(
                 data = SerializationUtils.serialize(authorizationRequest)!!,
             )
@@ -62,7 +64,7 @@ class CookieAuthorizationRequestRepository(
 
     @Suppress("DEPRECATION")
     private fun decryptRequest(data: String): OAuth2AuthorizationRequest {
-        val requestJson = mosaicOAuth2UserService.serverSideCrypto.decrypt(
+        val requestJson = serverSideCrypto.decrypt(
             data, AuthorizationRequestJson::class.java
         )
         return SerializationUtils.deserialize(requestJson.data) as OAuth2AuthorizationRequest

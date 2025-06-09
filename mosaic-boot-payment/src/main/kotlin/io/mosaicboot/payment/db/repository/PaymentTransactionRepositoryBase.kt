@@ -17,15 +17,15 @@
 package io.mosaicboot.payment.db.repository
 
 import io.mosaicboot.core.repository.BaseRepository
-import io.mosaicboot.payment.db.dto.PaymentOrderInput
-import io.mosaicboot.payment.db.entity.PaymentOrder
+import io.mosaicboot.payment.db.dto.PaymentTransactionInput
+import io.mosaicboot.payment.db.entity.PaymentTransaction
 
-interface PaymentOrderRepositoryBase<T : PaymentOrder> :
-    BaseRepository<PaymentOrder, T, String>,
+interface PaymentTransactionRepositoryBase<T : PaymentTransaction> :
+    BaseRepository<PaymentTransaction, T, String>,
     PaymentOrderMosaicRepository<T>
 {
-    fun save(input: PaymentOrderInput): T
+    fun save(input: PaymentTransactionInput): T
 
     fun findByPgAndOrderId(pg: String, orderId: String): T?
-    fun findByUserIdAndOrderId(userId: String, orderId: String): T?
+    fun findByUserIdAndId(userId: String, id: String): T?
 }

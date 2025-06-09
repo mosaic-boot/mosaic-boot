@@ -17,8 +17,10 @@
 package io.mosaicboot.payment.nicepay.config
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import io.mosaicboot.core.encryption.ServerSideCrypto
+import io.mosaicboot.payment.db.repository.PaymentBillingRepositoryBase
 import io.mosaicboot.payment.db.repository.PaymentLogRepositoryBase
-import io.mosaicboot.payment.db.repository.PaymentOrderRepositoryBase
+import io.mosaicboot.payment.db.repository.PaymentTransactionRepositoryBase
 import io.mosaicboot.payment.nicepay.api.NicepayApiClient
 import io.mosaicboot.payment.nicepay.controller.NicepayController
 import io.mosaicboot.payment.nicepay.service.NicepayService
@@ -37,16 +39,22 @@ import org.springframework.context.annotation.Bean
 class NicepayConfig {
     @Bean
     fun nicepayService(
+        nicepayProperties: NicepayProperties,
         nicepayApiClient: NicepayApiClient,
         paymentLogRepository: PaymentLogRepositoryBase<*, *>,
-        paymentOrderRepository: PaymentOrderRepositoryBase<*>,
+        paymentOrderRepository: PaymentTransactionRepositoryBase<*>,
+        paymentBillingRepository: PaymentBillingRepositoryBase<*>,
         objectMapper: ObjectMapper,
+        serverSideCrypto: ServerSideCrypto,
     ): NicepayService {
         return NicepayService(
+            nicepayProperties = nicepayProperties,
             nicepayApiClient = nicepayApiClient,
             paymentLogRepository = paymentLogRepository,
-            paymentOrderRepository = paymentOrderRepository,
+            paymentTransactionRepository = paymentOrderRepository,
+            paymentBillingRepository = paymentBillingRepository,
             objectMapper = objectMapper,
+            serverSideCrypto = serverSideCrypto,
         )
     }
 

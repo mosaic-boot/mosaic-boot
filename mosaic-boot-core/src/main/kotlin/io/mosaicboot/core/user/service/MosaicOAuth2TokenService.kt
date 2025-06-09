@@ -22,7 +22,8 @@ import io.mosaicboot.core.auth.repository.AuthenticationRepositoryBase
 import io.mosaicboot.core.user.controller.dto.OAuth2AccessTokenJson
 import io.mosaicboot.core.user.controller.dto.OAuth2RefreshTokenJson
 import io.mosaicboot.core.auth.oauth2.OAuth2AccessTokenRepository
-import io.mosaicboot.core.util.ServerSideCrypto
+import io.mosaicboot.core.encryption.JweServerSideCryptoProvider
+import io.mosaicboot.core.encryption.ServerSideCrypto
 import org.springframework.security.oauth2.client.ClientAuthorizationException
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClient
 import org.springframework.security.oauth2.client.endpoint.OAuth2RefreshTokenGrantRequest
@@ -45,12 +46,8 @@ class MosaicOAuth2TokenService(
     private val authenticationRepository: AuthenticationRepositoryBase<*>,
     private val oAuth2AccessTokenRepository: OAuth2AccessTokenRepository,
     private val clientRegistrationRepository: ClientRegistrationRepository,
+    private val serverSideCrypto: ServerSideCrypto,
 ) {
-    val serverSideCrypto = ServerSideCrypto(
-        mosaicAuthProperties.jwe,
-        objectMapper = objectMapper,
-    )
-
     private val clock = Clock.systemUTC()
     private var accessTokenResponseClient = RestClientRefreshTokenTokenResponseClient()
 

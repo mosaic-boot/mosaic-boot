@@ -132,7 +132,7 @@ class JweHelper(
             val claims = encryptedJWT.jwtClaimsSet
             val now = Date.from(Instant.now())
 
-            if (claims.expirationTime.before(now)) {
+            if (claims.expirationTime?.before(now) == true) {
                 throw BadCredentialsException("Expired JWT token")
             }
 

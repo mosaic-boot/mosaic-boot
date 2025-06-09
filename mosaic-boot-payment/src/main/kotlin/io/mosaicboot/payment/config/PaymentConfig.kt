@@ -17,8 +17,13 @@
 package io.mosaicboot.payment.config
 
 import io.mosaicboot.payment.controller.MosaicPaymentController
-import io.mosaicboot.payment.db.repository.PaymentOrderRepositoryBase
+import io.mosaicboot.payment.db.repository.PaymentTransactionRepositoryBase
 import io.mosaicboot.payment.goods.GoodsRepository
+import io.mosaicboot.payment.service.PaymentService
+import io.mosaicboot.payment.service.PgRouter
+import io.mosaicboot.payment.service.PgService
+import io.mosaicboot.payment.service.SinglePgRouter
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
@@ -27,16 +32,38 @@ import org.springframework.context.annotation.Bean
 @ConditionalOnProperty("mosaic.payment", havingValue = "true", matchIfMissing = true)
 class PaymentConfig {
     @Bean
+    @ConditionalOnMissingBean(PgRouter::class)
+    fun pgRouter(
+        pgServices: List<PgService>,
+    ): SinglePgRouter {
+        if (pgServices.size != 1) {
+            throw IllegalStateException("pgServices is not single (count: ${pgServices.size})")
+        }
+        return SinglePgRouter(pgServices.first())
+    }
+
+    @Bean
+    fun paymentService(
+        pgRouter: PgRouter,
+    ): PaymentService {
+        return PaymentService(
+            pgRouter = pgRouter,
+        )
+    }
+
+    @Bean
     @ConditionalOnProperty(prefix = "mosaic.payment.api", name = ["enabled"], havingValue = "true", matchIfMissing = true)
     fun mosaicPaymentController(
         paymentProperties: PaymentProperties,
         goodsRepository: GoodsRepository,
-        paymentOrderRepository: PaymentOrderRepositoryBase<*>,
+        paymentOrderRepository: PaymentTransactionRepositoryBase<*>,
+        paymentService: PaymentService,
     ): MosaicPaymentController {
         return MosaicPaymentController(
             paymentProperties = paymentProperties,
             goodsRepository = goodsRepository,
-            paymentOrderRepository = paymentOrderRepository,
+            paymentTransactionRepository = paymentOrderRepository,
+            paymentService = paymentService,
         )
     }
 }

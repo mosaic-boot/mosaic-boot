@@ -18,30 +18,33 @@ package io.mosaicboot.payment.controller.dto
 
 import com.fasterxml.jackson.annotation.JsonProperty
 import io.mosaicboot.payment.db.dto.OrderStatus
+import io.mosaicboot.payment.db.dto.TransactionType
 import io.mosaicboot.payment.db.dto.VbankInfo
 import java.math.BigDecimal
 import java.time.Instant
 
-class OrderDetail(
+class TransactionDetail(
+    id: String,
     createdAt: Instant?,
-    orderId: String,
-    goodsId: String,
-    goodsName: String,
-    amount: BigDecimal,
-    status: OrderStatus,
+    type: TransactionType,
+    goodsId: String?,
+    goodsName: String?,
+    subscriptionId: String?,
+    amount: BigDecimal?,
+    orderStatus: OrderStatus,
     paidAt: Instant?,
     cancelledAt: Instant?,
-    @field:JsonProperty("message")
-    val message: String?,
     @field:JsonProperty("vbank")
     val vbank: VbankInfo?,
-) : Order(
-    createdAt = createdAt,
-    orderId = orderId,
-    goodsId = goodsId,
-    goodsName = goodsName,
-    amount = amount,
-    status = status,
-    paidAt = paidAt,
-    cancelledAt = cancelledAt,
+) : Transaction(
+    id,
+    createdAt,
+    type,
+    goodsId,
+    goodsName,
+    subscriptionId,
+    amount,
+    orderStatus,
+    paidAt,
+    cancelledAt,
 )

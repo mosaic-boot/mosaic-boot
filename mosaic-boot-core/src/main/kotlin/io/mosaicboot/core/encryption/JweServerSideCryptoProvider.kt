@@ -14,20 +14,19 @@
  * limitations under the License.
  */
 
-package io.mosaicboot.core.util
+package io.mosaicboot.core.encryption
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.nimbusds.jose.JWEAlgorithm
 import com.nimbusds.jwt.JWTClaimsSet
-import io.mosaicboot.core.auth.config.MosaicAuthProperties
+import io.mosaicboot.core.config.MosaicEncryptionProperties
 import io.mosaicboot.core.jwt.JweHelper
 import io.mosaicboot.core.jwt.JwkHelper
-import io.mosaicboot.core.user.config.MosaicUserProperties
 
-class ServerSideCrypto(
-    jweConfig: MosaicAuthProperties.Jwe,
+class JweServerSideCryptoProvider(
+    jweConfig: MosaicEncryptionProperties.Jwe,
     objectMapper: ObjectMapper,
-) {
+): ServerSideCryptoProvider {
     private val jweTokenHelper = let {
         val algorithm = JWEAlgorithm.parse(jweConfig.algorithm.uppercase())
         JweHelper(
@@ -38,13 +37,22 @@ class ServerSideCrypto(
         )
     }
 
-    fun <T : Any> encrypt(
-        claims: T,
-    ): String {
-        return jweTokenHelper.encode(JWTClaimsSet.Builder(), claims)
+    override fun name(): String {
+        return "mosaic-jwe"
     }
 
-    fun <T> decrypt(token: String, type: Class<T>): T {
+    override fun support(clazz: Class<*>): Boolean {
+        return true
+    }
+
+    override fun <T : Any> encrypt(
+        builder: JWTClaimsSet.Builder,
+        claims: T,
+    ): String {
+        return jweTokenHelper.encode(builder, claims)
+    }
+
+    override fun <T> decrypt(token: String, type: Class<T>): T {
         return jweTokenHelper.decode(token, type)
     }
 }

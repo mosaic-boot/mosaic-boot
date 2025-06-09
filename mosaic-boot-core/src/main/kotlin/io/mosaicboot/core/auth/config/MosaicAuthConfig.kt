@@ -29,6 +29,7 @@ import io.mosaicboot.core.user.repository.TenantUserRepositoryBase
 import io.mosaicboot.core.user.repository.UserRepositoryBase
 import io.mosaicboot.core.auth.MosaicCredentialHandler
 import io.mosaicboot.core.auth.controller.AuthControllerHelper
+import io.mosaicboot.core.encryption.ServerSideCrypto
 import io.mosaicboot.core.tenant.config.MosaicTenantProperties
 import io.mosaicboot.core.user.repository.GlobalRoleRepositoryBase
 import io.mosaicboot.core.user.service.AuditService
@@ -68,11 +69,13 @@ class MosaicAuthConfig(
     fun authTokenService(
         objectMapper: ObjectMapper,
         userService: UserService,
+        serverSideCrypto: ServerSideCrypto,
     ): AuthTokenService {
         return AuthTokenService(
             mosaicAuthProperties = mosaicAuthProperties,
             objectMapper = objectMapper,
             userService = userService,
+            serverSideCrypto = serverSideCrypto,
         )
     }
 
