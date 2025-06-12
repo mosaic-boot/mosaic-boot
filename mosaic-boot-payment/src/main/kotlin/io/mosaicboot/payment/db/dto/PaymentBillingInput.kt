@@ -7,6 +7,8 @@ data class PaymentBillingInput(
     val userId: String,
     val pg: String,
 
+    val alias: String,
+
     /**
      * JWE Encrypted Data
      */

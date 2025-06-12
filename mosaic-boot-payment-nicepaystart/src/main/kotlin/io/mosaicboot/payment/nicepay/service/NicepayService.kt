@@ -20,6 +20,7 @@ import com.fasterxml.jackson.core.type.TypeReference
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.mosaicboot.core.auth.MosaicAuthenticatedToken
 import io.mosaicboot.core.encryption.ServerSideCrypto
+import io.mosaicboot.core.error.UserErrorMessageException
 import io.mosaicboot.core.util.UUIDv7
 import io.mosaicboot.payment.controller.dto.AddCardTypeKrRequest
 import io.mosaicboot.payment.db.dto.OrderStatus
@@ -28,6 +29,7 @@ import io.mosaicboot.payment.db.dto.PaymentLogInput
 import io.mosaicboot.payment.db.dto.PaymentTransactionInput
 import io.mosaicboot.payment.db.dto.TransactionType
 import io.mosaicboot.payment.db.dto.VbankInfo
+import io.mosaicboot.payment.db.entity.PaymentBilling
 import io.mosaicboot.payment.db.entity.PaymentTransaction
 import io.mosaicboot.payment.db.repository.PaymentBillingRepositoryBase
 import io.mosaicboot.payment.db.repository.PaymentLogRepositoryBase
@@ -79,7 +81,7 @@ class NicepayService(
             )
         )
 
-        val orderEntity = paymentTransactionRepository.findByPgAndOrderId(
+        val orderEntity = paymentTransactionRepository.findByPgAndPgUniqueId(
             NicepayConst.PG,
             body.orderId,
         ) ?: let {
@@ -143,7 +145,7 @@ class NicepayService(
         )
 
         try {
-            val orderEntity = paymentTransactionRepository.findByPgAndOrderId(
+            val orderEntity = paymentTransactionRepository.findByPgAndPgUniqueId(
                 NicepayConst.PG,
                 body.orderId,
             ) ?: let {
@@ -199,7 +201,7 @@ class NicepayService(
     override fun billingAddCard(
         authentication: MosaicAuthenticatedToken,
         request: AddCardTypeKrRequest,
-    ) {
+    ): Result<PaymentBilling> {
         val now = Instant.now()
         val txId = UUIDv7.generate().toString()
         val transaction = paymentTransactionRepository.save(PaymentTransactionInput(
@@ -212,7 +214,8 @@ class NicepayService(
             orderStatus = OrderStatus.PROCESSING,
         ))
         val ediDate = DateTimeFormatter.ISO_INSTANT.format(now)
-        try {
+
+        return try {
             val response = nicepayApiClient.postSubscribeRegist(
                 V1SubscribeRegistRequestBody(
                     orderId = transaction.pgUniqueId,
@@ -222,48 +225,57 @@ class NicepayService(
                     ediDate = ediDate,
                     encMode = "A2",
                     encData = V1SubscribeRegistRequestBody.generateEncData(
-                        secretKey = nicepayProperties.secretKey,
-                        cardNo = request.cardNo,
-                        expYear = request.expYear,
+                        secretKey = nicepayProperties.clientSecret,
+                        cardNo = request.cardNo.replace("-", ""),
+                        expYear = request.expYear.replace(Regex("[-/]"), ""),
                         expMonth = request.expMonth,
-                        idNo = request.idNo,
+                        idNo = request.idNo.replace("-", ""),
                         cardPw = request.cardPw,
                         encMode = "A2",
                     ),
-                    signData = V1SubscribeRegistRequestBody.makeSignData(txId, ediDate, nicepayProperties.secretKey),
+                    signData = V1SubscribeRegistRequestBody.makeSignData(transaction.pgUniqueId, ediDate, nicepayProperties.clientSecret),
                 )
             )
+            val bid = response.bid!!
+            response.bid = "[REDACTED]"
             transaction.pgData = objectMapper.convertValue(
                 response,
                 object: TypeReference<Map<String, *>>() {}
             )
             transaction.message = response.resultMsg
-            transaction.orderStatus = if (response.resultCode == "0000") {
-                OrderStatus.COMPLETED
-            } else {
-                OrderStatus.FAILURE
-            }
+            if (response.resultCode == "0000") {
+                transaction.orderStatus = OrderStatus.COMPLETED
 
-            paymentBillingRepository.save(PaymentBillingInput(
-                createdAt = Instant.now(),
-                userId = authentication.userId,
-                pg = NicepayConst.PG,
-                addCardTxId = transaction.id,
-                secret = serverSideCrypto.encrypt(
-                    NicepayBillingData(
-                        bid = response.bid!!,
-                        authDate = response.authDate,
-                        cardCode = response.cardCode,
-                        cardName = response.cardName,
-                    )
-                ),
-            ))
+                val paymentBilling = paymentBillingRepository.save(PaymentBillingInput(
+                    createdAt = Instant.now(),
+                    userId = authentication.userId,
+                    pg = NicepayConst.PG,
+                    addCardTxId = transaction.id,
+                    alias = (request.alias ?: "") + " (${response.cardName} ${request.cardNo.substring(request.cardNo.length-4)})",
+                    secret = serverSideCrypto.encrypt(
+                        NicepayBillingData(
+                            bid = bid,
+                            authDate = response.authDate,
+                            cardCode = response.cardCode,
+                            cardName = response.cardName,
+                        )
+                    ),
+                ))
+
+                Result.success(paymentBilling)
+            } else {
+                transaction.orderStatus = OrderStatus.FAILURE
+
+                Result.failure(UserErrorMessageException("${response.resultCode}: ${response.resultMsg}"))
+            }
         } catch (e: Throwable) {
             transaction.orderStatus = OrderStatus.ERROR
             transaction.message = "server error"
             log.error("server error", e)
-        }
 
-        paymentTransactionRepository.saveEntity(transaction)
+            paymentTransactionRepository.saveEntity(transaction)
+
+            Result.failure(e)
+        }
     }
 }

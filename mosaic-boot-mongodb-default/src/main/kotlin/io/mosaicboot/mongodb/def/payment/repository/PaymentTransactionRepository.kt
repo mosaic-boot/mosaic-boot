@@ -16,9 +16,7 @@
 
 package io.mosaicboot.mongodb.def.payment.repository
 
-import io.mosaicboot.core.util.UUIDv7
 import io.mosaicboot.mongodb.def.payment.entity.PaymentTransactionEntity
-import io.mosaicboot.payment.db.dto.PaymentTransactionInput
 import io.mosaicboot.payment.db.repository.PaymentTransactionRepositoryBase
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.data.mongodb.repository.MongoRepository
@@ -30,25 +28,3 @@ interface PaymentTransactionRepository :
     MongoRepository<PaymentTransactionEntity, String>,
     PaymentTransactionRepositoryBase<PaymentTransactionEntity>,
     PaymentTransactionCustomRepository
-{
-    override fun save(input: PaymentTransactionInput): PaymentTransactionEntity {
-        return save(PaymentTransactionEntity(
-            id = input.id ?: UUIDv7.generate().toString(),
-            createdAt = input.createdAt,
-            updatedAt = input.createdAt,
-            userId = input.userId,
-            type = input.type,
-            pg = input.pg,
-            pgUniqueId = input.pgUniqueId,
-            pgData = input.pgData,
-
-            goodsId = input.goodsId,
-            goodsName = input.goodsName,
-            subscriptionId = input.subscriptionId,
-            amount = input.amount,
-
-            orderStatus = input.orderStatus,
-            message = input.message,
-        ))
-    }
-}

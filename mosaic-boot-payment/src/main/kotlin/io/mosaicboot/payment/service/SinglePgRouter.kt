@@ -16,8 +16,17 @@
 
 package io.mosaicboot.payment.service
 
+import io.mosaicboot.core.auth.MosaicAuthenticatedToken
+import io.mosaicboot.payment.controller.dto.AddCardTypeKrRequest
+import io.mosaicboot.payment.db.entity.PaymentBilling
+
 class SinglePgRouter(
     val pgService: PgService,
 ) : PgRouter {
-
+    override fun billingAddCard(
+        authentication: MosaicAuthenticatedToken,
+        request: AddCardTypeKrRequest
+    ): Result<PaymentBilling> {
+        return pgService.billingAddCard(authentication, request)
+    }
 }

@@ -14,18 +14,25 @@
  * limitations under the License.
  */
 
-package io.mosaicboot.mongodb.def.payment.repository
+package io.mosaicboot.mongodb.def.payment.repository.impl
 
 import io.mosaicboot.mongodb.def.payment.entity.PaymentLogEntity
-import io.mosaicboot.payment.db.repository.PaymentLogRepositoryBase
+import io.mosaicboot.mongodb.def.payment.repository.PaymentLogCustomRepository
+import io.mosaicboot.payment.db.dto.PaymentLogInput
 import org.bson.types.ObjectId
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
-import org.springframework.data.mongodb.repository.MongoRepository
-import org.springframework.stereotype.Repository
+import org.springframework.data.mongodb.core.MongoTemplate
 
-@Repository
-@ConditionalOnProperty(prefix = "mosaic.datasource.mongodb.collections.payment-log", name = ["customized"], havingValue = "false", matchIfMissing = true)
-interface PaymentLogRepository :
-    MongoRepository<PaymentLogEntity, ObjectId>,
-    PaymentLogRepositoryBase<PaymentLogEntity, ObjectId>,
-    PaymentLogCustomRepository
+class PaymentLogCustomRepositoryImpl(
+    private val mongoTemplate: MongoTemplate,
+) : PaymentLogCustomRepository {
+    override fun save(input: PaymentLogInput): PaymentLogEntity {
+        return mongoTemplate.save(PaymentLogEntity(
+            id = ObjectId.get(),
+            createdAt = input.createdAt,
+            pg = input.pg,
+            type = input.type,
+            orderId = input.orderId,
+            data = input.data,
+        ))
+    }
+}

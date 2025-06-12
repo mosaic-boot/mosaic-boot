@@ -39,7 +39,7 @@ class JweHelper(
     jwkSecret: JWK,
     private val objectMapper: ObjectMapper,
     private val expirationSeconds: Long?,
-): JwtCodec {
+) {
     private val keyId: String = jwkSecret.keyID
     private val encrypter: JWEEncrypter
     private val decrypter: JWEDecrypter
@@ -82,6 +82,7 @@ class JweHelper(
     }
 
     fun <T> encrypt(
+        providerName: String,
         builder: JWTClaimsSet.Builder,
         cty: String,
         claims: T,
@@ -101,7 +102,7 @@ class JweHelper(
             }
 
         val jweHeader = JWEHeader.Builder(algorithm, encryptionMethod)
-            .keyID(keyId)
+            .keyID("$providerName:$keyId")
             .contentType(cty)
             .compressionAlgorithm(CompressionAlgorithm.DEF)
             .build()
@@ -115,18 +116,17 @@ class JweHelper(
         }
     }
 
-    override fun <T : Any> encode(
+    fun <T : Any> encode(
+        providerName: String,
         builder: JWTClaimsSet.Builder,
         claims: T,
     ): String {
         val contentType = claims.javaClass.getAnnotation(JwtContentType::class.java)
-        return encrypt(builder, contentType.value, claims)
+        return encrypt(providerName, builder, contentType.value, claims)
     }
 
-    fun decrypt(token: String, cty: String): EncryptedJWT {
+    fun decrypt(encryptedJWT: EncryptedJWT, cty: String) {
         try {
-            val encryptedJWT = EncryptedJWT.parse(token)
-
             encryptedJWT.decrypt(decrypter)
 
             val claims = encryptedJWT.jwtClaimsSet
@@ -139,8 +139,6 @@ class JweHelper(
             if (encryptedJWT.header.contentType != cty) {
                 throw BadCredentialsException("Invalid Content Type")
             }
-
-            return encryptedJWT
         } catch (e: ParseException) {
             throw BadCredentialsException(
                 "Invalid JWT token",
@@ -154,9 +152,9 @@ class JweHelper(
         }
     }
 
-    override fun <T> decode(token: String, type: Class<T>): T {
+    fun <T> decode(encryptedJWT: EncryptedJWT, type: Class<T>): T {
         val contentType = type.getAnnotation(JwtContentType::class.java)
-        val encryptedJwt = decrypt(token, contentType.value)
-        return objectMapper.convertValue(encryptedJwt.jwtClaimsSet.toJSONObject(), type)
+        decrypt(encryptedJWT, contentType.value)
+        return objectMapper.convertValue(encryptedJWT.jwtClaimsSet.toJSONObject(), type)
     }
 }

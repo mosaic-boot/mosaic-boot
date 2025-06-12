@@ -30,7 +30,7 @@ class AddNullableTypeOpenApiCustomizer : OpenApiCustomizer {
             (schema.properties as Map<String?, Schema<*>>).forEach { (name: String?, value: Schema<*>) ->
                 if (schema.required == null || !schema.required.contains(name) || value.nullable == true) {
                     value.nullable = true
-                    value.types.add("null")
+                    value.types?.add("null")
                 }
             }
         }

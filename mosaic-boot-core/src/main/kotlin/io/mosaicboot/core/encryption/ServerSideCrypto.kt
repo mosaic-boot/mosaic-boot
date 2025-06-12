@@ -16,6 +16,7 @@
 
 package io.mosaicboot.core.encryption
 
+import com.nimbusds.jwt.EncryptedJWT
 import com.nimbusds.jwt.JWTClaimsSet
 
 class ServerSideCrypto(
@@ -27,16 +28,14 @@ class ServerSideCrypto(
     ): String {
         val provider = providers.find { it.support(claims.javaClass) }
             ?: throw IllegalStateException("No suitable provider found for ${claims.javaClass}")
-        return provider.name() + "|" + provider.encrypt(builder, claims)
+        return provider.encrypt(builder, claims)
     }
 
-    fun <T> decrypt(ciphertext: String, type: Class<T>): T {
-        val parsed = ciphertext.split(Regex("\\|"), limit = 2)
-        if (parsed.size != 2) {
-            throw IllegalArgumentException("Token '$ciphertext' does not match providers")
-        }
-        val provider = providers.find { it.name() == parsed[0] }
-            ?: throw IllegalStateException("No provider found for ${parsed[0]}")
-        return provider.decrypt(parsed[1], type)
+    fun <T> decrypt(token: String, type: Class<T>): T {
+        val encryptedJWT = EncryptedJWT.parse(token)
+        val providerName = encryptedJWT.header.keyID.split(":", limit = 2).first()
+        val provider = providers.find { it.name() == providerName }
+            ?: throw IllegalStateException("No provider found for ${providerName}")
+        return provider.decrypt(encryptedJWT, type)
     }
 }

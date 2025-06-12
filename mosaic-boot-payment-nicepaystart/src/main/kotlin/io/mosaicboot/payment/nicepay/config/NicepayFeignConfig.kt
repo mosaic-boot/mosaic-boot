@@ -56,7 +56,7 @@ class NicepayFeignConfig(
     ) : RequestInterceptor {
         override fun apply(request: RequestTemplate) {
             val authorizationHeader = "Basic " + Base64.getEncoder().encodeToString(
-                "${nicepayProperties.clientId}:${nicepayProperties.secretKey}".toByteArray(
+                "${nicepayProperties.clientId}:${nicepayProperties.clientSecret}".toByteArray(
                     StandardCharsets.UTF_8
                 )
             )

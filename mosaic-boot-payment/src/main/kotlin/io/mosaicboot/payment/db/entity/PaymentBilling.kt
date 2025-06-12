@@ -7,6 +7,8 @@ interface PaymentBilling : UpdatableEntity<String> {
     val pg: String
     val deleted: Boolean
 
+    val alias: String
+
     /**
      * JWE Encrypted Data
      */

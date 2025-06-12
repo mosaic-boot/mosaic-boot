@@ -16,10 +16,12 @@
 
 package io.mosaicboot.mongodb.def.payment.repository.impl
 
+import io.mosaicboot.core.util.UUIDv7
 import io.mosaicboot.mongodb.def.payment.entity.PaymentTransactionEntity
 import io.mosaicboot.mongodb.def.payment.repository.PaymentTransactionCustomRepository
 import io.mosaicboot.mongodb.def.repository.impl.Paged
 import io.mosaicboot.mongodb.def.repository.impl.pagedAggregation
+import io.mosaicboot.payment.db.dto.PaymentTransactionInput
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.data.mongodb.core.MongoTemplate
@@ -31,6 +33,27 @@ import org.springframework.data.mongodb.core.query.isEqualTo
 class PaymentTransactionCustomRepositoryImpl(
     private val mongoTemplate: MongoTemplate,
 ) : PaymentTransactionCustomRepository {
+    override fun save(input: PaymentTransactionInput): PaymentTransactionEntity {
+        return mongoTemplate.save(PaymentTransactionEntity(
+            id = input.id ?: UUIDv7.generate().toString(),
+            createdAt = input.createdAt,
+            updatedAt = input.createdAt,
+            userId = input.userId,
+            type = input.type,
+            pg = input.pg,
+            pgUniqueId = input.pgUniqueId,
+            pgData = input.pgData,
+
+            goodsId = input.goodsId,
+            goodsName = input.goodsName,
+            subscriptionId = input.subscriptionId,
+            amount = input.amount,
+
+            orderStatus = input.orderStatus,
+            message = input.message,
+        ))
+    }
+
     override fun getOrderListByUserIdWithPaged(
         userId: String,
         pageable: Pageable,

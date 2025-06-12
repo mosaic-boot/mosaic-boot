@@ -3,6 +3,9 @@ package io.mosaicboot.payment.controller.dto
 import com.fasterxml.jackson.annotation.JsonProperty
 
 data class AddCardTypeKrRequest(
+    @JsonProperty("alias")
+    val alias: String?,
+
     @JsonProperty("name")
     val name: String?,
 

@@ -14,21 +14,11 @@
  * limitations under the License.
  */
 
-package io.mosaicboot.payment.service
+package io.mosaicboot.mongodb.def.payment.repository
 
-import io.mosaicboot.core.auth.MosaicAuthenticatedToken
-import io.mosaicboot.payment.controller.dto.AddCardTypeKrRequest
-import io.mosaicboot.payment.db.entity.PaymentBilling
-import org.springframework.stereotype.Service
+import io.mosaicboot.mongodb.def.payment.entity.PaymentSubscriptionEntity
+import io.mosaicboot.payment.db.dto.PaymentSubscriptionInput
 
-@Service
-class PaymentService(
-    private val pgRouter: PgRouter
-) {
-    fun billingAddCard(
-        authentication: MosaicAuthenticatedToken,
-        request: AddCardTypeKrRequest,
-    ): Result<PaymentBilling> {
-        return pgRouter.billingAddCard(authentication, request)
-    }
+interface PaymentSubscriptionCustomRepository {
+    fun save(input: PaymentSubscriptionInput): PaymentSubscriptionEntity
 }

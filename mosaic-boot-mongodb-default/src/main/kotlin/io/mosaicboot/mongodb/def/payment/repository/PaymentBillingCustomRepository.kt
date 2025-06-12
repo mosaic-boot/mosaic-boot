@@ -17,14 +17,8 @@
 package io.mosaicboot.mongodb.def.payment.repository
 
 import io.mosaicboot.mongodb.def.payment.entity.PaymentBillingEntity
-import io.mosaicboot.payment.db.repository.PaymentBillingRepositoryBase
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
-import org.springframework.data.mongodb.repository.MongoRepository
-import org.springframework.stereotype.Repository
+import io.mosaicboot.payment.db.dto.PaymentBillingInput
 
-@Repository
-@ConditionalOnProperty(prefix = "mosaic.datasource.mongodb.collections.payment-billing", name = ["customized"], havingValue = "false", matchIfMissing = true)
-interface PaymentBillingRepository :
-    MongoRepository<PaymentBillingEntity, String>,
-    PaymentBillingRepositoryBase<PaymentBillingEntity>,
-    PaymentBillingCustomRepository
+interface PaymentBillingCustomRepository {
+    fun save(input: PaymentBillingInput): PaymentBillingEntity
+}

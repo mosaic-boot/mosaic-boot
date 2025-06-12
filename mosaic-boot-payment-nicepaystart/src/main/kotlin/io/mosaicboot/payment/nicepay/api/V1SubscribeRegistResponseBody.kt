@@ -65,7 +65,7 @@ data class V1SubscribeRegistResponseBody(
      * 선택 | 30 Byte
      */
     @JsonProperty("bid")
-    val bid: String? = null,
+    var bid: String? = null,
 
     /**
      * 인증일자

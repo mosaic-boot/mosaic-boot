@@ -23,7 +23,7 @@ data class NicepayProperties(
     var enabled: Boolean = true,
     var apiUrl: String = "",
     var clientId: String = "",
-    var secretKey: String = "",
+    var clientSecret: String = "",
     var api: Api = Api(),
 ) {
     data class Api(

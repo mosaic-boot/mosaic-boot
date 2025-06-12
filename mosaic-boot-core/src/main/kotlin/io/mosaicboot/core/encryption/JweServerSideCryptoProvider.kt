@@ -18,6 +18,7 @@ package io.mosaicboot.core.encryption
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.nimbusds.jose.JWEAlgorithm
+import com.nimbusds.jwt.EncryptedJWT
 import com.nimbusds.jwt.JWTClaimsSet
 import io.mosaicboot.core.config.MosaicEncryptionProperties
 import io.mosaicboot.core.jwt.JweHelper
@@ -49,10 +50,10 @@ class JweServerSideCryptoProvider(
         builder: JWTClaimsSet.Builder,
         claims: T,
     ): String {
-        return jweTokenHelper.encode(builder, claims)
+        return jweTokenHelper.encode(name(), builder, claims)
     }
 
-    override fun <T> decrypt(token: String, type: Class<T>): T {
-        return jweTokenHelper.decode(token, type)
+    override fun <T> decrypt(encryptedJWT: EncryptedJWT, type: Class<T>): T {
+        return jweTokenHelper.decode(encryptedJWT, type)
     }
 }

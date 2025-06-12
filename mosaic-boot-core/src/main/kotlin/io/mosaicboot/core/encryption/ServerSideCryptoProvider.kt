@@ -16,6 +16,7 @@
 
 package io.mosaicboot.core.encryption
 
+import com.nimbusds.jwt.EncryptedJWT
 import com.nimbusds.jwt.JWTClaimsSet
 
 interface ServerSideCryptoProvider {
@@ -28,5 +29,5 @@ interface ServerSideCryptoProvider {
         claims: T,
     ): String
 
-    fun <T> decrypt(token: String, type: Class<T>): T
+    fun <T> decrypt(encryptedJWT: EncryptedJWT, type: Class<T>): T
 }

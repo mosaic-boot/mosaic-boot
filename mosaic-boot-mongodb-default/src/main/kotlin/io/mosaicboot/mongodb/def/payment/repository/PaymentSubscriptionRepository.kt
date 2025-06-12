@@ -16,9 +16,7 @@
 
 package io.mosaicboot.mongodb.def.payment.repository
 
-import io.mosaicboot.core.util.UUIDv7
 import io.mosaicboot.mongodb.def.payment.entity.PaymentSubscriptionEntity
-import io.mosaicboot.payment.db.dto.PaymentSubscriptionInput
 import io.mosaicboot.payment.db.repository.PaymentSubscriptionRepositoryBase
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.stereotype.Repository
@@ -26,17 +24,5 @@ import org.springframework.stereotype.Repository
 @Repository
 @ConditionalOnProperty(prefix = "mosaic.datasource.mongodb.collections.payment-subscription", name = ["customized"], havingValue = "false", matchIfMissing = true)
 interface PaymentSubscriptionRepository :
-    PaymentSubscriptionRepositoryBase<PaymentSubscriptionEntity>
-{
-    override fun save(input: PaymentSubscriptionInput): PaymentSubscriptionEntity {
-        return save(PaymentSubscriptionEntity(
-            id = UUIDv7.generate().toString(),
-            createdAt = input.createdAt,
-            updatedAt = input.createdAt,
-            pg = input.pg,
-            active = input.active,
-            cancelledAt = null,
-            data = input.data,
-        ))
-    }
-}
+    PaymentSubscriptionRepositoryBase<PaymentSubscriptionEntity>,
+    PaymentSubscriptionCustomRepository

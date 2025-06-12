@@ -18,12 +18,13 @@ package io.mosaicboot.payment.service
 
 import io.mosaicboot.core.auth.MosaicAuthenticatedToken
 import io.mosaicboot.payment.controller.dto.AddCardTypeKrRequest
+import io.mosaicboot.payment.db.entity.PaymentBilling
 
 interface PgService {
     fun billingAddCard(
         authentication: MosaicAuthenticatedToken,
         request: AddCardTypeKrRequest,
-    ) {
+    ): Result<PaymentBilling> {
         throw NotImplementedError("Not implemented this PG")
     }
 }

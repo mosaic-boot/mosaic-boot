@@ -32,6 +32,8 @@ class PaymentBillingEntity(
     override val pg: String,
     override val deleted: Boolean,
 
+    override val alias: String,
+
     /**
      * JWE Encrypted Data
      */

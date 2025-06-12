@@ -66,4 +66,9 @@ class PaymentConfig {
             paymentService = paymentService,
         )
     }
+
+    @Bean
+    fun goodsRepository(): GoodsRepository {
+        return object: GoodsRepository {}
+    }
 }

@@ -7,6 +7,7 @@ import io.mosaicboot.payment.nicepay.api.AuthResponse
 import io.mosaicboot.payment.nicepay.api.PaymentNotificationResponse
 import io.mosaicboot.payment.nicepay.config.NicepayProperties
 import io.mosaicboot.payment.nicepay.service.NicepayService
+import io.swagger.v3.oas.annotations.Operation
 import jakarta.servlet.http.HttpServletResponse
 import org.slf4j.LoggerFactory
 import org.springframework.context.ApplicationContext
@@ -36,6 +37,10 @@ class NicepayController(
         return nicepayProperties.api.path
     }
 
+    @Operation(
+        summary = "nicepay auth",
+        hidden = true,
+    )
     @PostMapping(
         path = ["/auth"],
         consumes = [MediaType.APPLICATION_FORM_URLENCODED_VALUE],
@@ -52,7 +57,7 @@ class NicepayController(
             )
         if (
             requestBody.clientId != nicepayProperties.clientId ||
-            !requestBody.verifySignature(nicepayProperties.secretKey)
+            !requestBody.verifySignature(nicepayProperties.clientSecret)
         ) {
             throw HttpClientErrorException.create(
                 HttpStatus.BAD_REQUEST,
@@ -72,6 +77,7 @@ class NicepayController(
         httpServletResponse.sendRedirect(finishUrlBuilder.build().toUriString())
     }
 
+    @Operation(summary = "nicepay webhook receiver")
     @PostMapping(
         path = ["/webhook"],
         consumes = [MediaType.APPLICATION_JSON_VALUE],
@@ -83,7 +89,7 @@ class NicepayController(
         body ?: return ResponseEntity.ok("OK")
         val isTest = body.mallReserved?.contains("TEST") == true
 
-        if (!isTest && !body.verifySignature(nicepayProperties.secretKey)) {
+        if (!isTest && !body.verifySignature(nicepayProperties.clientSecret)) {
             throw HttpClientErrorException.create(
                 HttpStatus.BAD_REQUEST,
                 "bad signature or data",

@@ -26,6 +26,6 @@ interface PaymentTransactionRepositoryBase<T : PaymentTransaction> :
 {
     fun save(input: PaymentTransactionInput): T
 
-    fun findByPgAndOrderId(pg: String, orderId: String): T?
+    fun findByPgAndPgUniqueId(pg: String, pgUniqueId: String): T?
     fun findByUserIdAndId(userId: String, id: String): T?
 }
