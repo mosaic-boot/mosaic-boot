@@ -16,7 +16,7 @@
 
 package io.mosaicboot.core.auth
 
-import io.mosaicboot.core.auth.entity.Authentication
+import io.mosaicboot.data.entity.Authentication
 
 interface MosaicCredentialHandler {
     fun methods(): List<String>?

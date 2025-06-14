@@ -16,7 +16,7 @@
 
 package io.mosaicboot.payment.db.repository
 
-import io.mosaicboot.core.repository.BaseRepository
+import io.mosaicboot.data.repository.BaseRepository
 import io.mosaicboot.payment.db.dto.PaymentLogInput
 import io.mosaicboot.payment.db.entity.PaymentLog
 

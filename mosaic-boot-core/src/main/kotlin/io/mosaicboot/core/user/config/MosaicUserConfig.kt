@@ -18,16 +18,15 @@ package io.mosaicboot.core.user.config
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.mosaicboot.core.auth.MosaicAuthenticationHandler
-import io.mosaicboot.core.auth.controller.AuthControllerHelper
 import io.mosaicboot.core.auth.service.CredentialService
 import io.mosaicboot.core.auth.repository.AuthenticationRepositoryBase
 import io.mosaicboot.core.permission.aspect.PermissionInterceptor
 import io.mosaicboot.core.permission.service.PermissionService
 import io.mosaicboot.core.tenant.service.TenantService
 import io.mosaicboot.core.tenant.service.TenantUserService
-import io.mosaicboot.core.user.repository.TenantUserRepositoryBase
-import io.mosaicboot.core.user.repository.UserAuditLogRepositoryBase
-import io.mosaicboot.core.user.repository.UserRepositoryBase
+import io.mosaicboot.data.repository.TenantUserRepositoryBase
+import io.mosaicboot.data.repository.UserAuditLogRepositoryBase
+import io.mosaicboot.data.repository.UserRepositoryBase
 import io.mosaicboot.core.user.controller.UserController
 import io.mosaicboot.core.user.service.*
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
@@ -96,13 +95,11 @@ class MosaicUserConfig(
     fun mosaicUserController(
         userService: UserService,
         tenantService: TenantService,
-        authControllerHelper: AuthControllerHelper,
         mosaicAuthenticationHandler: MosaicAuthenticationHandler,
     ): UserController {
         return UserController(
             userService = userService,
             tenantService = tenantService,
-            authControllerHelper = authControllerHelper,
             mosaicAuthenticationHandler = mosaicAuthenticationHandler,
         )
     }

@@ -16,8 +16,8 @@
 
 package io.mosaicboot.mongodb.def.entity
 
-import io.mosaicboot.core.tenant.entity.Tenant
-import io.mosaicboot.core.tenant.enums.TenantStatus
+import io.mosaicboot.common.tenant.enums.TenantStatus
+import io.mosaicboot.data.entity.Tenant
 import org.springframework.data.annotation.Id
 import org.springframework.data.mongodb.core.mapping.Document
 import org.springframework.data.mongodb.core.mapping.Field

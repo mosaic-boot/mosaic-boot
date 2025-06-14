@@ -16,9 +16,9 @@
 
 package io.mosaicboot.mongodb.def.entity
 
-import io.mosaicboot.core.user.entity.GlobalRole
-import io.mosaicboot.core.user.entity.User
-import io.mosaicboot.core.user.enums.UserStatus
+import io.mosaicboot.common.user.enums.UserStatus
+import io.mosaicboot.data.entity.GlobalRole
+import io.mosaicboot.data.entity.User
 import org.springframework.data.annotation.Id
 import org.springframework.data.mongodb.core.index.Indexed
 import org.springframework.data.mongodb.core.mapping.Document
@@ -45,6 +45,9 @@ open class UserEntity(
     @Field("roleIds")
     open var roleIds: List<String>,
 ) : User {
-    override val roles: List<GlobalRole>
+    override var roles: List<GlobalRole>
+        set(input) {
+            roleIds = input.map { it.id }
+        }
         get() = throw NotImplementedError()
 }

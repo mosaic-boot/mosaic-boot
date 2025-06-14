@@ -21,14 +21,16 @@ import io.mosaicboot.core.auth.config.MosaicAuthProperties
 import io.mosaicboot.core.auth.controller.dto.OAuth2ProviderInfo
 import io.mosaicboot.core.auth.controller.dto.RegisterRequest
 import io.mosaicboot.core.auth.controller.dto.RegisterResponse
-import io.mosaicboot.core.auth.dto.RegisterResult
+import io.mosaicboot.common.auth.dto.RegisterResult
 import io.mosaicboot.core.auth.oauth2.MosaicOAuth2RegisterToken
 import io.mosaicboot.core.auth.oauth2.OAuth2BasicInfo
 import io.mosaicboot.core.auth.service.AuthTokenService
 import io.mosaicboot.core.http.BaseMosaicController
 import io.mosaicboot.core.http.MosaicController
-import io.mosaicboot.core.user.dto.UserInput
-import io.mosaicboot.core.user.enums.UserStatus
+import io.mosaicboot.common.user.dto.UserInput
+import io.mosaicboot.common.user.enums.UserStatus
+import io.mosaicboot.data.entity.Authentication
+import io.mosaicboot.data.entity.TenantUser
 import io.mosaicboot.core.user.service.MosaicOAuth2UserService
 import io.mosaicboot.core.util.WebClientInfo
 import io.swagger.v3.oas.annotations.Operation
@@ -192,8 +194,8 @@ class MosaicOAuth2Controller(
             val authenticatedToken = authTokenService.issueAuthenticatedToken(
                 webClientInfo,
                 result.user,
-                result.authentication,
-                result.tenantUsers
+                result.authentication as Authentication,
+                result.tenantUsers as List<Pair<TenantUser, io.mosaicboot.common.auth.dto.TenantLoginStatus>>
             )
             mosaicAuthenticationHandler.onAuthenticationSuccess(
                 request,
@@ -202,7 +204,16 @@ class MosaicOAuth2Controller(
             )
         }
 
-        return result.toResponseEntity()
+        return when (result) {
+            is RegisterResult.Success -> ResponseEntity.ok(
+                RegisterResponse.Success()
+            )
+            is RegisterResult.Failure -> ResponseEntity.badRequest().body(
+                RegisterResponse.Failure(
+                    reason = result.reason,
+                )
+            )
+        }
     }
 
 //    @GetMapping("/authorize")

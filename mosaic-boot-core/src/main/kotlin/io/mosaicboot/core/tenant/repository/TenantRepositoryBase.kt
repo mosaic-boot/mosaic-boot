@@ -16,8 +16,9 @@
 
 package io.mosaicboot.core.tenant.repository
 
-import io.mosaicboot.core.repository.BaseRepository
-import io.mosaicboot.core.tenant.entity.Tenant
+import io.mosaicboot.data.repository.BaseRepository
+import io.mosaicboot.data.entity.Tenant
+import io.mosaicboot.data.repository.TenantMosaicRepository
 
 interface TenantRepositoryBase<T : Tenant> : BaseRepository<Tenant, T, String>,
     TenantMosaicRepository<T>

@@ -16,14 +16,14 @@
 
 package io.mosaicboot.mongodb.def.repository.impl
 
-import io.mosaicboot.core.user.entity.TenantUser
-import io.mosaicboot.core.user.dto.CurrentActiveUser
-import io.mosaicboot.core.user.dto.TenantUserInput
-import io.mosaicboot.core.user.enums.UserStatus
+import io.mosaicboot.common.user.dto.CurrentActiveUser
+import io.mosaicboot.common.user.dto.TenantUserInput
+import io.mosaicboot.common.user.enums.UserStatus
 import io.mosaicboot.mongodb.def.config.MongodbCollectionsProperties
 import io.mosaicboot.mongodb.def.entity.TenantRoleEntity
 import io.mosaicboot.mongodb.def.entity.TenantUserEntity
 import io.mosaicboot.mongodb.def.entity.UserEntity
+import io.mosaicboot.data.entity.TenantUser
 import io.mosaicboot.mongodb.def.repository.TenantUserCustomRepository
 import org.springframework.data.annotation.Id
 import org.springframework.data.domain.Page
@@ -68,7 +68,7 @@ class TenantUserCustomRepositoryImpl(
         ).uniqueMappedResult
     }
 
-    override fun save(input: TenantUserInput): TenantUser {
+    override fun save(input: TenantUserInput): TenantUserEntity {
         val now = Instant.now()
         return mongoTemplate.save(
             TenantUserEntity(

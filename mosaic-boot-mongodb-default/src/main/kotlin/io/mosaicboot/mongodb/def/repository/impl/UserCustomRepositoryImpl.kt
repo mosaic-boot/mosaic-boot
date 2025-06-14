@@ -16,13 +16,12 @@
 
 package io.mosaicboot.mongodb.def.repository.impl
 
-import com.fasterxml.uuid.Generators
-import io.mosaicboot.core.user.dto.UserInput
-import io.mosaicboot.core.user.entity.User
-import io.mosaicboot.core.user.enums.UserStatus
+import io.mosaicboot.common.user.dto.UserInput
+import io.mosaicboot.common.user.enums.UserStatus
+import io.mosaicboot.data.entity.GlobalRole
 import io.mosaicboot.mongodb.def.config.MongodbCollectionsProperties
-import io.mosaicboot.mongodb.def.entity.GlobalRoleEntity
 import io.mosaicboot.mongodb.def.entity.UserEntity
+import io.mosaicboot.data.entity.User
 import io.mosaicboot.mongodb.def.repository.UserCustomRepository
 import org.springframework.data.annotation.Id
 import org.springframework.data.mongodb.core.MongoTemplate
@@ -90,6 +89,6 @@ class UserCustomRepositoryImpl(
         @Field("roleIds")
         var roleIds: List<String>,
         @Field("roles")
-        override var roles: List<GlobalRoleEntity>,
+        override var roles: List<GlobalRole>,
     ) : User
 }

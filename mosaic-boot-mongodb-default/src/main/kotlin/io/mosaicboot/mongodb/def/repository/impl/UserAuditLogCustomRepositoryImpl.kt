@@ -16,12 +16,12 @@
 
 package io.mosaicboot.mongodb.def.repository.impl
 
-import io.mosaicboot.core.user.entity.User
-import io.mosaicboot.core.user.enums.UserAuditAction
-import io.mosaicboot.core.user.enums.UserAuditLogStatus
-import io.mosaicboot.core.user.dto.UserAuditLogDetail
-import io.mosaicboot.core.user.dto.UserAuditLogInput
+import io.mosaicboot.common.user.dto.UserAuditLogDetail
+import io.mosaicboot.common.user.dto.UserAuditLogInput
+import io.mosaicboot.common.user.enums.UserAuditAction
+import io.mosaicboot.common.user.enums.UserAuditLogStatus
 import io.mosaicboot.mongodb.def.entity.UserAuditLogEntity
+import io.mosaicboot.data.entity.User
 import io.mosaicboot.mongodb.def.repository.UserAuditLogCustomRepository
 import org.bson.types.ObjectId
 import org.springframework.data.annotation.Id

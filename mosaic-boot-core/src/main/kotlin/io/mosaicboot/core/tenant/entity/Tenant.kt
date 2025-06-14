@@ -16,14 +16,7 @@
 
 package io.mosaicboot.core.tenant.entity
 
-import io.mosaicboot.core.entity.UpdatableEntity
-import io.mosaicboot.core.tenant.enums.TenantStatus
+import io.mosaicboot.data.entity.UpdatableEntity
+import io.mosaicboot.common.tenant.enums.TenantStatus
 
-interface Tenant : UpdatableEntity<String> {
-    var name: String
-    var status: TenantStatus
-    /**
-     * e.g. "Asia/Seoul"
-     */
-    var timeZone: String
-}
+interface Tenant : io.mosaicboot.data.entity.Tenant, UpdatableEntity<String>

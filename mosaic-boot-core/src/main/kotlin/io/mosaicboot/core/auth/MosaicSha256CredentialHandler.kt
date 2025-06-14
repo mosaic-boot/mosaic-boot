@@ -16,7 +16,7 @@
 
 package io.mosaicboot.core.auth
 
-import io.mosaicboot.core.auth.entity.Authentication
+import io.mosaicboot.data.entity.Authentication
 import java.util.*
 
 class MosaicSha256CredentialHandler : MosaicCredentialHandler {

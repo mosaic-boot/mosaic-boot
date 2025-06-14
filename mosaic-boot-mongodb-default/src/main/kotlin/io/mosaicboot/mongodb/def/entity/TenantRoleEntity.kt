@@ -16,7 +16,7 @@
 
 package io.mosaicboot.mongodb.def.entity
 
-import io.mosaicboot.core.user.entity.TenantRole
+import io.mosaicboot.data.entity.TenantRole
 import org.springframework.data.annotation.Id
 import org.springframework.data.mongodb.core.mapping.Document
 import org.springframework.data.mongodb.core.mapping.Field
@@ -31,7 +31,7 @@ data class TenantRoleEntity(
     @Field("updatedAt")
     override var updatedAt: Instant,
     @Field("tenantId")
-    override var tenantId: String?,
+    override var tenantId: String,
     @Field("name")
     override val name: String,
     @Field("permissions")

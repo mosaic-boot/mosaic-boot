@@ -17,14 +17,14 @@
 package io.mosaicboot.core.tenant.service
 
 import io.mosaicboot.core.tenant.config.MosaicTenantProperties
-import io.mosaicboot.core.tenant.dto.InviteResult
+import io.mosaicboot.common.tenant.dto.InviteResult
 import io.mosaicboot.core.tenant.repository.TenantRepositoryBase
-import io.mosaicboot.core.user.dto.TenantUserInput
-import io.mosaicboot.core.user.entity.TenantRole
-import io.mosaicboot.core.user.entity.TenantUser
-import io.mosaicboot.core.user.enums.UserStatus
-import io.mosaicboot.core.user.repository.TenantRoleRepositoryBase
-import io.mosaicboot.core.user.repository.TenantUserRepositoryBase
+import io.mosaicboot.common.user.dto.TenantUserInput
+import io.mosaicboot.data.entity.TenantRole
+import io.mosaicboot.data.entity.TenantUser
+import io.mosaicboot.common.user.enums.UserStatus
+import io.mosaicboot.data.repository.TenantRoleRepositoryBase
+import io.mosaicboot.data.repository.TenantUserRepositoryBase
 import io.mosaicboot.core.user.service.AuditService
 import io.mosaicboot.core.user.service.UserService
 import io.mosaicboot.core.util.PagedResult
@@ -60,24 +60,26 @@ class TenantUserService(
             email
         ) ?: return InviteResult.UserNotExists
 
-        tenantUserRepository.findByTenantIdAndUserId(
-            performedBy.tenantId,
-            targetUser.id,
-        )?.let {
-            return InviteResult.AlreadyExists(it)
-        }
+        performedBy.tenantId?.let { tenantId ->
+            tenantUserRepository.findByTenantIdAndUserId(
+                tenantId,
+                targetUser.id,
+            )?.let {
+                return InviteResult.AlreadyExists(it)
+            }
 
-        val tenantUser = tenantUserRepository.save(
-            TenantUserInput(
-                tenantId = performedBy.tenantId,
-                userId = targetUser.id,
-                nickname = targetUser.name,
-                email = email,
-                status = UserStatus.ACTIVE,
-                roles = roles,
+            val tenantUser = tenantUserRepository.save(
+                TenantUserInput(
+                    tenantId = tenantId,
+                    userId = targetUser.id,
+                    nickname = targetUser.name,
+                    email = email,
+                    status = UserStatus.ACTIVE,
+                    roles = roles,
+                )
             )
-        )
-        return InviteResult.Success(tenantUser)
+            return InviteResult.Success(tenantUser)
+        } ?: return InviteResult.UserNotExists
     }
 
     fun getTenantUsers(

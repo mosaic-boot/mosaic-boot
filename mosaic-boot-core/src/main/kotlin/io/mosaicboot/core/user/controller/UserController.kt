@@ -19,7 +19,6 @@ package io.mosaicboot.core.user.controller
 import io.mosaicboot.core.http.BaseMosaicController
 import io.mosaicboot.core.http.MosaicController
 import io.mosaicboot.core.auth.MosaicAuthenticatedToken
-import io.mosaicboot.core.auth.controller.AuthControllerHelper
 import io.mosaicboot.core.tenant.service.TenantService
 import io.mosaicboot.core.user.config.MosaicUserProperties
 import io.mosaicboot.core.user.controller.dto.ActiveTenantUser
@@ -56,7 +55,6 @@ import org.springframework.web.bind.annotation.RequestBody
 class UserController(
     private val userService: UserService,
     private val tenantService: TenantService,
-    private val authControllerHelper: AuthControllerHelper,
     private val mosaicAuthenticationHandler: MosaicAuthenticationHandler,
 ) : BaseMosaicController {
     companion object {
@@ -176,8 +174,8 @@ class UserController(
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build()
         }
         authentication.activeTenantId = requestBody.tenantId
-        authControllerHelper.refresh(
-            request, response, webClientInfo, authentication
+        mosaicAuthenticationHandler.onAuthenticationSuccess(
+            request, response, authentication
         )
         return ResponseEntity.ok().build()
     }

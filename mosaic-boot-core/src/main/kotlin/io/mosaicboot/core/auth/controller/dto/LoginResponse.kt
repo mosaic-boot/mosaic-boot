@@ -17,8 +17,8 @@
 package io.mosaicboot.core.auth.controller.dto
 
 import com.fasterxml.jackson.annotation.JsonProperty
-import io.mosaicboot.core.user.controller.dto.LoginFailureReason
-import io.mosaicboot.core.user.controller.dto.TenantLoginStatus
+import io.mosaicboot.common.auth.dto.LoginFailureReason
+import io.mosaicboot.common.auth.dto.TenantLoginStatus
 import io.swagger.v3.oas.annotations.media.Schema
 
 sealed class LoginResponse {

@@ -16,7 +16,7 @@
 
 package io.mosaicboot.payment.db.entity
 
-import io.mosaicboot.core.entity.BaseEntity
+import io.mosaicboot.data.entity.BaseEntity
 
 /**
  * ID : UUIDv7

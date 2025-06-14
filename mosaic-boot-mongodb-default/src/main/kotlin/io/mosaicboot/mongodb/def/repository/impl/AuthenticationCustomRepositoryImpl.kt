@@ -16,11 +16,10 @@
 
 package io.mosaicboot.mongodb.def.repository.impl
 
-import com.fasterxml.uuid.Generators
-import io.mosaicboot.core.auth.dto.AuthenticationDetail
-import io.mosaicboot.core.auth.dto.AuthenticationInput
-import io.mosaicboot.core.auth.entity.Authentication
-import io.mosaicboot.core.auth.enums.AuthMethod
+import io.mosaicboot.common.auth.dto.AuthenticationDetail
+import io.mosaicboot.common.auth.dto.AuthenticationInput
+import io.mosaicboot.common.auth.enums.AuthMethod
+import io.mosaicboot.data.entity.Authentication
 import io.mosaicboot.mongodb.def.config.MongodbCollectionsProperties
 import io.mosaicboot.mongodb.def.entity.AuthenticationEntity
 import io.mosaicboot.mongodb.def.entity.UserEntity

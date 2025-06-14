@@ -16,9 +16,9 @@
 
 package io.mosaicboot.core.user.service
 
-import io.mosaicboot.core.user.entity.UserAuditLog
-import io.mosaicboot.core.user.dto.UserAuditLogInput
-import io.mosaicboot.core.user.repository.UserAuditLogRepositoryBase
+import io.mosaicboot.data.entity.UserAuditLog
+import io.mosaicboot.common.user.dto.UserAuditLogInput
+import io.mosaicboot.data.repository.UserAuditLogRepositoryBase
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional

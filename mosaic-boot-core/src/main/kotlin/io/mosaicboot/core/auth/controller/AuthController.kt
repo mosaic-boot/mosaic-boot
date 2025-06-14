@@ -16,24 +16,22 @@
 
 package io.mosaicboot.core.auth.controller
 
-import io.mosaicboot.core.auth.MosaicAuthenticatedToken
 import io.mosaicboot.core.auth.config.MosaicAuthProperties
 import io.mosaicboot.core.auth.controller.dto.LoginRequest
 import io.mosaicboot.core.auth.controller.dto.LoginResponse
 import io.mosaicboot.core.auth.controller.dto.RegisterRequest
 import io.mosaicboot.core.auth.controller.dto.RegisterResponse
-import io.mosaicboot.core.user.enums.UserStatus
-import io.mosaicboot.core.user.dto.UserInput
 import io.mosaicboot.core.http.BaseMosaicController
 import io.mosaicboot.core.http.MosaicController
 import io.mosaicboot.core.util.WebClientInfo
-import io.mosaicboot.core.auth.dto.LoginResult
 import io.mosaicboot.core.auth.MosaicAuthenticationHandler
-import io.mosaicboot.core.auth.dto.RegisterResult
 import io.mosaicboot.core.auth.service.AuthTokenService
 import io.mosaicboot.core.auth.service.AuthenticationService
 import io.mosaicboot.core.user.service.MosaicOAuth2UserService
-import io.mosaicboot.core.util.UnreachableException
+import io.mosaicboot.common.auth.dto.LoginResult
+import io.mosaicboot.common.auth.dto.RegisterResult
+import io.mosaicboot.common.user.dto.UserInput
+import io.mosaicboot.common.user.enums.UserStatus
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.media.Content
@@ -120,8 +118,6 @@ class AuthController(
                     reason = result.reason,
                 )
             )
-
-            else -> throw UnreachableException()
         }
     }
 
@@ -187,6 +183,15 @@ class AuthController(
             )
         }
 
-        return result.toResponseEntity()
+        return when (result) {
+            is RegisterResult.Success -> ResponseEntity.ok(
+                RegisterResponse.Success()
+            )
+            is RegisterResult.Failure -> ResponseEntity.badRequest().body(
+                RegisterResponse.Failure(
+                    reason = result.reason,
+                )
+            )
+        }
     }
 }

@@ -18,28 +18,17 @@ package io.mosaicboot.core.auth.service
 
 import com.fasterxml.jackson.core.type.TypeReference
 import com.fasterxml.jackson.databind.ObjectMapper
-import io.mosaicboot.core.auth.dto.AuthenticationDetail
-import io.mosaicboot.core.auth.dto.AuthenticationInput
-import io.mosaicboot.core.user.entity.TenantUser
-import io.mosaicboot.core.user.enums.UserAuditAction
-import io.mosaicboot.core.user.enums.UserAuditLogStatus
-import io.mosaicboot.core.user.enums.UserStatus
+import io.mosaicboot.common.auth.dto.*
+import io.mosaicboot.common.user.dto.*
+import io.mosaicboot.common.user.enums.UserAuditAction
+import io.mosaicboot.common.user.enums.UserAuditLogStatus
+import io.mosaicboot.common.user.enums.UserStatus
 import io.mosaicboot.core.auth.repository.AuthenticationRepositoryBase
-import io.mosaicboot.core.user.repository.TenantUserRepositoryBase
-import io.mosaicboot.core.user.repository.UserRepositoryBase
-import io.mosaicboot.core.auth.dto.LoginResult
-import io.mosaicboot.core.auth.dto.RegisterResult
-import io.mosaicboot.core.user.controller.dto.LoginFailureReason
-import io.mosaicboot.core.auth.controller.dto.RegisterFailureReason
-import io.mosaicboot.core.auth.entity.Authentication
-import io.mosaicboot.core.user.dto.UserAuditLogInput
-import io.mosaicboot.core.user.dto.UserAuditLoginActionDetail
-import io.mosaicboot.core.user.dto.UserAuditRegisterActionDetail
-import io.mosaicboot.core.user.dto.UserInput
-import io.mosaicboot.core.user.controller.dto.TenantLoginStatus
-import io.mosaicboot.core.user.dto.UserAuditOAuth2LinkActionDetail
-import io.mosaicboot.core.user.entity.User
-import io.mosaicboot.core.user.repository.GlobalRoleRepositoryBase
+import io.mosaicboot.data.repository.TenantUserRepositoryBase
+import io.mosaicboot.data.repository.UserRepositoryBase
+import io.mosaicboot.data.entity.Authentication
+import io.mosaicboot.data.entity.TenantUser
+import io.mosaicboot.data.repository.GlobalRoleRepositoryBase
 import io.mosaicboot.core.user.service.AuditService
 import io.mosaicboot.core.util.UnreachableException
 import io.mosaicboot.core.util.WebClientInfo
@@ -185,10 +174,11 @@ class AuthenticationService(
             }
 
             // Create new user
-            userTemplate.roles = setOf(
-                globalRoleRepositoryBase.findById("system.general-user").get(),
-            )
-            val user = userRepository.save(userTemplate)
+            val user = userRepository.save(userTemplate.apply {
+                this.roles = setOf(
+                    globalRoleRepositoryBase.findById("system.general-user").get(),
+                )
+            })
 
             // Create authentication
             val encodedCredential = credential?.let { credentialService.encodeCredential(method, username, it) }
@@ -288,11 +278,11 @@ class AuthenticationService(
         userId: String,
         authenticationId: String,
         webClientInfo: WebClientInfo,
-    ): LoginResult.Success {
+    ): LoginResult {
         val authDetail = authenticationRepository.findByUserIdAndAuthenticationId(
             userId,
             authenticationId
-        )!!
+        ) ?: return LoginResult.Failure(LoginFailureReason.NO_USER)
         val tenantUsers = getTenantUsers(authDetail.userId)
         val tenantUserResults = tenantUsers.map { tenantUser ->
             Pair(tenantUser, checkTenantUser(tenantUser, webClientInfo))

@@ -19,7 +19,7 @@ package io.mosaicboot.core.auth.controller.dto
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.annotation.JsonProperty
 import io.mosaicboot.core.jwt.JwtContentType
-import io.mosaicboot.core.user.controller.dto.TenantLoginStatus
+import io.mosaicboot.common.auth.dto.TenantLoginStatus
 
 @JwtContentType("auth")
 @JsonIgnoreProperties(ignoreUnknown = true)

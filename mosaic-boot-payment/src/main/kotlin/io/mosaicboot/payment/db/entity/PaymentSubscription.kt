@@ -16,7 +16,7 @@
 
 package io.mosaicboot.payment.db.entity
 
-import io.mosaicboot.core.entity.UpdatableEntity
+import io.mosaicboot.data.entity.UpdatableEntity
 import java.time.Instant
 
 /**

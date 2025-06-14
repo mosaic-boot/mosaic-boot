@@ -16,14 +16,13 @@
 
 package io.mosaicboot.mongodb.def.repository.impl
 
-import com.fasterxml.uuid.Generators
-import io.mosaicboot.core.tenant.dto.TenantInput
+import io.mosaicboot.common.tenant.dto.TenantInput
 import io.mosaicboot.mongodb.def.entity.TenantEntity
-import io.mosaicboot.mongodb.def.repository.TenantCustomRepository
 import org.springframework.data.mongodb.core.MongoTemplate
 import org.springframework.stereotype.Component
 import java.time.Instant
 import java.util.*
+import io.mosaicboot.mongodb.def.repository.TenantCustomRepository
 
 @Component
 class TenantCustomRepositoryImpl(

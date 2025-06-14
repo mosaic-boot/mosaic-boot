@@ -23,12 +23,15 @@ import io.mosaicboot.core.auth.config.MosaicAuthProperties
 import io.mosaicboot.core.auth.oauth2.*
 import io.mosaicboot.core.auth.service.AuthTokenService
 import io.mosaicboot.core.auth.service.AuthenticationService
-import io.mosaicboot.core.auth.enums.AuthMethod
-import io.mosaicboot.core.user.dto.UserInput
-import io.mosaicboot.core.auth.dto.LoginResult
-import io.mosaicboot.core.auth.dto.RegisterResult
+import io.mosaicboot.common.auth.enums.AuthMethod
+import io.mosaicboot.common.user.dto.UserInput
+import io.mosaicboot.common.auth.dto.LoginResult
+import io.mosaicboot.common.auth.dto.RegisterResult
 import io.mosaicboot.core.encryption.JweServerSideCryptoProvider
 import io.mosaicboot.core.encryption.ServerSideCrypto
+import io.mosaicboot.data.entity.User as DataUser
+import io.mosaicboot.data.entity.Authentication as DataAuthentication
+import io.mosaicboot.data.entity.TenantUser as DataTenantUser
 import io.mosaicboot.core.util.UnreachableException
 import io.mosaicboot.core.util.WebClientInfo
 import io.mosaicboot.core.util.WebClientInfoResolver
@@ -151,9 +154,9 @@ class MosaicOAuth2UserService(
                 return AuthenticatedOAuth2User(
                     authenticatedToken = authTokenService.issueAuthenticatedToken(
                         webClientInfo,
-                        result.user,
-                        result.authentication,
-                        result.tenantUsers,
+                        result.user as DataUser,
+                        result.authentication as DataAuthentication,
+                        result.tenantUsers as List<Pair<DataTenantUser, io.mosaicboot.common.auth.dto.TenantLoginStatus>>,
                     ),
                     oAuth2User = oAuth2User,
                 )
@@ -164,7 +167,6 @@ class MosaicOAuth2UserService(
                     basicInfo,
                 )
             }
-            else -> throw UnreachableException()
         }
     }
 

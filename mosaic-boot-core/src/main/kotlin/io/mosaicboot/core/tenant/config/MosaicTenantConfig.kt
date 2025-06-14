@@ -16,13 +16,13 @@
 
 package io.mosaicboot.core.tenant.config
 
-import io.mosaicboot.core.auth.controller.AuthControllerHelper
+import io.mosaicboot.core.auth.MosaicAuthenticationHandler
 import io.mosaicboot.core.tenant.repository.TenantRepositoryBase
-import io.mosaicboot.core.user.repository.TenantUserRepositoryBase
+import io.mosaicboot.data.repository.TenantUserRepositoryBase
 import io.mosaicboot.core.tenant.controller.TenantsController
 import io.mosaicboot.core.tenant.service.TenantService
 import io.mosaicboot.core.tenant.service.TenantUserService
-import io.mosaicboot.core.user.repository.TenantRoleRepositoryBase
+import io.mosaicboot.data.repository.TenantRoleRepositoryBase
 import io.mosaicboot.core.user.service.AuditService
 import io.mosaicboot.core.user.service.UserService
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
@@ -77,13 +77,13 @@ class MosaicTenantConfig {
         mosaicTenantProperties: MosaicTenantProperties,
         tenantService: TenantService,
         tenantUserService: TenantUserService,
-        authControllerHelper: AuthControllerHelper,
+        mosaicAuthenticationHandler: MosaicAuthenticationHandler,
     ): TenantsController {
         return TenantsController(
             mosaicTenantProperties,
             tenantService,
             tenantUserService,
-            authControllerHelper,
+            mosaicAuthenticationHandler,
         )
     }
 }

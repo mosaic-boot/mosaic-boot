@@ -16,8 +16,9 @@
 
 package io.mosaicboot.core.auth.repository
 
-import io.mosaicboot.core.auth.entity.Authentication
-import io.mosaicboot.core.repository.BaseRepository
+import io.mosaicboot.data.entity.Authentication
+import io.mosaicboot.data.repository.BaseRepository
+import io.mosaicboot.data.repository.AuthenticationMosaicRepository
 
 interface AuthenticationRepositoryBase<T : Authentication> : BaseRepository<Authentication, T, String>,
     AuthenticationMosaicRepository<T>

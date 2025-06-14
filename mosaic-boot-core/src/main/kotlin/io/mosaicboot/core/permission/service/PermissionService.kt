@@ -18,8 +18,8 @@ package io.mosaicboot.core.permission.service
 
 import io.mosaicboot.core.auth.MosaicAuthenticatedToken
 import io.mosaicboot.core.tenant.service.TenantUserService
-import io.mosaicboot.core.user.enums.UserStatus
-import io.mosaicboot.core.user.repository.UserRepositoryBase
+import io.mosaicboot.common.user.enums.UserStatus
+import io.mosaicboot.data.repository.UserRepositoryBase
 import org.springframework.stereotype.Service
 
 @Service

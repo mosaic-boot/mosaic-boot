@@ -17,7 +17,7 @@
 package io.mosaicboot.core.auth.oauth2
 
 import io.mosaicboot.core.auth.MosaicAuthenticatedToken
-import io.mosaicboot.core.auth.enums.AuthMethod
+import io.mosaicboot.common.auth.enums.AuthMethod
 import io.mosaicboot.core.auth.repository.AuthenticationRepositoryBase
 import io.mosaicboot.core.encryption.ServerSideCrypto
 import io.mosaicboot.core.user.service.MosaicOAuth2UserService

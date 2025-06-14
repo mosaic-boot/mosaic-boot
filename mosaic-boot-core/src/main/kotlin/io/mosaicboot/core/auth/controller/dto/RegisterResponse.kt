@@ -17,6 +17,7 @@
 package io.mosaicboot.core.auth.controller.dto
 
 import com.fasterxml.jackson.annotation.JsonProperty
+import io.mosaicboot.common.auth.dto.RegisterFailureReason
 import io.swagger.v3.oas.annotations.media.Schema
 
 sealed class RegisterResponse(

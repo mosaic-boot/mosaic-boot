@@ -22,11 +22,11 @@ import io.mosaicboot.core.tenant.config.MosaicTenantProperties
 import io.mosaicboot.core.tenant.controller.dto.*
 import io.mosaicboot.core.tenant.service.TenantService
 import io.mosaicboot.core.auth.MosaicAuthenticatedToken
-import io.mosaicboot.core.auth.controller.AuthControllerHelper
+import io.mosaicboot.core.auth.MosaicAuthenticationHandler
 import io.mosaicboot.core.permission.annotation.RequirePermission
 import io.mosaicboot.core.permission.aspect.AuthorizationContext
 import io.mosaicboot.core.permission.aspect.PermissionInterceptor
-import io.mosaicboot.core.tenant.dto.InviteResult
+import io.mosaicboot.common.tenant.dto.InviteResult
 import io.mosaicboot.core.tenant.service.TenantUserService
 import io.mosaicboot.core.user.service.UserService
 import io.mosaicboot.core.util.WebClientInfo
@@ -49,7 +49,7 @@ class TenantsController(
     private val mosaicTenantProperties: MosaicTenantProperties,
     private val tenantService: TenantService,
     private val tenantUserService: TenantUserService,
-    private val authControllerHelper: AuthControllerHelper,
+    private val mosaicAuthenticationHandler: MosaicAuthenticationHandler,
 ) : BaseMosaicController {
     override fun getBaseUrl(applicationContext: ApplicationContext): String {
         return mosaicTenantProperties.api.path
@@ -90,8 +90,8 @@ class TenantsController(
             timeZone = requestBody.timeZone,
         )
         authentication.activeTenantId = tenant.id
-        authControllerHelper.refresh(
-            request, response, webClientInfo, authentication
+        mosaicAuthenticationHandler.onAuthenticationSuccess(
+            request, response, authentication
         )
 
         return ResponseEntity.ok(
@@ -193,7 +193,7 @@ class TenantsController(
             is InviteResult.Success -> ResponseEntity.ok(
                 InviteResponse(result = InviteResultCode.SUCCESS)
             )
-            InviteResult.UserNotExists -> ResponseEntity.ok(
+            is InviteResult.UserNotExists -> ResponseEntity.ok(
                 InviteResponse(result = InviteResultCode.USER_NOT_EXISTS)
             )
             is InviteResult.AlreadyExists -> ResponseEntity.ok(

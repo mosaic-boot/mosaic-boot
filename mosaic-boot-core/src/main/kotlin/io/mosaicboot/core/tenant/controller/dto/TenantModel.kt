@@ -17,8 +17,8 @@
 package io.mosaicboot.core.tenant.controller.dto
 
 import com.fasterxml.jackson.annotation.JsonProperty
-import io.mosaicboot.core.tenant.enums.TenantStatus
-import io.mosaicboot.core.user.enums.UserStatus
+import io.mosaicboot.common.tenant.enums.TenantStatus
+import io.mosaicboot.common.user.enums.UserStatus
 
 data class TenantResponse(
     @field:JsonProperty("id")

@@ -19,21 +19,21 @@ package io.mosaicboot.core.user.service
 import com.fasterxml.jackson.core.type.TypeReference
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.mosaicboot.core.auth.MosaicAuthenticatedToken
-import io.mosaicboot.core.user.entity.User
+import io.mosaicboot.data.entity.User
 import io.mosaicboot.core.auth.repository.AuthenticationRepositoryBase
-import io.mosaicboot.core.user.dto.CurrentActiveUser
-import io.mosaicboot.core.user.repository.TenantUserRepositoryBase
-import io.mosaicboot.core.user.repository.UserRepositoryBase
+import io.mosaicboot.common.user.dto.CurrentActiveUser
+import io.mosaicboot.data.repository.TenantUserRepositoryBase
+import io.mosaicboot.data.repository.UserRepositoryBase
 import io.mosaicboot.core.user.controller.dto.ActiveTenantUser
 import io.mosaicboot.core.user.controller.dto.UpdateUserRequest
 import io.mosaicboot.core.user.controller.dto.LinkedOAuth2Provider
-import io.mosaicboot.core.user.dto.UserAuditLogInput
-import io.mosaicboot.core.user.enums.UserAuditAction
-import io.mosaicboot.core.user.enums.UserAuditLogStatus
-import io.mosaicboot.core.user.enums.UserStatus
+import io.mosaicboot.common.user.dto.UserAuditLogInput
+import io.mosaicboot.common.user.enums.UserAuditAction
+import io.mosaicboot.common.user.enums.UserAuditLogStatus
+import io.mosaicboot.common.user.enums.UserStatus
 import io.mosaicboot.core.util.WebClientInfo
-import io.mosaicboot.core.auth.enums.AuthMethod
-import io.mosaicboot.core.user.dto.UserAuditOAuth2LinkActionDetail
+import io.mosaicboot.common.auth.enums.AuthMethod
+import io.mosaicboot.common.user.dto.UserAuditOAuth2LinkActionDetail
 import org.springframework.security.authentication.InsufficientAuthenticationException
 import org.springframework.security.core.Authentication
 import org.springframework.stereotype.Service
@@ -83,7 +83,7 @@ class UserService(
 
     @Transactional
     fun updateUser(userId: String, updateRequest: UpdateUserRequest, webClientInfo: WebClientInfo) {
-        val user = userRepository.findById(userId).orElseThrow {
+        var user = userRepository.findById(userId).orElseThrow {
             IllegalArgumentException("User not found")
         }
 

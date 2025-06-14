@@ -16,7 +16,7 @@
 
 package io.mosaicboot.mongodb.def.repository
 
-import io.mosaicboot.core.user.repository.TenantUserRepositoryBase
+import io.mosaicboot.data.repository.TenantUserRepositoryBase
 import io.mosaicboot.mongodb.def.entity.TenantUserEntity
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.data.mongodb.repository.MongoRepository

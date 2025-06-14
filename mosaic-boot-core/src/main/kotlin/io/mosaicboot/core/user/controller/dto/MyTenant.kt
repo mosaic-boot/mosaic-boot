@@ -17,6 +17,7 @@
 package io.mosaicboot.core.user.controller.dto
 
 import com.fasterxml.jackson.annotation.JsonProperty
+import io.mosaicboot.common.auth.dto.TenantLoginStatus
 
 data class MyTenant(
     @field:JsonProperty("tenantId")

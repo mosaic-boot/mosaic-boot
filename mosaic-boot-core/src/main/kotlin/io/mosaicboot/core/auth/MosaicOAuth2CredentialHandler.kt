@@ -16,8 +16,8 @@
 
 package io.mosaicboot.core.auth
 
-import io.mosaicboot.core.auth.enums.AuthMethod
-import io.mosaicboot.core.auth.entity.Authentication
+import io.mosaicboot.common.auth.enums.AuthMethod
+import io.mosaicboot.data.entity.Authentication
 
 class MosaicOAuth2CredentialHandler : MosaicCredentialHandler {
     override fun methods(): List<String>? {

@@ -156,6 +156,8 @@ class MosaicPaymentController(
                 return ResponseEntity.status(
                     HttpStatus.BAD_REQUEST
                 ).body(SimpleErrorResponse(exception))
+            } else {
+                throw exception
             }
         }
     }

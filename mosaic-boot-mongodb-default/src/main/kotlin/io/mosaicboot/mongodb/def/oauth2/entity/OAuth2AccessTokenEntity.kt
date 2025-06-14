@@ -21,7 +21,7 @@ import org.springframework.data.mongodb.core.mapping.Document
 import org.springframework.data.mongodb.core.mapping.Field
 import java.time.Instant
 
-@Document(collection = "\${mosaic.datasource.mongodb.collections.oauth2AccessToken.collection:oauth2Tokens}")
+@Document(collection = "\${mosaic.datasource.mongodb.collections.userOauth2AccessToken.collection:userOauth2Tokens}")
 data class OAuth2AccessTokenEntity(
     @Id
     val id: String,

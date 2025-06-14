@@ -44,6 +44,8 @@ dependencies {
     api("org.springframework.boot:spring-boot-starter-aop")
     compileOnly("org.springframework.security:spring-security-oauth2-client")
 
+    api(project(":mosaic-boot-common"))
+
     implementation("org.springframework:spring-tx")
     implementation("com.fasterxml.uuid:java-uuid-generator:5.1.0")
 

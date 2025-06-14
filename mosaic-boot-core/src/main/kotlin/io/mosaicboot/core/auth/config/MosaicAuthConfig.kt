@@ -25,13 +25,12 @@ import io.mosaicboot.core.auth.service.AuthTokenService
 import io.mosaicboot.core.auth.service.AuthenticationService
 import io.mosaicboot.core.auth.service.CredentialService
 import io.mosaicboot.core.auth.repository.AuthenticationRepositoryBase
-import io.mosaicboot.core.user.repository.TenantUserRepositoryBase
-import io.mosaicboot.core.user.repository.UserRepositoryBase
+import io.mosaicboot.data.repository.TenantUserRepositoryBase
+import io.mosaicboot.data.repository.UserRepositoryBase
 import io.mosaicboot.core.auth.MosaicCredentialHandler
-import io.mosaicboot.core.auth.controller.AuthControllerHelper
 import io.mosaicboot.core.encryption.ServerSideCrypto
 import io.mosaicboot.core.tenant.config.MosaicTenantProperties
-import io.mosaicboot.core.user.repository.GlobalRoleRepositoryBase
+import io.mosaicboot.data.repository.GlobalRoleRepositoryBase
 import io.mosaicboot.core.user.service.AuditService
 import io.mosaicboot.core.user.service.MosaicOAuth2UserService
 import io.mosaicboot.core.user.service.UserService
@@ -125,19 +124,6 @@ class MosaicAuthConfig(
         )
         registrationBean.order = SecurityProperties.DEFAULT_FILTER_ORDER - 1
         return registrationBean
-    }
-
-    @Bean
-    fun authControllerHelper(
-        authenticationService: AuthenticationService,
-        authTokenService: AuthTokenService,
-        mosaicAuthenticationHandler: MosaicAuthenticationHandler,
-    ): AuthControllerHelper {
-        return AuthControllerHelper(
-            authenticationService,
-            authTokenService,
-            mosaicAuthenticationHandler,
-        )
     }
 
     @Bean

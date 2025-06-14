@@ -22,9 +22,9 @@ import com.nimbusds.jose.JWSAlgorithm
 import com.nimbusds.jwt.JWTClaimsSet
 import io.mosaicboot.core.auth.config.MosaicAuthProperties
 import io.mosaicboot.core.auth.controller.dto.AuthTokenData
-import io.mosaicboot.core.auth.entity.Authentication
-import io.mosaicboot.core.user.entity.TenantUser
-import io.mosaicboot.core.user.entity.User
+import io.mosaicboot.data.entity.Authentication
+import io.mosaicboot.data.entity.TenantUser
+import io.mosaicboot.data.entity.User
 import io.mosaicboot.core.jwt.JweHelper
 import io.mosaicboot.core.jwt.JwkHelper
 import io.mosaicboot.core.jwt.JwtHelper
@@ -37,7 +37,7 @@ import io.mosaicboot.core.permission.exception.PermissionDeniedException
 import io.mosaicboot.core.user.controller.dto.ActiveTenantUser
 import io.mosaicboot.core.user.controller.dto.OAuth2AccessTokenJson
 import io.mosaicboot.core.user.controller.dto.OAuth2RefreshTokenJson
-import io.mosaicboot.core.user.controller.dto.TenantLoginStatus
+import io.mosaicboot.common.auth.dto.TenantLoginStatus
 import io.mosaicboot.core.user.service.UserService
 import io.mosaicboot.core.util.WebClientInfo
 import org.springframework.stereotype.Service
@@ -93,12 +93,11 @@ class AuthTokenService(
             userId = user.id,
             authenticationId = authentication.id,
             tenants = tenantUsers.associate {
-                it.first.tenantId to
-                    AuthTokenData.TenantItem(
-                        id = it.first.tenantId,
-                        userId = it.first.id,
-                        status = it.second,
-                    )
+                it.first.tenantId to AuthTokenData.TenantItem(
+                    id = it.first.tenantId,
+                    userId = it.first.id,
+                    status = it.second,
+                )
             },
             authorities = null,
             activeTenantId = tenantUsers.takeIf { it.size == 1 }

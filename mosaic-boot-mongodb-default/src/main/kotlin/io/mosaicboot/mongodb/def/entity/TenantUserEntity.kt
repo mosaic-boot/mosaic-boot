@@ -16,9 +16,9 @@
 
 package io.mosaicboot.mongodb.def.entity
 
-import io.mosaicboot.core.user.entity.TenantRole
-import io.mosaicboot.core.user.entity.TenantUser
-import io.mosaicboot.core.user.enums.UserStatus
+import io.mosaicboot.common.user.enums.UserStatus
+import io.mosaicboot.data.entity.TenantRole
+import io.mosaicboot.data.entity.TenantUser
 import org.springframework.data.annotation.Id
 import org.springframework.data.mongodb.core.index.CompoundIndex
 import org.springframework.data.mongodb.core.index.CompoundIndexes

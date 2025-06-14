@@ -29,7 +29,7 @@ data class MongodbCollectionsProperties(
     var authentication: Collection = Collection("authentications"),
     var userAuditLog: Collection = Collection("userAuditLog"),
 
-    var oauth2AccessToken: Collection = Collection("oauth2Tokens"),
+    var userOauth2AccessToken: Collection = Collection("userOauth2Tokens"),
 ) {
     data class Collection(
         var collection: String,
