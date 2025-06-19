@@ -17,6 +17,7 @@
 package io.mosaicboot.core.jwt
 
 import com.fasterxml.jackson.core.type.TypeReference
+import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.nimbusds.jose.*
 import com.nimbusds.jose.crypto.AESDecrypter
@@ -37,9 +38,11 @@ import java.util.*
 class JweHelper(
     private val algorithm: JWEAlgorithm,
     jwkSecret: JWK,
-    private val objectMapper: ObjectMapper,
+    objectMapper: ObjectMapper,
     private val expirationSeconds: Long?,
 ) {
+    private val objectMapper = objectMapper.copy()
+        .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
     private val keyId: String = jwkSecret.keyID
     private val encrypter: JWEEncrypter
     private val decrypter: JWEDecrypter

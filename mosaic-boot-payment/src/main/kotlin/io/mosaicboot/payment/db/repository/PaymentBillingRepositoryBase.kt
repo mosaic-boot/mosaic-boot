@@ -24,4 +24,6 @@ interface PaymentBillingRepositoryBase<T : PaymentBilling> :
     BaseRepository<PaymentBilling, T, String>
 {
     fun save(input: PaymentBillingInput): T
+    fun findAllByUserId(userId: String): List<T>
+    fun findAllByUserIdAndId(userId: String, id: String): T?
 }

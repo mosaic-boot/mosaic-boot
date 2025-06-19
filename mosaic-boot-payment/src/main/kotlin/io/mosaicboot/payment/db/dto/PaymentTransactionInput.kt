@@ -31,6 +31,7 @@ data class PaymentTransactionInput(
     val goodsId: String? = null,
     val goodsName: String? = null,
     val subscriptionId: String? = null,
+    val usedCouponIds: List<String>? = null,
     val amount: BigDecimal? = null,
 
     var orderStatus: OrderStatus,

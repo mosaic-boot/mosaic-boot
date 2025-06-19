@@ -20,7 +20,12 @@ import java.time.Instant
 
 data class PaymentSubscriptionInput(
     val createdAt: Instant = Instant.now(),
+    val goodsId: String,
+    val planId: String,
+    val usedCouponIds: List<String>?,
     val pg: String,
     val active: Boolean,
-    val data: Map<String, *>,
+    val pgData: Map<String, *>,
+    val validFrom: Instant,
+    val validTo: Instant,
 )

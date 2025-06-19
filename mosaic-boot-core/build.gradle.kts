@@ -74,6 +74,12 @@ dependencies {
     testImplementation("org.springframework.boot:spring-boot-starter-oauth2-client")
 }
 
+dependencyManagement {
+    imports {
+        mavenBom("org.springframework.cloud:spring-cloud-dependencies:${property("springCloudVersion")}")
+    }
+}
+
 tasks.withType<Test> {
     useJUnitPlatform()
 }

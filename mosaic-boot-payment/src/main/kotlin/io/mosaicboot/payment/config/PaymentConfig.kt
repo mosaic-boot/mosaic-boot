@@ -17,8 +17,10 @@
 package io.mosaicboot.payment.config
 
 import io.mosaicboot.payment.controller.MosaicPaymentController
+import io.mosaicboot.payment.db.repository.PaymentBillingRepositoryBase
+import io.mosaicboot.payment.db.repository.PaymentCouponRepositoryBase
+import io.mosaicboot.payment.db.repository.PaymentGoodsRepositoryBase
 import io.mosaicboot.payment.db.repository.PaymentTransactionRepositoryBase
-import io.mosaicboot.payment.goods.GoodsRepository
 import io.mosaicboot.payment.service.PaymentService
 import io.mosaicboot.payment.service.PgRouter
 import io.mosaicboot.payment.service.PgService
@@ -45,9 +47,17 @@ class PaymentConfig {
     @Bean
     fun paymentService(
         pgRouter: PgRouter,
+        paymentBillingRepository: PaymentBillingRepositoryBase<*>,
+        paymentCouponRepository: PaymentCouponRepositoryBase<*>,
+        paymentGoodsRepository: PaymentGoodsRepositoryBase<*>,
+        paymentTransactionRepository: PaymentTransactionRepositoryBase<*>,
     ): PaymentService {
         return PaymentService(
             pgRouter = pgRouter,
+            paymentBillingRepository = paymentBillingRepository,
+            paymentCouponRepository = paymentCouponRepository,
+            paymentGoodsRepository = paymentGoodsRepository,
+            paymentTransactionRepository = paymentTransactionRepository,
         )
     }
 
@@ -55,7 +65,7 @@ class PaymentConfig {
     @ConditionalOnProperty(prefix = "mosaic.payment.api", name = ["enabled"], havingValue = "true", matchIfMissing = true)
     fun mosaicPaymentController(
         paymentProperties: PaymentProperties,
-        goodsRepository: GoodsRepository,
+        goodsRepository: PaymentGoodsRepositoryBase<*>,
         paymentOrderRepository: PaymentTransactionRepositoryBase<*>,
         paymentService: PaymentService,
     ): MosaicPaymentController {
@@ -65,10 +75,5 @@ class PaymentConfig {
             paymentTransactionRepository = paymentOrderRepository,
             paymentService = paymentService,
         )
-    }
-
-    @Bean
-    fun goodsRepository(): GoodsRepository {
-        return object: GoodsRepository {}
     }
 }

@@ -30,15 +30,17 @@ class PaymentBillingEntity(
     override val userId: String,
 
     override val pg: String,
-    override val deleted: Boolean,
+    override var deleted: Boolean,
 
-    override val alias: String,
+    override var alias: String,
+
+    override var description: String,
 
     /**
      * JWE Encrypted Data
      */
-    override val secret: String,
+    override var secret: String?,
 
     override val addCardTxId: String?,
-    override var deleteCardTxId: String?,
+    override var deletePaymentMethodTxId: String?,
 ) : PaymentBilling

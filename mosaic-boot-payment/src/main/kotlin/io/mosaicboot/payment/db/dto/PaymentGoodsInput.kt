@@ -14,15 +14,23 @@
  * limitations under the License.
  */
 
-package io.mosaicboot.payment.db.repository
+package io.mosaicboot.payment.db.dto
 
-import io.mosaicboot.payment.db.entity.PaymentTransaction
-import org.springframework.data.domain.Page
-import org.springframework.data.domain.Pageable
+import io.mosaicboot.payment.db.entity.GoodsOption
+import io.mosaicboot.payment.db.entity.GoodsType
 
-interface PaymentOrderMosaicRepository<T : PaymentTransaction> {
-    fun getOrderListByUserIdWithPaged(
-        userId: String,
-        pageable: Pageable,
-    ): Page<T>
-}
+data class PaymentGoodsInput(
+    val id: String? = null,
+    val name: String,
+    val type: GoodsType,
+    val description: String? = null,
+    val basePrice: Long,
+    val options: List<GoodsOptionInput> = emptyList(),
+)
+
+data class GoodsOptionInput(
+    override val id: String,
+    override var name: String,
+    override var additionalPrice: Long,
+    override var data: Map<String, Any?>? = null,
+) : GoodsOption

@@ -16,4 +16,7 @@
 
 package io.mosaicboot.payment.service
 
-interface PgRouter : PgService
+interface PgRouter {
+    fun getPg(name: String): PgService
+    fun getDefault(): PgService
+}

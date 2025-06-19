@@ -1,4 +1,4 @@
-package io.mosaicboot.core.error
+package io.mosaicboot.core.result
 
 class UserErrorMessageException : Exception {
     constructor(message: String) : super(message)

@@ -42,6 +42,7 @@ class PaymentTransactionEntity(
     override val goodsId: String?,
     override val goodsName: String?,
     override val subscriptionId: String?,
+    override val usedCouponIds: List<String>?,
     override val amount: BigDecimal?,
 
     override var orderStatus: OrderStatus,

@@ -23,11 +23,18 @@ kotlin {
 dependencies {
     implementation(platform("org.springframework.cloud:spring-cloud-dependencies:2024.0.1"))
     implementation("org.springframework.cloud:spring-cloud-starter-openfeign")
+    implementation("org.springframework.cloud:spring-cloud-stream")
     implementation("org.springframework:spring-tx")
 
     api(project(":mosaic-boot-core"))
     api(project(":mosaic-boot-payment"))
     implementation("com.nimbusds:nimbus-jose-jwt:10.0.1")
+}
+
+dependencyManagement {
+    imports {
+        mavenBom("org.springframework.cloud:spring-cloud-dependencies:${property("springCloudVersion")}")
+    }
 }
 
 tasks.test {

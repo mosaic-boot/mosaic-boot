@@ -34,9 +34,10 @@ class PaymentBillingCustomRepositoryImpl(
             pg = input.pg,
             deleted = false,
             alias = input.alias,
+            description = input.description,
             secret = input.secret,
             addCardTxId = input.addCardTxId,
-            deleteCardTxId = null,
+            deletePaymentMethodTxId = null,
         ))
     }
 }

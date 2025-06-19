@@ -25,6 +25,11 @@ import java.time.Instant
 interface PaymentSubscription : UpdatableEntity<String> {
     val pg: String
     val active: Boolean
-    val data: Map<String, *>
+    val pgData: Map<String, *>
     val cancelledAt: Instant?
+    val goodsId: String
+    val planId: String
+    val usedCouponIds: List<String>?
+    val validFrom: Instant
+    val validTo: Instant
 }

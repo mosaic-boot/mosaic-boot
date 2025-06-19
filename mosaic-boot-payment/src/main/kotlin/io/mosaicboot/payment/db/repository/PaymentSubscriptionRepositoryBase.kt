@@ -19,10 +19,11 @@ package io.mosaicboot.payment.db.repository
 import io.mosaicboot.data.repository.BaseRepository
 import io.mosaicboot.payment.db.dto.PaymentSubscriptionInput
 import io.mosaicboot.payment.db.entity.PaymentSubscription
+import io.mosaicboot.payment.db.entity.PaymentSubscriptionHistory
 
 interface PaymentSubscriptionRepositoryBase<T : PaymentSubscription> :
     BaseRepository<PaymentSubscription, T, String>,
     PaymentSubscriptionMosaicRepository<T>
 {
-    fun save(input: PaymentSubscriptionInput): T
+//    fun findActiveByGoodsId(goodsId: String, userId: String): List<T>
 }

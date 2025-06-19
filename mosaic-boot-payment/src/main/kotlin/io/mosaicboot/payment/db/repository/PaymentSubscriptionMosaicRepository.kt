@@ -16,5 +16,8 @@
 
 package io.mosaicboot.payment.db.repository
 
+import io.mosaicboot.payment.db.dto.PaymentSubscriptionInput
+
 interface PaymentSubscriptionMosaicRepository<T> {
+    fun save(input: PaymentSubscriptionInput): T
 }

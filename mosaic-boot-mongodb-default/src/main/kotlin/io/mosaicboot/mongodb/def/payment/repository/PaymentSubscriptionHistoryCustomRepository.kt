@@ -14,7 +14,10 @@
  * limitations under the License.
  */
 
-package io.mosaicboot.payment.goods
+package io.mosaicboot.mongodb.def.payment.repository
 
-interface GoodsRepository {
+import io.mosaicboot.mongodb.def.payment.entity.PaymentPaymentSubscriptionHistoryEntity
+
+interface PaymentSubscriptionHistoryCustomRepository {
+    fun findAllBySubscriptionId(subscriptionId: String): List<PaymentPaymentSubscriptionHistoryEntity>
 }

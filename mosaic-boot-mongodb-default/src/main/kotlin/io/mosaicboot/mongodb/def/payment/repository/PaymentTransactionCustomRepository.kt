@@ -18,8 +18,6 @@ package io.mosaicboot.mongodb.def.payment.repository
 
 import io.mosaicboot.mongodb.def.payment.entity.PaymentTransactionEntity
 import io.mosaicboot.payment.db.dto.PaymentTransactionInput
-import io.mosaicboot.payment.db.repository.PaymentOrderMosaicRepository
+import io.mosaicboot.payment.db.repository.PaymentTransactionMosaicRepository
 
-interface PaymentTransactionCustomRepository : PaymentOrderMosaicRepository<PaymentTransactionEntity> {
-    fun save(input: PaymentTransactionInput): PaymentTransactionEntity
-}
+interface PaymentTransactionCustomRepository : PaymentTransactionMosaicRepository<PaymentTransactionEntity>

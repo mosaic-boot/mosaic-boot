@@ -33,6 +33,7 @@ interface PaymentTransaction : UpdatableEntity<String> {
     val goodsId: String?
     val goodsName: String?
     val subscriptionId: String?
+    val usedCouponIds: List<String>?
     val amount: BigDecimal?
 
     var orderStatus: OrderStatus

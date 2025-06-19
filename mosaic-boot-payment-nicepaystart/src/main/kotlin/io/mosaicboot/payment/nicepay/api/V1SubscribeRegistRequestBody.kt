@@ -95,7 +95,7 @@ data class V1SubscribeRegistRequestBody(
      * 선택 | 256 Byte
      */
     @field:JsonProperty("signData")
-    val signData: String? = null,
+    var signData: String? = null,
 
     /**
      * 응답파라메터 인코딩 방식
@@ -106,6 +106,14 @@ data class V1SubscribeRegistRequestBody(
     @field:JsonProperty("returnCharSet")
     val returnCharSet: String = "utf-8",
 ) {
+    fun withSign(secretKey: String): V1SubscribeRegistRequestBody{
+        this.signData = ApiUtil.makeSignature(
+            "${orderId}${ediDate}",
+            secretKey
+        )
+        return this
+    }
+
     companion object {
         fun makeSignData(orderId: String, ediDate: String, secretKey: String): String {
             return ApiUtil.makeSignature(orderId + ediDate, secretKey)

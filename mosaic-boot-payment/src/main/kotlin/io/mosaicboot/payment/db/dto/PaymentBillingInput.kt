@@ -9,6 +9,8 @@ data class PaymentBillingInput(
 
     val alias: String,
 
+    val description: String,
+
     /**
      * JWE Encrypted Data
      */

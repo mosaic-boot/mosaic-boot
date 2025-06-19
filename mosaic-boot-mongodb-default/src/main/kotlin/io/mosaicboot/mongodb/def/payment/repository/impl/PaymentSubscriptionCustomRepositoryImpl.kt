@@ -21,6 +21,7 @@ import io.mosaicboot.mongodb.def.payment.entity.PaymentSubscriptionEntity
 import io.mosaicboot.mongodb.def.payment.repository.PaymentSubscriptionCustomRepository
 import io.mosaicboot.payment.db.dto.PaymentSubscriptionInput
 import org.springframework.data.mongodb.core.MongoTemplate
+import java.time.Instant
 
 class PaymentSubscriptionCustomRepositoryImpl(
     private val mongoTemplate: MongoTemplate,
@@ -30,10 +31,15 @@ class PaymentSubscriptionCustomRepositoryImpl(
             id = UUIDv7.generate().toString(),
             createdAt = input.createdAt,
             updatedAt = input.createdAt,
+            goodsId = input.goodsId,
+            planId = input.planId,
+            usedCouponIds = input.usedCouponIds,
             pg = input.pg,
             active = input.active,
             cancelledAt = null,
-            data = input.data,
+            pgData = input.pgData,
+            validFrom = input.validFrom,
+            validTo = input.validTo,
         ))
     }
 }

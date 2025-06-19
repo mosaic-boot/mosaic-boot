@@ -1,7 +1,7 @@
 package io.mosaicboot.core.http.dto
 
 import com.fasterxml.jackson.annotation.JsonProperty
-import io.mosaicboot.core.error.UserErrorMessageException
+import io.mosaicboot.core.result.UserErrorMessageException
 
 class SimpleErrorResponse(
     @JsonProperty("message")

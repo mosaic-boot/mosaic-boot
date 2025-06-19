@@ -33,6 +33,9 @@ subprojects {
         }
     }
 
+    extra["springCloudVersion"] = "2024.0.1"
+
+
 //    extensions.getByType(JavaPluginExtension::class).apply {
 //        sourceCompatibility = JavaVersion.VERSION_17
 //        targetCompatibility = JavaVersion.VERSION_17

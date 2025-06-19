@@ -25,8 +25,16 @@ tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().all {
 }
 
 dependencies {
+    implementation("org.springframework.cloud:spring-cloud-stream")
+
     api(project(":mosaic-boot-core"))
     implementation("com.nimbusds:nimbus-jose-jwt:10.0.1")
+}
+
+dependencyManagement {
+    imports {
+        mavenBom("org.springframework.cloud:spring-cloud-dependencies:${property("springCloudVersion")}")
+    }
 }
 
 tasks.test {

@@ -28,6 +28,7 @@ import org.springframework.data.mongodb.core.MongoTemplate
 import org.springframework.data.mongodb.core.aggregation.Aggregation
 import org.springframework.data.mongodb.core.mapping.Field
 import org.springframework.data.mongodb.core.query.Criteria
+import org.springframework.data.mongodb.core.query.Query
 import org.springframework.data.mongodb.core.query.isEqualTo
 
 class PaymentTransactionCustomRepositoryImpl(
@@ -47,6 +48,7 @@ class PaymentTransactionCustomRepositoryImpl(
             goodsId = input.goodsId,
             goodsName = input.goodsName,
             subscriptionId = input.subscriptionId,
+            usedCouponIds = input.usedCouponIds,
             amount = input.amount,
 
             orderStatus = input.orderStatus,
@@ -76,4 +78,15 @@ class PaymentTransactionCustomRepositoryImpl(
         @Field("items")
         override val items: List<PaymentTransactionEntity>,
     ) : Paged<PaymentTransactionEntity>
+
+
+    override fun hasCouponUsed(userId: String, couponId: String): Boolean {
+        return mongoTemplate.find(
+            Query.query(
+                Criteria("userId").isEqualTo(userId)
+                    .and("usedCouponIds").`in`(couponId)
+            ),
+            PaymentTransactionEntity::class.java,
+        ).isNotEmpty()
+    }
 }

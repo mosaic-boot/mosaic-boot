@@ -5,15 +5,17 @@ import io.mosaicboot.data.entity.UpdatableEntity
 interface PaymentBilling : UpdatableEntity<String> {
     val userId: String
     val pg: String
-    val deleted: Boolean
+    var deleted: Boolean
 
-    val alias: String
+    var alias: String
+
+    var description: String
 
     /**
      * JWE Encrypted Data
      */
-    val secret: String
+    var secret: String?
 
     val addCardTxId: String?
-    var deleteCardTxId: String?
+    var deletePaymentMethodTxId: String?
 }
