@@ -39,7 +39,7 @@ class JweHelper(
     private val algorithm: JWEAlgorithm,
     jwkSecret: JWK,
     objectMapper: ObjectMapper,
-    private val expirationSeconds: Long?,
+    private val expirationSeconds: Long? = null,
 ) {
     private val objectMapper = objectMapper.copy()
         .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)

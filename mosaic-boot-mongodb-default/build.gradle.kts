@@ -24,6 +24,7 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-data-mongodb")
     implementation("com.fasterxml.uuid:java-uuid-generator:5.1.0")
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.18.3")
+    implementation("org.bouncycastle:bcprov-${Version.BCPROV}")
     api(project(":mosaic-boot-common"))
     api(project(":mosaic-boot-core"))
     compileOnly(project(":mosaic-boot-payment"))

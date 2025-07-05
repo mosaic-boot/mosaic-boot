@@ -16,10 +16,11 @@
 
 package io.mosaicboot.data.entity
 
+import io.mosaicboot.data.iface.UserRelatedObject
 import java.time.Instant
 
-interface Authentication : UpdatableEntity<String> {
-    val userId: String
+interface Authentication : UpdatableEntity<String>, UserRelatedObject {
+    override val userId: String
 
     /**
      * [io.mosaicboot.common.auth.enums.AuthMethod]

@@ -41,6 +41,6 @@ data class PaymentGoodsEntity(
 data class GoodsOptionEntity(
     override val id: String,
     override var name: String,
-    override var additionalPrice: Long,
+    override var additionalPrice: BigDecimal,
     override var data: Map<String, Any?>? = null,
 ) : io.mosaicboot.payment.db.entity.GoodsOption

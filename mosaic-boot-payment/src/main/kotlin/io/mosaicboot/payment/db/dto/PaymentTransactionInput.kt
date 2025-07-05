@@ -23,6 +23,7 @@ data class PaymentTransactionInput(
     val id: String? = null,
     val userId: String,
     val createdAt: Instant,
+    val traceId: String,
     val type: TransactionType,
     val pg: String,
     val pgUniqueId: String,

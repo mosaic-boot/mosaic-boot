@@ -14,16 +14,19 @@
  * limitations under the License.
  */
 
-package io.mosaicboot.payment.db.dto
+package io.mosaicboot.payment.controller.dto
 
-import io.mosaicboot.payment.db.entity.CouponType
-import java.time.Instant
+import com.fasterxml.jackson.annotation.JsonProperty
 
-data class PaymentCouponInput(
-    val createdAt: Instant,
-    val code: String,
-    val count: Long,
-    val type: CouponType,
-    val oncePerUser: Boolean,
-    val discounts: List<PaymentCouponDiscount>,
+data class CreateSubscriptionRequest(
+    @JsonProperty("goodsId")
+    val goodsId: String,
+    @JsonProperty("planId")
+    val planId: String,
+    @JsonProperty("billingId")
+    val billingId: String,
+    @JsonProperty("optionId")
+    val optionId: String?,
+    @JsonProperty("couponId")
+    val couponId: String?,
 )

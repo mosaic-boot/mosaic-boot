@@ -114,7 +114,7 @@ data class V1SubscribePaymentRequestBody(
      * 선택 | 256 Byte
      */
     @field:JsonProperty("signData")
-    val signData: String? = null,
+    var signData: String? = null,
 
     /**
      * 응답파라메터 인코딩 방식
@@ -124,4 +124,12 @@ data class V1SubscribePaymentRequestBody(
      */
     @field:JsonProperty("returnCharSet")
     val returnCharSet: String = "utf-8"
-)
+) {
+    fun withSign(bid: String, secretKey: String): V1SubscribePaymentRequestBody {
+        this.signData = ApiUtil.makeSignature(
+            "${orderId}${bid}${ediDate}",
+            secretKey
+        )
+        return this
+    }
+}

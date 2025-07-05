@@ -34,7 +34,6 @@ class JweServerSideCryptoProvider(
             algorithm = algorithm,
             jwkSecret = JwkHelper.loadSecret(algorithm, jweConfig.secret),
             objectMapper = objectMapper,
-            expirationSeconds = jweConfig.expiration.toLong(),
         )
     }
 

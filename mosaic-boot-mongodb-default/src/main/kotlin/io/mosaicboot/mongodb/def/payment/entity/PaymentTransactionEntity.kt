@@ -33,6 +33,7 @@ class PaymentTransactionEntity(
     override val createdAt: Instant,
     override var updatedAt: Instant,
     override val userId: String,
+    override val traceId: String,
     override val type: TransactionType,
     override val pg: String,
     @Indexed(unique = true)

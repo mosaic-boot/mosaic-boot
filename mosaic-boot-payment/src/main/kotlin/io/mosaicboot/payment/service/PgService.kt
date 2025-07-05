@@ -20,21 +20,34 @@ import io.mosaicboot.core.auth.MosaicAuthenticatedToken
 import io.mosaicboot.core.result.SimpleSuccess
 import io.mosaicboot.payment.controller.dto.AddCardTypeKrRequest
 import io.mosaicboot.payment.db.entity.PaymentBilling
+import io.mosaicboot.payment.db.entity.PaymentTransaction
+import io.mosaicboot.payment.dto.SubmitBillingPayment
 
 interface PgService {
     fun getName(): String
 
-    fun billingAddCard(
+    fun addBillingCard(
         authentication: MosaicAuthenticatedToken,
+        traceId: String,
         request: AddCardTypeKrRequest,
     ): Result<PaymentBilling> {
         throw NotImplementedError("Not implemented this PG")
     }
 
-    fun billingDelete(
+    fun removeBillingMethod(
         authentication: MosaicAuthenticatedToken,
+        traceId: String,
         billing: PaymentBilling,
     ): Result<SimpleSuccess> {
+        throw NotImplementedError("Not implemented this PG")
+    }
+
+    fun processBillingPayment(
+        authentication: MosaicAuthenticatedToken,
+        traceId: String,
+        billing: PaymentBilling,
+        request: SubmitBillingPayment,
+    ): Result<PaymentTransaction> {
         throw NotImplementedError("Not implemented this PG")
     }
 }

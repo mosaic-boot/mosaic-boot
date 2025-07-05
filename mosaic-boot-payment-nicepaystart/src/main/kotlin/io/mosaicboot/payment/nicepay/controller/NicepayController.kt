@@ -1,3 +1,19 @@
+/**
+ * Copyright 2025 JC-Lab (mosaicboot.io)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package io.mosaicboot.payment.nicepay.controller
 
 import com.fasterxml.jackson.databind.ObjectMapper
@@ -11,7 +27,6 @@ import io.swagger.v3.oas.annotations.Operation
 import jakarta.servlet.http.HttpServletResponse
 import org.slf4j.LoggerFactory
 import org.springframework.context.ApplicationContext
-import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
@@ -19,9 +34,8 @@ import org.springframework.util.MultiValueMap
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestParam
-import org.springframework.web.client.HttpClientErrorException
+import org.springframework.web.server.ResponseStatusException
 import org.springframework.web.util.UriComponentsBuilder
-import java.nio.charset.StandardCharsets
 
 @MosaicController
 class NicepayController(
@@ -59,12 +73,9 @@ class NicepayController(
             requestBody.clientId != nicepayProperties.clientId ||
             !requestBody.verifySignature(nicepayProperties.clientSecret)
         ) {
-            throw HttpClientErrorException.create(
+            throw ResponseStatusException(
                 HttpStatus.BAD_REQUEST,
-                "bad signature or data",
-                HttpHeaders(),
-                "".toByteArray(),
-                StandardCharsets.UTF_8
+                "bad signature or data"
             )
         }
 
@@ -90,12 +101,9 @@ class NicepayController(
         val isTest = body.mallReserved?.contains("TEST") == true
 
         if (!isTest && !body.verifySignature(nicepayProperties.clientSecret)) {
-            throw HttpClientErrorException.create(
+            throw ResponseStatusException(
                 HttpStatus.BAD_REQUEST,
                 "bad signature or data",
-                HttpHeaders(),
-                "".toByteArray(),
-                StandardCharsets.UTF_8
             )
         }
 

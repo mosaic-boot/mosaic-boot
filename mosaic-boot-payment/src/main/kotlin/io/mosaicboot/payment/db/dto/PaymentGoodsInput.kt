@@ -18,6 +18,7 @@ package io.mosaicboot.payment.db.dto
 
 import io.mosaicboot.payment.db.entity.GoodsOption
 import io.mosaicboot.payment.db.entity.GoodsType
+import java.math.BigDecimal
 
 data class PaymentGoodsInput(
     val id: String? = null,
@@ -31,6 +32,6 @@ data class PaymentGoodsInput(
 data class GoodsOptionInput(
     override val id: String,
     override var name: String,
-    override var additionalPrice: Long,
+    override var additionalPrice: BigDecimal,
     override var data: Map<String, Any?>? = null,
 ) : GoodsOption

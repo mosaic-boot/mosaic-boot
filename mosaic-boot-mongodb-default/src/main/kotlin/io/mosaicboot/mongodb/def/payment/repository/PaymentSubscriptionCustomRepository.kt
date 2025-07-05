@@ -18,7 +18,16 @@ package io.mosaicboot.mongodb.def.payment.repository
 
 import io.mosaicboot.mongodb.def.payment.entity.PaymentSubscriptionEntity
 import io.mosaicboot.payment.db.dto.PaymentSubscriptionInput
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.PageRequest
 
 interface PaymentSubscriptionCustomRepository {
     fun save(input: PaymentSubscriptionInput): PaymentSubscriptionEntity
+    fun findLatestByUserIdAndGoodsId(userId: String, goodsId: String): PaymentSubscriptionEntity?
+    fun findSubscriptions(
+        userId: String,
+        goodsId: String?,
+        active: Boolean?,
+        pageRequest: PageRequest,
+    ): Page<PaymentSubscriptionEntity>
 }

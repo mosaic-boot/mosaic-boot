@@ -17,9 +17,11 @@
 package io.mosaicboot.payment.config
 
 import io.mosaicboot.payment.controller.MosaicPaymentController
+import io.mosaicboot.payment.controller.MosaicPaymentSubscriptionController
 import io.mosaicboot.payment.db.repository.PaymentBillingRepositoryBase
 import io.mosaicboot.payment.db.repository.PaymentCouponRepositoryBase
 import io.mosaicboot.payment.db.repository.PaymentGoodsRepositoryBase
+import io.mosaicboot.payment.db.repository.PaymentSubscriptionRepositoryBase
 import io.mosaicboot.payment.db.repository.PaymentTransactionRepositoryBase
 import io.mosaicboot.payment.service.PaymentService
 import io.mosaicboot.payment.service.PgRouter
@@ -51,6 +53,7 @@ class PaymentConfig {
         paymentCouponRepository: PaymentCouponRepositoryBase<*>,
         paymentGoodsRepository: PaymentGoodsRepositoryBase<*>,
         paymentTransactionRepository: PaymentTransactionRepositoryBase<*>,
+        paymentSubscriptionRepository: PaymentSubscriptionRepositoryBase<*>,
     ): PaymentService {
         return PaymentService(
             pgRouter = pgRouter,
@@ -58,6 +61,7 @@ class PaymentConfig {
             paymentCouponRepository = paymentCouponRepository,
             paymentGoodsRepository = paymentGoodsRepository,
             paymentTransactionRepository = paymentTransactionRepository,
+            paymentSubscriptionRepository = paymentSubscriptionRepository,
         )
     }
 
@@ -70,6 +74,22 @@ class PaymentConfig {
         paymentService: PaymentService,
     ): MosaicPaymentController {
         return MosaicPaymentController(
+            paymentProperties = paymentProperties,
+            goodsRepository = goodsRepository,
+            paymentTransactionRepository = paymentOrderRepository,
+            paymentService = paymentService,
+        )
+    }
+
+    @Bean
+    @ConditionalOnProperty(prefix = "mosaic.payment.subscription.api", name = ["enabled"], havingValue = "true", matchIfMissing = true)
+    fun mosaicPaymentSubscriptionController(
+        paymentProperties: PaymentProperties,
+        goodsRepository: PaymentGoodsRepositoryBase<*>,
+        paymentOrderRepository: PaymentTransactionRepositoryBase<*>,
+        paymentService: PaymentService,
+    ): MosaicPaymentSubscriptionController {
+        return MosaicPaymentSubscriptionController(
             paymentProperties = paymentProperties,
             goodsRepository = goodsRepository,
             paymentTransactionRepository = paymentOrderRepository,

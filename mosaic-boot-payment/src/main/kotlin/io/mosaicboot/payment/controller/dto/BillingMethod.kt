@@ -2,7 +2,7 @@ package io.mosaicboot.payment.controller.dto
 
 import com.fasterxml.jackson.annotation.JsonProperty
 
-data class AddCardResponse(
+data class BillingMethod(
     @field:JsonProperty("billingId")
     val billingId: String,
     @field:JsonProperty("alias")

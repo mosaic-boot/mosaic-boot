@@ -17,7 +17,11 @@
 package io.mosaicboot.mongodb.def.payment.entity
 
 import io.mosaicboot.payment.db.entity.PaymentSubscription
+import org.bson.types.ObjectId
 import org.springframework.data.annotation.Id
+import org.springframework.data.mongodb.core.index.CompoundIndex
+import org.springframework.data.mongodb.core.index.CompoundIndexes
+import org.springframework.data.mongodb.core.index.Indexed
 import org.springframework.data.mongodb.core.mapping.Document
 import java.time.Instant
 
@@ -27,13 +31,20 @@ data class PaymentSubscriptionEntity(
     override val id: String,
     override val createdAt: Instant,
     override var updatedAt: Instant,
+    override val traceId: String,
+    @Indexed(unique = false)
+    override val userId: String,
     override val goodsId: String,
-    override val planId: String,
+    override val optionId: String?,
+    override val version: Int,
+    @Indexed(unique = true)
+    override val idempotentKey: String,
     override val usedCouponIds: List<String>?,
-    override val pg: String,
+    override val billingId: String,
+    override val billingCycle: Int,
     override val pgData: Map<String, *>,
-    override val active: Boolean,
-    override val cancelledAt: Instant?,
-    override val validFrom: Instant,
-    override val validTo: Instant,
+    override var active: Boolean,
+    override var cancelledAt: Instant?,
+    override var validFrom: Instant,
+    override var validTo: Instant,
 ) : PaymentSubscription

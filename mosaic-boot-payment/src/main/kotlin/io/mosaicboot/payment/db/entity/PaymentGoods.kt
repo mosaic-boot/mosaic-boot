@@ -30,12 +30,12 @@ interface PaymentGoods : UpdatableEntity<String> {
 
 enum class GoodsType {
     REGULAR,
-    SUBSCRIPTION
+    SUBSCRIPTION,
 }
 
 interface GoodsOption {
     val id: String
     var name: String
-    var additionalPrice: Long
+    var additionalPrice: BigDecimal
     var data: Map<String, Any?>?
 }

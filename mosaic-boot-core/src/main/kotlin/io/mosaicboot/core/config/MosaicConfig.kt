@@ -33,6 +33,7 @@ import io.mosaicboot.core.util.AuthorizationContextResolver
 import io.mosaicboot.core.encryption.JweServerSideCryptoProvider
 import io.mosaicboot.core.encryption.ServerSideCrypto
 import io.mosaicboot.core.encryption.ServerSideCryptoProvider
+import io.mosaicboot.core.http.MosaicErrorControllerAdvice
 import io.mosaicboot.core.util.WebClientInfo
 import io.mosaicboot.core.util.WebClientInfoResolver
 import io.swagger.v3.oas.models.OpenAPI
@@ -123,6 +124,11 @@ class MosaicConfig {
             serverBaseUrlCustomisers,
             javadocProvider
         )
+    }
+
+    @Bean
+    fun mosaicErrorControllerAdvice(): MosaicErrorControllerAdvice {
+        return MosaicErrorControllerAdvice()
     }
 
     @Bean

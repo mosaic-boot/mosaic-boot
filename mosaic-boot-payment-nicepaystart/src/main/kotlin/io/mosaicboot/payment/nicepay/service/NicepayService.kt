@@ -35,6 +35,8 @@ import io.mosaicboot.payment.db.entity.PaymentTransaction
 import io.mosaicboot.payment.db.repository.PaymentBillingRepositoryBase
 import io.mosaicboot.payment.db.repository.PaymentLogRepositoryBase
 import io.mosaicboot.payment.db.repository.PaymentTransactionRepositoryBase
+import io.mosaicboot.payment.dto.SubmitBillingPayment
+import io.mosaicboot.payment.dto.TransactionBasicInfo
 import io.mosaicboot.payment.nicepay.api.AuthResponse
 import io.mosaicboot.payment.nicepay.api.NicepayApiClient
 import io.mosaicboot.payment.nicepay.api.PaymentNotificationResponse
@@ -42,6 +44,7 @@ import io.mosaicboot.payment.nicepay.api.V1PaymentNetCancelRequestBody
 import io.mosaicboot.payment.nicepay.api.V1PaymentRequestBody
 import io.mosaicboot.payment.nicepay.api.V1PaymentResultBase
 import io.mosaicboot.payment.nicepay.api.V1SubscribeExpireRequestBody
+import io.mosaicboot.payment.nicepay.api.V1SubscribePaymentRequestBody
 import io.mosaicboot.payment.nicepay.api.V1SubscribeRegistRequestBody
 import io.mosaicboot.payment.nicepay.config.NicepayProperties
 import io.mosaicboot.payment.nicepay.dto.NicepayBillingData
@@ -49,7 +52,9 @@ import io.mosaicboot.payment.nicepay.dto.NicepayConst
 import io.mosaicboot.payment.nicepay.dto.OrderResult
 import io.mosaicboot.payment.service.PgService
 import org.slf4j.LoggerFactory
+import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
 import java.time.Instant
 import java.time.format.DateTimeFormatter
@@ -202,12 +207,14 @@ class NicepayService(
         }
     }
 
-    override fun billingAddCard(
+    override fun addBillingCard(
         authentication: MosaicAuthenticatedToken,
+        traceId: String,
         request: AddCardTypeKrRequest,
     ): Result<PaymentBilling> {
         return handleTransaction(
             authentication,
+            traceId,
             TransactionType.BILLING_ADD_CARD
         ) { transaction, ediDate ->
             val response = nicepayApiClient.postSubscribeRegist(
@@ -260,18 +267,25 @@ class NicepayService(
             } else {
                 transaction.orderStatus = OrderStatus.FAILURE
 
-                Result.failure(UserErrorMessageException("${response.resultCode}: ${response.resultMsg}"))
+                Result.failure(
+                    UserErrorMessageException(
+                        HttpStatus.BAD_REQUEST,
+                        "${response.resultCode}: ${response.resultMsg}",
+                    )
+                )
             }
         }
     }
 
-    override fun billingDelete(
+    override fun removeBillingMethod(
         authentication: MosaicAuthenticatedToken,
+        traceId: String,
         billing: PaymentBilling
     ): Result<SimpleSuccess> {
         return handleTransaction(
             authentication,
-            TransactionType.BILLING_ADD_CARD
+            traceId,
+            TransactionType.BILLING_REMOVE_CARD
         ) { transaction, ediDate ->
             val data = serverSideCrypto.decrypt(billing.secret!!, NicepayBillingData::class.java)
             val response = nicepayApiClient.postSubscribeExpire(
@@ -281,24 +295,76 @@ class NicepayService(
                     ediDate = ediDate,
                 ).withSign(data.bid, nicepayProperties.clientSecret)
             )
+            transaction.pgData = objectMapper.convertValue(
+                response,
+                object: TypeReference<Map<String, *>>() {}
+            )
             if (response.resultCode == "0000") {
                 transaction.orderStatus = OrderStatus.COMPLETED
                 Result.success(SimpleSuccess(response.resultMsg))
             } else {
                 transaction.orderStatus = OrderStatus.FAILURE
-                Result.failure(UserErrorMessageException("${response.resultCode}: ${response.resultMsg}"))
+                Result.failure(UserErrorMessageException(
+                    HttpStatus.BAD_REQUEST,
+                    "${response.resultCode}: ${response.resultMsg}"
+                ))
+            }
+        }
+    }
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    override fun processBillingPayment(
+        authentication: MosaicAuthenticatedToken,
+        traceId: String,
+        billing: PaymentBilling,
+        request: SubmitBillingPayment
+    ): Result<PaymentTransaction> {
+        return handleTransaction(
+            authentication,
+            traceId,
+            TransactionType.ORDER,
+            transactionBasicInfo = request,
+        ) { transaction, ediDate ->
+            val data = serverSideCrypto.decrypt(billing.secret!!, NicepayBillingData::class.java)
+            val response = nicepayApiClient.postSubscribePayment(
+                data.bid,
+                V1SubscribePaymentRequestBody(
+                    orderId = transaction.pgUniqueId,
+                    ediDate = ediDate,
+                    goodsName = request.goodsName ?: "",
+                    cardQuota = "0",
+                    useShopInterest = false,
+                    amount = request.amount.toInt(), // TODO: convert safety
+                ).withSign(data.bid, nicepayProperties.clientSecret)
+            )
+            transaction.pgData = objectMapper.convertValue(
+                response,
+                object: TypeReference<Map<String, *>>() {}
+            )
+            if (response.resultCode == "0000") {
+                transaction.orderStatus = OrderStatus.COMPLETED
+                Result.success(transaction)
+            } else {
+                transaction.orderStatus = OrderStatus.FAILURE
+                Result.failure(UserErrorMessageException(
+                    HttpStatus.BAD_REQUEST,
+                    "${response.resultCode}: ${response.resultMsg}"
+                ))
             }
         }
     }
 
     fun <T> handleTransaction(
         authentication: MosaicAuthenticatedToken,
+        traceId: String,
         type: TransactionType,
+        transactionBasicInfo: TransactionBasicInfo? = null,
         fn: (tx: PaymentTransaction, ediDate: String) -> Result<T>,
     ): Result<T> {
         val now = Instant.now()
         val txId = UUIDv7.generate().toString()
         val transaction = paymentTransactionRepository.save(PaymentTransactionInput(
+            traceId = traceId,
             id = txId,
             userId = authentication.userId,
             createdAt = now,
@@ -306,6 +372,10 @@ class NicepayService(
             pg = NicepayConst.PG,
             pgUniqueId = txId,
             orderStatus = OrderStatus.PROCESSING,
+            goodsId = transactionBasicInfo?.goodsId,
+            goodsName = transactionBasicInfo?.goodsName,
+            subscriptionId = transactionBasicInfo?.subscriptionId,
+            amount = transactionBasicInfo?.amount,
         ))
         val ediDate = DateTimeFormatter.ISO_INSTANT.format(now)
 

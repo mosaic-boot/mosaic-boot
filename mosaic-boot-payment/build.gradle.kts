@@ -26,6 +26,7 @@ tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().all {
 
 dependencies {
     implementation("org.springframework.cloud:spring-cloud-stream")
+    implementation("org.bouncycastle:bcprov-${Version.BCPROV}")
 
     api(project(":mosaic-boot-core"))
     implementation("com.nimbusds:nimbus-jose-jwt:10.0.1")

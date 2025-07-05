@@ -17,7 +17,17 @@
 package io.mosaicboot.payment.db.repository
 
 import io.mosaicboot.payment.db.dto.PaymentSubscriptionInput
+import io.mosaicboot.payment.db.entity.PaymentSubscription
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.PageRequest
 
-interface PaymentSubscriptionMosaicRepository<T> {
+interface PaymentSubscriptionMosaicRepository<T : PaymentSubscription> {
     fun save(input: PaymentSubscriptionInput): T
+    fun findLatestByUserIdAndGoodsId(userId: String, goodsId: String): T?
+    fun findSubscriptions(
+        userId: String,
+        goodsId: String?,
+        active: Boolean?,
+        pageRequest: PageRequest,
+    ): Page<T>
 }

@@ -40,6 +40,7 @@ class PaymentTransactionCustomRepositoryImpl(
             createdAt = input.createdAt,
             updatedAt = input.createdAt,
             userId = input.userId,
+            traceId = input.traceId,
             type = input.type,
             pg = input.pg,
             pgUniqueId = input.pgUniqueId,
