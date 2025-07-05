@@ -16,6 +16,8 @@
 
 package io.mosaicboot.data.entity
 
-interface BaseTenantEntity<ID> : UpdatableEntity<ID> {
-    val tenantId: String
+import io.mosaicboot.data.iface.TenantRelatedObject
+
+interface BaseTenantEntity<ID> : UpdatableEntity<ID>, TenantRelatedObject {
+    override val tenantId: String
 }

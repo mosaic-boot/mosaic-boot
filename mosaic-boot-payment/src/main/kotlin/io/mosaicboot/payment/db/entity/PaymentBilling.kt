@@ -1,9 +1,10 @@
 package io.mosaicboot.payment.db.entity
 
+import io.mosaicboot.data.iface.UserRelatedObject
 import io.mosaicboot.data.entity.UpdatableEntity
 
-interface PaymentBilling : UpdatableEntity<String> {
-    val userId: String
+interface PaymentBilling : UpdatableEntity<String>, UserRelatedObject {
+    override val userId: String
     val pg: String
     var deleted: Boolean
 

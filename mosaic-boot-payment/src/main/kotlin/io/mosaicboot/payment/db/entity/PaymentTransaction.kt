@@ -16,6 +16,7 @@
 
 package io.mosaicboot.payment.db.entity
 
+import io.mosaicboot.data.iface.UserRelatedObject
 import io.mosaicboot.data.entity.UpdatableEntity
 import io.mosaicboot.payment.db.dto.OrderStatus
 import io.mosaicboot.payment.db.dto.TransactionType
@@ -23,8 +24,9 @@ import io.mosaicboot.payment.db.dto.VbankInfo
 import java.math.BigDecimal
 import java.time.Instant
 
-interface PaymentTransaction : UpdatableEntity<String> {
-    val userId: String
+interface PaymentTransaction : UpdatableEntity<String>, UserRelatedObject {
+    override val userId: String
+    val traceId: String
     val type: TransactionType
     val pg: String
     val pgUniqueId: String

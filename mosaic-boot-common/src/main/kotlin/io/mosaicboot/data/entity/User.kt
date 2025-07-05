@@ -16,12 +16,18 @@
 
 package io.mosaicboot.data.entity
 
+import com.fasterxml.jackson.annotation.JsonIgnore
 import io.mosaicboot.common.user.enums.UserStatus
+import io.mosaicboot.data.iface.UserRelatedObject
 
-interface User : UpdatableEntity<String> {
+interface User : UpdatableEntity<String>, UserRelatedObject {
     var name: String
     var email: String
     var status: UserStatus
     var timeZone: String
     var roles: List<GlobalRole>
+
+    override val userId: String
+        @JsonIgnore
+        get() = id
 }

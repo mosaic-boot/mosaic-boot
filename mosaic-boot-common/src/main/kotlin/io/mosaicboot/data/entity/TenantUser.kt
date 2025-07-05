@@ -17,9 +17,10 @@
 package io.mosaicboot.data.entity
 
 import io.mosaicboot.common.user.enums.UserStatus
+import io.mosaicboot.data.iface.UserRelatedObject
 
-interface TenantUser : BaseTenantEntity<String> {
-    val userId: String
+interface TenantUser : BaseTenantEntity<String>, UserRelatedObject {
+    override val userId: String
     var nickname: String
     var email: String?
     var status: UserStatus

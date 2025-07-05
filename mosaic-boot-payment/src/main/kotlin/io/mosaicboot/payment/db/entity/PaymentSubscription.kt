@@ -16,20 +16,41 @@
 
 package io.mosaicboot.payment.db.entity
 
+import io.mosaicboot.data.iface.UserRelatedObject
+import io.mosaicboot.core.util.CryptoUtils
 import io.mosaicboot.data.entity.UpdatableEntity
 import java.time.Instant
 
 /**
  * ID : UUIDv7
  */
-interface PaymentSubscription : UpdatableEntity<String> {
-    val pg: String
-    val active: Boolean
+interface PaymentSubscription : UpdatableEntity<String>, UserRelatedObject {
+    override val userId: String
+    val traceId: String
+    val billingId: String
     val pgData: Map<String, *>
-    val cancelledAt: Instant?
     val goodsId: String
-    val planId: String
+    val optionId: String?
+
+    /**
+     * Version for when userId and goodsId are the same.
+     */
+    val version: Int
+
+    /**
+     * must be unique key
+     */
+    val idempotentKey: String
+
+    val billingCycle: Int
+
     val usedCouponIds: List<String>?
-    val validFrom: Instant
-    val validTo: Instant
+    var active: Boolean
+    var cancelledAt: Instant?
+    var validFrom: Instant
+    var validTo: Instant
+}
+
+fun subscriptionIdempotentKey(userId: String, goodsId: String, version: Int): String {
+    return CryptoUtils.sha256ForKey(userId, goodsId, version.toString())
 }
