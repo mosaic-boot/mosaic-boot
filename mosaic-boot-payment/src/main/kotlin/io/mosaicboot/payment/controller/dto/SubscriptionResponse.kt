@@ -1,6 +1,7 @@
 package io.mosaicboot.payment.controller.dto
 
 import com.fasterxml.jackson.annotation.JsonProperty
+import io.mosaicboot.payment.db.entity.SubscriptionStatus
 
 data class SubscriptionResponse(
     @JsonProperty("id")
@@ -13,13 +14,8 @@ data class SubscriptionResponse(
     val billingCycle: Int,
     @JsonProperty("usedCouponIds")
     val usedCouponIds: List<String>?,
-    @JsonProperty("active")
-    val active: Boolean,
-    /**
-     * unix epoch seconds
-     */
-    @JsonProperty("cancelledAt")
-    val cancelledAt: Long?,
+    @JsonProperty("status")
+    val status: SubscriptionStatus,
     /**
      * unix epoch seconds
      */
@@ -30,4 +26,6 @@ data class SubscriptionResponse(
      */
     @JsonProperty("validTo")
     val validTo: Long,
+    @JsonProperty("scheduledOptionId")
+    val scheduledOptionId: String?,
 )

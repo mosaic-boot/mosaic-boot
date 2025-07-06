@@ -28,9 +28,9 @@ interface PaymentSubscription : UpdatableEntity<String>, UserRelatedObject {
     override val userId: String
     val traceId: String
     val billingId: String
-    val pgData: Map<String, *>
+    val customData: Map<String, *>
     val goodsId: String
-    val optionId: String?
+    var optionId: String?
 
     /**
      * Version for when userId and goodsId are the same.
@@ -45,10 +45,14 @@ interface PaymentSubscription : UpdatableEntity<String>, UserRelatedObject {
     val billingCycle: Int
 
     val usedCouponIds: List<String>?
-    var active: Boolean
-    var cancelledAt: Instant?
+    var status: SubscriptionStatus
     var validFrom: Instant
     var validTo: Instant
+
+    /**
+     * A plan change is scheduled for the end of the current billing cycle.
+     */
+    var scheduledOptionId: String?
 }
 
 fun subscriptionIdempotentKey(userId: String, goodsId: String, version: Int): String {

@@ -21,6 +21,7 @@ import io.mosaicboot.payment.controller.MosaicPaymentSubscriptionController
 import io.mosaicboot.payment.db.repository.PaymentBillingRepositoryBase
 import io.mosaicboot.payment.db.repository.PaymentCouponRepositoryBase
 import io.mosaicboot.payment.db.repository.PaymentGoodsRepositoryBase
+import io.mosaicboot.payment.db.repository.PaymentSubscriptionLogRepositoryBase
 import io.mosaicboot.payment.db.repository.PaymentSubscriptionRepositoryBase
 import io.mosaicboot.payment.db.repository.PaymentTransactionRepositoryBase
 import io.mosaicboot.payment.service.PaymentService
@@ -54,6 +55,7 @@ class PaymentConfig {
         paymentGoodsRepository: PaymentGoodsRepositoryBase<*>,
         paymentTransactionRepository: PaymentTransactionRepositoryBase<*>,
         paymentSubscriptionRepository: PaymentSubscriptionRepositoryBase<*>,
+        paymentSubscriptionLogRepository: PaymentSubscriptionLogRepositoryBase<*>,
     ): PaymentService {
         return PaymentService(
             pgRouter = pgRouter,
@@ -62,6 +64,7 @@ class PaymentConfig {
             paymentGoodsRepository = paymentGoodsRepository,
             paymentTransactionRepository = paymentTransactionRepository,
             paymentSubscriptionRepository = paymentSubscriptionRepository,
+            paymentSubscriptionLogRepository = paymentSubscriptionLogRepository,
         )
     }
 

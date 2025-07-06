@@ -22,6 +22,7 @@ import io.mosaicboot.mongodb.def.payment.repository.PaymentSubscriptionCustomRep
 import io.mosaicboot.mongodb.def.repository.impl.Paged
 import io.mosaicboot.mongodb.def.repository.impl.pagedAggregation
 import io.mosaicboot.payment.db.dto.PaymentSubscriptionInput
+import io.mosaicboot.payment.db.entity.SubscriptionStatus
 import io.mosaicboot.payment.db.entity.subscriptionIdempotentKey
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageRequest
@@ -54,11 +55,11 @@ class PaymentSubscriptionCustomRepositoryImpl(
             usedCouponIds = input.usedCouponIds,
             billingId = input.billingId,
             billingCycle = input.billingCycle,
-            active = input.active,
-            cancelledAt = null,
-            pgData = input.pgData,
+            status = input.status,
+            customData = input.customData,
             validFrom = input.validFrom,
             validTo = input.validTo,
+            scheduledOptionId = input.scheduledOptionId,
         ))
     }
 
@@ -77,10 +78,23 @@ class PaymentSubscriptionCustomRepositoryImpl(
         )
     }
 
+    override fun findCurrentByUserIdAndGoodsId(userId: String, goodsId: String): PaymentSubscriptionEntity? {
+        return mongoTemplate.findOne(
+            Query.query(
+                Criteria("userId").isEqualTo(userId)
+                    .and("goodsId").isEqualTo(goodsId)
+                    .and("status").ne(SubscriptionStatus.CANCELED)
+            )
+                .with(Sort.by(Sort.Direction.DESC, "_id"))
+                .limit(1),
+            PaymentSubscriptionEntity::class.java,
+        )
+    }
+
     override fun findSubscriptions(
         userId: String,
         goodsId: String?,
-        active: Boolean?,
+        statuses: List<SubscriptionStatus>?,
         pageRequest: PageRequest,
     ): Page<PaymentSubscriptionEntity> {
         val sort = if (pageRequest.sort.isUnsorted) {
@@ -98,8 +112,8 @@ class PaymentSubscriptionCustomRepositoryImpl(
                             } else criteria
                         }
                         .let { criteria ->
-                            if (active != null) {
-                                criteria.and("active").isEqualTo(active)
+                            if (statuses != null) {
+                                criteria.and("status").`in`(statuses)
                             } else criteria
                         }
                 ),

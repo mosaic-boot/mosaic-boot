@@ -28,14 +28,17 @@ import org.springframework.stereotype.Service
 import io.mosaicboot.payment.db.entity.PaymentCoupon
 import io.mosaicboot.payment.db.repository.PaymentCouponRepositoryBase
 import io.mosaicboot.payment.db.repository.PaymentGoodsRepositoryBase
+import io.mosaicboot.payment.db.repository.PaymentSubscriptionLogRepositoryBase
 import io.mosaicboot.payment.db.repository.PaymentTransactionRepositoryBase
 import io.mosaicboot.payment.db.repository.PaymentSubscriptionRepositoryBase
 import io.mosaicboot.payment.dto.CouponResult
 import io.mosaicboot.payment.dto.SubmitBillingPayment
 import io.mosaicboot.payment.db.dto.PaymentSubscriptionInput
+import io.mosaicboot.payment.db.dto.PaymentSubscriptionLogInput
 import io.mosaicboot.payment.db.entity.GoodsOption
 import io.mosaicboot.payment.db.entity.PaymentGoods
 import io.mosaicboot.payment.db.entity.PaymentSubscription
+import io.mosaicboot.payment.db.entity.SubscriptionStatus
 import io.mosaicboot.payment.dto.SubscriptionUpdateType
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageRequest
@@ -54,6 +57,7 @@ class PaymentService(
     private val paymentGoodsRepository: PaymentGoodsRepositoryBase<*>,
     private val paymentTransactionRepository: PaymentTransactionRepositoryBase<*>,
     private val paymentSubscriptionRepository: PaymentSubscriptionRepositoryBase<*>,
+    private val paymentSubscriptionLogRepository: PaymentSubscriptionLogRepositoryBase<*>,
 ) {
     fun billingAddCard(
         authentication: MosaicAuthenticatedToken,
@@ -178,7 +182,7 @@ class PaymentService(
         firstAmount: BigDecimal,
         billingCycle: Int = 30,
         isUpdate: SubscriptionUpdateType? = null,
-        subscription: PaymentSubscription? = null,
+        feedback: String? = null,
     ): PaymentSubscription {
         // 1. 금액 검증은 caller 에서 해야 함.
 
@@ -193,110 +197,191 @@ class PaymentService(
             )
 
         // 4. 이전 subscription 확인
-        val latest = subscription ?: getCurrentSubscription(authentication, goodsId)
-        val latestIsActive = latest?.let { it.active && isSubscriptionAvailable(it) } ?: false
-        if (isUpdate == null && latestIsActive) {
-            throw UserErrorMessageException(
-                HttpStatus.CONFLICT,
-                "Active subscription already exists for this goods"
-            )
-        } else if (isUpdate != null && !latestIsActive) {
-            throw UserErrorMessageException(
-                HttpStatus.CONFLICT,
-                "No existing subscription"
-            )
-        }
-
-        val now = Instant.now()
-        when (isUpdate) {
-            SubscriptionUpdateType.NOW -> {
-                latest!!
-                latest.active = false
-                latest.validTo = now
-                paymentSubscriptionRepository.saveEntity(latest)
-            }
-            SubscriptionUpdateType.NEXT -> {
-                latest!!
-                latest.active = false
-                paymentSubscriptionRepository.saveEntity(latest)
-            }
-            else -> {}
-        }
-        val validFrom = latest?.validTo ?: now
-
-        // 4. subscription 추가
-        val subscriptionInput = PaymentSubscriptionInput(
-            createdAt = now,
-            traceId = traceId,
+        val lastSubscription = paymentSubscriptionRepository.findLatestByUserIdAndGoodsId(
             userId = authentication.userId,
             goodsId = goodsId,
-            version = latest?.version ?: 1,
-            optionId = optionId,
-            usedCouponIds = if (couponId != null) listOf(couponId) else null,
-            billingId = billing.id,
-            active = true,
-            pgData = emptyMap<String, Any>(),
-            billingCycle = billingCycle,
-            validFrom = validFrom,
-            validTo = validFrom.plus(billingCycle.toLong(), ChronoUnit.DAYS),
         )
-        val subscription = paymentSubscriptionRepository.save(subscriptionInput)
+        val existingSubscription = lastSubscription
+            ?.takeIf { isSubscriptionAvailable(it) }
 
-        val paymentResult = pgRouter.getPg(billing.pg).processBillingPayment(
-            authentication,
-            traceId,
-            billing,
-            SubmitBillingPayment(
-                goodsId = goods.id,
-                goodsName = goods.name + option?.name.let { ": $it" },
-                subscriptionId = subscription.id,
-                amount = firstAmount,
+        val now = Instant.now()
+
+        if (existingSubscription != null) {
+            // 구독 갱신 또는 변경
+            if (isUpdate == null) {
+                throw UserErrorMessageException(
+                    HttpStatus.CONFLICT,
+                    "Active subscription already exists for this goods"
+                )
+            }
+
+            val fromOptionId = existingSubscription.optionId
+            when (isUpdate) {
+                SubscriptionUpdateType.NOW -> { // 즉시 변경 (업그레이드)
+                    existingSubscription.optionId = optionId
+                    existingSubscription.status = SubscriptionStatus.ACTIVE
+                    existingSubscription.validTo = now.plus(billingCycle.toLong(), ChronoUnit.DAYS)
+                }
+                SubscriptionUpdateType.NEXT -> { // 다음 결제 주기에 변경 (다운그레이드)
+                    existingSubscription.scheduledOptionId = optionId
+                    existingSubscription.status = SubscriptionStatus.PENDING_CHANGE
+                }
+            }
+            existingSubscription.updatedAt = now
+            paymentSubscriptionRepository.saveEntity(existingSubscription)
+            paymentSubscriptionLogRepository.save(
+                PaymentSubscriptionLogInput(
+                    userId = authentication.userId,
+                    subscriptionId = existingSubscription.id,
+                    traceId = traceId,
+                    status = existingSubscription.status,
+                    fromOptionId = fromOptionId,
+                    toOptionId = optionId,
+                    reason = feedback
+                )
             )
-        ).getOrThrow()
+            return existingSubscription
+        } else {
+            // 신규 구독
+            val subscriptionInput = PaymentSubscriptionInput(
+                createdAt = now,
+                traceId = traceId,
+                userId = authentication.userId,
+                goodsId = goodsId,
+                version = 1,
+                optionId = optionId,
+                usedCouponIds = if (couponId != null) listOf(couponId) else null,
+                billingId = billing.id,
+                status = SubscriptionStatus.ACTIVE,
+                billingCycle = billingCycle,
+                validFrom = now,
+                validTo = now.plus(billingCycle.toLong(), ChronoUnit.DAYS),
+                scheduledOptionId = null
+            )
+            val subscription = paymentSubscriptionRepository.save(subscriptionInput)
 
-        return subscription
+            paymentSubscriptionLogRepository.save(
+                PaymentSubscriptionLogInput(
+                    userId = authentication.userId,
+                    subscriptionId = subscription.id,
+                    traceId = traceId,
+                    status = subscription.status,
+                    fromOptionId = null,
+                    toOptionId = optionId,
+                    reason = "New subscription"
+                )
+            )
+
+            pgRouter.getPg(billing.pg).processBillingPayment(
+                authentication,
+                traceId,
+                billing,
+                SubmitBillingPayment(
+                    goodsId = goods.id,
+                    goodsName = goods.name + option?.name?.let { ": $it" },
+                    subscriptionId = subscription.id,
+                    amount = firstAmount,
+                )
+            ).getOrThrow()
+
+            return subscription
+        }
     }
 
     @Transactional
     fun cancelSubscription(
         authentication: MosaicAuthenticatedToken,
+        traceId: String,
         goodsId: String,
-        subscription: PaymentSubscription? = null,
+        feedback: String? = null,
     ) {
-        val latest = subscription ?: paymentSubscriptionRepository.findLatestByUserIdAndGoodsId(
+        val now = Instant.now()
+
+        val subscription = paymentSubscriptionRepository.findCurrentByUserIdAndGoodsId(
             userId = authentication.userId,
             goodsId = goodsId,
         ) ?: throw UserErrorMessageException(
             HttpStatus.NOT_FOUND,
             "no existing subscription"
         )
-        latest.active = false
-        paymentSubscriptionRepository.saveEntity(latest)
+        subscription.status = SubscriptionStatus.PENDING_CANCEL
+        subscription.updatedAt = now
+        paymentSubscriptionRepository.saveEntity(subscription)
+        paymentSubscriptionLogRepository.save(
+            PaymentSubscriptionLogInput(
+                userId = authentication.userId,
+                subscriptionId = subscription.id,
+                traceId = traceId,
+                status = subscription.status,
+                fromOptionId = subscription.optionId,
+                toOptionId = subscription.optionId,
+                reason = feedback
+            )
+        )
+    }
+
+    @Transactional
+    fun cancelChangeSubscription(
+        authentication: MosaicAuthenticatedToken,
+        traceId: String,
+        goodsId: String,
+        feedback: String? = null,
+    ) {
+        val now = Instant.now()
+
+        val subscription = paymentSubscriptionRepository.findCurrentByUserIdAndGoodsId(
+            userId = authentication.userId,
+            goodsId = goodsId,
+        ) ?: throw UserErrorMessageException(
+            HttpStatus.NOT_FOUND,
+            "no existing subscription"
+        )
+
+        if (subscription.status == SubscriptionStatus.PENDING_CHANGE || subscription.status == SubscriptionStatus.PENDING_CANCEL) {
+            val fromOptionId = subscription.optionId
+            val scheduledOptionId = subscription.scheduledOptionId
+            subscription.updatedAt = now
+            subscription.status = SubscriptionStatus.ACTIVE
+            subscription.scheduledOptionId = null
+            paymentSubscriptionRepository.saveEntity(subscription)
+            paymentSubscriptionLogRepository.save(
+                PaymentSubscriptionLogInput(
+                    userId = authentication.userId,
+                    subscriptionId = subscription.id,
+                    traceId = traceId,
+                    status = subscription.status,
+                    fromOptionId = fromOptionId,
+                    toOptionId = scheduledOptionId,
+                    reason = feedback
+                )
+            )
+        } else {
+            throw UserErrorMessageException(
+                HttpStatus.BAD_REQUEST,
+                "Subscription is not pending any change."
+            )
+        }
     }
 
     fun findSubscriptions(
         authentication: MosaicAuthenticatedToken,
         goodsId: String?,
-        active: Boolean?,
+        statuses: List<SubscriptionStatus>?,
         pageRequest: PageRequest,
     ): Page<out PaymentSubscription> {
-        val now = Instant.now()
         return paymentSubscriptionRepository.findSubscriptions(
             authentication.userId,
             goodsId,
-            active,
+            statuses,
             pageRequest,
-        ).map {
-            it.active = isSubscriptionAvailable(it, now)
-            it
-        }
+        )
     }
 
     fun getCurrentSubscription(
         authentication: MosaicAuthenticatedToken,
         goodsId: String,
     ): PaymentSubscription? {
-        val subscription = paymentSubscriptionRepository.findLatestByUserIdAndGoodsId(
+        val subscription = paymentSubscriptionRepository.findCurrentByUserIdAndGoodsId(
             userId = authentication.userId,
             goodsId = goodsId,
         ) ?: return null
@@ -310,6 +395,6 @@ class PaymentService(
         subscription: PaymentSubscription,
         now: Instant = Instant.now(),
     ): Boolean {
-        return subscription.validTo.isAfter(now)
+        return subscription.status != SubscriptionStatus.CANCELED && subscription.validTo.isAfter(now)
     }
 }

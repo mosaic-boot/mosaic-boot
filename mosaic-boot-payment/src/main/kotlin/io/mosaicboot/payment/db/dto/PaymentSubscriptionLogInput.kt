@@ -14,15 +14,17 @@
  * limitations under the License.
  */
 
-package io.mosaicboot.payment.db.entity
+package io.mosaicboot.payment.db.dto
 
-import io.mosaicboot.data.entity.UpdatableEntity
+import io.mosaicboot.payment.db.entity.SubscriptionStatus
 import java.time.Instant
 
-interface PaymentSubscriptionHistory : UpdatableEntity<String> {
-    val subscriptionId: String
-    var status: SubscriptionStatus
-    var changeDate: Instant
-    var details: String?
-    var data: Map<String, Any?>?
-}
+data class PaymentSubscriptionLogInput(
+    val userId: String,
+    val subscriptionId: String,
+    val traceId: String,
+    val status: SubscriptionStatus,
+    val fromOptionId: String?,
+    val toOptionId: String?,
+    val reason: String?
+)

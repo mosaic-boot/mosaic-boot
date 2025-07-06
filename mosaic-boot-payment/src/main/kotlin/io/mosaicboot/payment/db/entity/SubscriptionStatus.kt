@@ -16,13 +16,29 @@
 
 package io.mosaicboot.payment.db.entity
 
-import io.mosaicboot.data.entity.UpdatableEntity
-import java.time.Instant
+enum class SubscriptionStatus {
+    /**
+     * Active and in good standing.
+     */
+    ACTIVE,
 
-interface PaymentSubscriptionHistory : UpdatableEntity<String> {
-    val subscriptionId: String
-    var status: SubscriptionStatus
-    var changeDate: Instant
-    var details: String?
-    var data: Map<String, Any?>?
+    /**
+     * The subscription has been canceled and is no longer active.
+     */
+    CANCELED,
+
+    /**
+     * Payment has failed, and the subscription is temporarily inactive.
+     */
+    PAST_DUE,
+
+    /**
+     * A plan change is scheduled for the end of the current billing cycle.
+     */
+    PENDING_CHANGE,
+
+    /**
+     * The subscription is scheduled to be canceled at the end of the current billing cycle.
+     */
+    PENDING_CANCEL,
 }
