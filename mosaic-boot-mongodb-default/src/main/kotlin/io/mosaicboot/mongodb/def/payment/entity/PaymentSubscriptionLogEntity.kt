@@ -16,36 +16,25 @@
 
 package io.mosaicboot.mongodb.def.payment.entity
 
-import io.mosaicboot.payment.db.entity.PaymentSubscription
+import io.mosaicboot.payment.db.entity.PaymentSubscriptionLog
 import io.mosaicboot.payment.db.entity.SubscriptionStatus
-import org.bson.types.ObjectId
 import org.springframework.data.annotation.Id
-import org.springframework.data.mongodb.core.index.CompoundIndex
-import org.springframework.data.mongodb.core.index.CompoundIndexes
 import org.springframework.data.mongodb.core.index.Indexed
 import org.springframework.data.mongodb.core.mapping.Document
 import java.time.Instant
 
-@Document(collection = "\${mosaic.datasource.mongodb.collections.payment-subscription.collection:payment.subscriptions}")
-data class PaymentSubscriptionEntity(
+@Document(collection = "\${mosaic.datasource.mongodb.collections.payment-subscription-log.collection:payment.subscriptionLogs}")
+data class PaymentSubscriptionLogEntity(
     @Id
     override val id: String,
     override val createdAt: Instant,
-    override var updatedAt: Instant,
-    override val traceId: String,
     @Indexed(unique = false)
     override val userId: String,
-    override val goodsId: String,
-    override var optionId: String?,
-    override val version: Int,
-    @Indexed(unique = true)
-    override val idempotentKey: String,
-    override val usedCouponIds: List<String>?,
-    override val billingId: String,
-    override val billingCycle: Int,
-    override val customData: Map<String, *>,
-    override var status: SubscriptionStatus,
-    override var validFrom: Instant,
-    override var validTo: Instant,
-    override var scheduledOptionId: String?,
-) : PaymentSubscription
+    @Indexed(unique = false)
+    override val subscriptionId: String,
+    override val traceId: String,
+    override val status: SubscriptionStatus,
+    override val fromOptionId: String?,
+    override val toOptionId: String?,
+    override val reason: String?
+) : PaymentSubscriptionLog

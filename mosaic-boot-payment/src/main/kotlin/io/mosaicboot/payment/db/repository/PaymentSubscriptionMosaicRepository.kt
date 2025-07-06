@@ -18,6 +18,7 @@ package io.mosaicboot.payment.db.repository
 
 import io.mosaicboot.payment.db.dto.PaymentSubscriptionInput
 import io.mosaicboot.payment.db.entity.PaymentSubscription
+import io.mosaicboot.payment.db.entity.SubscriptionStatus
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageRequest
 import java.time.Instant
@@ -26,11 +27,10 @@ interface PaymentSubscriptionMosaicRepository<T : PaymentSubscription> {
     fun save(input: PaymentSubscriptionInput): T
     fun findLatestByUserIdAndGoodsId(userId: String, goodsId: String): T?
     fun findCurrentByUserIdAndGoodsId(userId: String, goodsId: String): T?
-    fun findActiveByUserIdAndGoodsId(userId: String, goodsId: String, now: Instant = Instant.now()): T?
     fun findSubscriptions(
         userId: String,
         goodsId: String?,
-        enabled: Boolean?,
+        statuses: List<SubscriptionStatus>?,
         pageRequest: PageRequest,
     ): Page<T>
 }

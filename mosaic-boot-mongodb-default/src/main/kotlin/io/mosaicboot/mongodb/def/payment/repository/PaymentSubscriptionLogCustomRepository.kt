@@ -14,15 +14,9 @@
  * limitations under the License.
  */
 
-package io.mosaicboot.payment.db.entity
+package io.mosaicboot.mongodb.def.payment.repository
 
-import io.mosaicboot.data.entity.UpdatableEntity
-import java.time.Instant
+import io.mosaicboot.mongodb.def.payment.entity.PaymentSubscriptionLogEntity
+import io.mosaicboot.payment.db.repository.PaymentSubscriptionLogMosaicRepository
 
-interface PaymentSubscriptionHistory : UpdatableEntity<String> {
-    val subscriptionId: String
-    var status: SubscriptionStatus
-    var changeDate: Instant
-    var details: String?
-    var data: Map<String, Any?>?
-}
+interface PaymentSubscriptionLogCustomRepository : PaymentSubscriptionLogMosaicRepository<PaymentSubscriptionLogEntity>

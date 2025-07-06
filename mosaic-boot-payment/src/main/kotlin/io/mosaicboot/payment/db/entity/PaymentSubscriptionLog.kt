@@ -16,13 +16,18 @@
 
 package io.mosaicboot.payment.db.entity
 
-import io.mosaicboot.data.entity.UpdatableEntity
-import java.time.Instant
+import io.mosaicboot.data.entity.BaseEntity
+import io.mosaicboot.data.iface.UserRelatedObject
 
-interface PaymentSubscriptionHistory : UpdatableEntity<String> {
+/**
+ * ID : UUIDv7
+ */
+interface PaymentSubscriptionLog : BaseEntity<String>, UserRelatedObject {
+    override val userId: String
     val subscriptionId: String
-    var status: SubscriptionStatus
-    var changeDate: Instant
-    var details: String?
-    var data: Map<String, Any?>?
+    val traceId: String
+    val status: SubscriptionStatus
+    val fromOptionId: String?
+    val toOptionId: String?
+    val reason: String?
 }

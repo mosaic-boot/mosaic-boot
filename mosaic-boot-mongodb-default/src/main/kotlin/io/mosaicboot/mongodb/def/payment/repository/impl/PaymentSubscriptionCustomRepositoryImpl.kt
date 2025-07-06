@@ -22,6 +22,7 @@ import io.mosaicboot.mongodb.def.payment.repository.PaymentSubscriptionCustomRep
 import io.mosaicboot.mongodb.def.repository.impl.Paged
 import io.mosaicboot.mongodb.def.repository.impl.pagedAggregation
 import io.mosaicboot.payment.db.dto.PaymentSubscriptionInput
+import io.mosaicboot.payment.db.entity.SubscriptionStatus
 import io.mosaicboot.payment.db.entity.subscriptionIdempotentKey
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageRequest
@@ -32,7 +33,6 @@ import org.springframework.data.mongodb.core.mapping.Field
 import org.springframework.data.mongodb.core.query.Criteria
 import org.springframework.data.mongodb.core.query.Query
 import org.springframework.data.mongodb.core.query.isEqualTo
-import java.time.Instant
 
 class PaymentSubscriptionCustomRepositoryImpl(
     private val mongoTemplate: MongoTemplate,
@@ -55,12 +55,11 @@ class PaymentSubscriptionCustomRepositoryImpl(
             usedCouponIds = input.usedCouponIds,
             billingId = input.billingId,
             billingCycle = input.billingCycle,
-            enabled = input.enabled,
+            status = input.status,
             customData = input.customData,
             validFrom = input.validFrom,
             validTo = input.validTo,
-            prevSubscriptionId = input.prevSubscriptionId,
-            deleted = false,
+            scheduledOptionId = input.scheduledOptionId,
         ))
     }
 
@@ -79,31 +78,12 @@ class PaymentSubscriptionCustomRepositoryImpl(
         )
     }
 
-    override fun findCurrentByUserIdAndGoodsId(
-        userId: String,
-        goodsId: String
-    ): PaymentSubscriptionEntity? {
+    override fun findCurrentByUserIdAndGoodsId(userId: String, goodsId: String): PaymentSubscriptionEntity? {
         return mongoTemplate.findOne(
             Query.query(
                 Criteria("userId").isEqualTo(userId)
                     .and("goodsId").isEqualTo(goodsId)
-                    .and("deleted").ne(true)
-                    .and("enabled").isEqualTo(true)
-            )
-                .with(Sort.by(Sort.Direction.DESC, "_id"))
-                .limit(1),
-            PaymentSubscriptionEntity::class.java,
-        )
-    }
-
-    override fun findActiveByUserIdAndGoodsId(userId: String, goodsId: String, now: Instant): PaymentSubscriptionEntity? {
-        return mongoTemplate.findOne(
-            Query.query(
-                Criteria("userId").isEqualTo(userId)
-                    .and("goodsId").isEqualTo(goodsId)
-                    .and("deleted").ne(true)
-                    .and("validFrom").lte(now)
-                    .and("validTo").gt(now)
+                    .and("status").ne(SubscriptionStatus.CANCELED)
             )
                 .with(Sort.by(Sort.Direction.DESC, "_id"))
                 .limit(1),
@@ -114,7 +94,7 @@ class PaymentSubscriptionCustomRepositoryImpl(
     override fun findSubscriptions(
         userId: String,
         goodsId: String?,
-        enabled: Boolean?,
+        statuses: List<SubscriptionStatus>?,
         pageRequest: PageRequest,
     ): Page<PaymentSubscriptionEntity> {
         val sort = if (pageRequest.sort.isUnsorted) {
@@ -126,15 +106,14 @@ class PaymentSubscriptionCustomRepositoryImpl(
             Aggregation.newAggregation(
                 Aggregation.match(
                     Criteria("userId").isEqualTo(userId)
-                        .and("deleted").ne(true)
                         .let { criteria ->
                             if (goodsId != null) {
                                 criteria.and("goodsId").isEqualTo(goodsId)
                             } else criteria
                         }
                         .let { criteria ->
-                            if (enabled != null) {
-                                criteria.and("enabled").isEqualTo(enabled)
+                            if (statuses != null) {
+                                criteria.and("status").`in`(statuses)
                             } else criteria
                         }
                 ),

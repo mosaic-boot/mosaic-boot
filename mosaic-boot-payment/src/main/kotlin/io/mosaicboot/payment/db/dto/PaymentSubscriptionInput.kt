@@ -16,6 +16,7 @@
 
 package io.mosaicboot.payment.db.dto
 
+import io.mosaicboot.payment.db.entity.SubscriptionStatus
 import java.time.Instant
 
 data class PaymentSubscriptionInput(
@@ -27,7 +28,7 @@ data class PaymentSubscriptionInput(
     val version: Int,
     val usedCouponIds: List<String>?,
     val billingId: String,
-    val enabled: Boolean,
+    val status: SubscriptionStatus,
     val customData: Map<String, *> = emptyMap<String, Any>(),
     /**
      * Days
@@ -35,6 +36,5 @@ data class PaymentSubscriptionInput(
     val billingCycle: Int,
     val validFrom: Instant,
     val validTo: Instant,
-
-    val prevSubscriptionId: String?,
+    val scheduledOptionId: String?,
 )

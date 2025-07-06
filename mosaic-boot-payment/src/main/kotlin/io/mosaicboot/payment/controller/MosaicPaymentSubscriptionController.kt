@@ -24,6 +24,7 @@ import io.mosaicboot.core.util.UUIDv7
 import io.mosaicboot.payment.config.PaymentProperties
 import io.mosaicboot.payment.controller.dto.StartSubscriptionRequest
 import io.mosaicboot.payment.controller.dto.SubscriptionResponse
+import io.mosaicboot.payment.db.entity.SubscriptionStatus
 import io.mosaicboot.payment.db.repository.PaymentGoodsRepositoryBase
 import io.mosaicboot.payment.db.repository.PaymentTransactionRepositoryBase
 import io.mosaicboot.payment.service.PaymentService
@@ -87,7 +88,6 @@ class MosaicPaymentSubscriptionController(
             goodsId,
         ) ?: return ResponseEntity.notFound().build()
 
-        val now = Instant.now()
         return ResponseEntity.ok(
             SubscriptionResponse(
                 id = result.id,
@@ -95,9 +95,10 @@ class MosaicPaymentSubscriptionController(
                 optionId = result.optionId,
                 billingCycle = result.billingCycle,
                 usedCouponIds = result.usedCouponIds,
-                enabled = result.enabled && result.validTo.isAfter(now),
+                status = result.status,
                 validFrom = result.validFrom.epochSecond,
                 validTo = result.validTo.epochSecond,
+                scheduledOptionId = result.scheduledOptionId
             )
         )
     }
@@ -108,7 +109,7 @@ class MosaicPaymentSubscriptionController(
     fun getSubscriptions(
         authentication: Authentication,
         @RequestParam("goods_id") goodsId: String?,
-        @RequestParam("active") active: Boolean?,
+        @RequestParam("status") statuses: List<String>?,
         @RequestParam("page") pageNumber: Int?,
         @RequestParam("size") pageSize: Int?,
     ): ResponseEntity<PagedResult<SubscriptionResponse>> {
@@ -117,11 +118,10 @@ class MosaicPaymentSubscriptionController(
         val result = paymentService.findSubscriptions(
             authentication,
             goodsId,
-            active,
+            statuses?.map { SubscriptionStatus.valueOf(it.uppercase()) },
             PageRequest.of(pageNumber ?: 0, pageSize ?: 10)
         )
 
-        val now = Instant.now()
         return ResponseEntity.ok(
             PagedResult(
                 result.content.map {
@@ -131,9 +131,10 @@ class MosaicPaymentSubscriptionController(
                         optionId = it.optionId,
                         billingCycle = it.billingCycle,
                         usedCouponIds = it.usedCouponIds,
-                        enabled = it.enabled && it.validTo.isAfter(now),
+                        status = it.status,
                         validFrom = it.validFrom.epochSecond,
                         validTo = it.validTo.epochSecond,
+                        scheduledOptionId = it.scheduledOptionId
                     )
                 },
                 result.totalElements,
