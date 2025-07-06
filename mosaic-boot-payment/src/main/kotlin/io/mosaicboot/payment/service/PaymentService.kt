@@ -179,6 +179,7 @@ class PaymentService(
         billingCycle: Int = 30,
         isUpdate: SubscriptionUpdateType? = null,
         subscription: PaymentSubscription? = null,
+        feedback: String? = null,
     ): PaymentSubscription {
         // 1. 금액 검증은 caller 에서 해야 함.
 
@@ -193,14 +194,18 @@ class PaymentService(
             )
 
         // 4. 이전 subscription 확인
-        val latest = subscription ?: getCurrentSubscription(authentication, goodsId)
-        val latestIsActive = latest?.let { it.active && isSubscriptionAvailable(it) } ?: false
-        if (isUpdate == null && latestIsActive) {
+        val latest = paymentSubscriptionRepository.findLatestByUserIdAndGoodsId(
+            userId = authentication.userId,
+            goodsId = goodsId,
+        )
+        val prev = subscription ?: getActiveSubscription(authentication, goodsId)
+        val prevIsActive = prev?.let { it.enabled && isSubscriptionAvailable(it) } ?: false
+        if (isUpdate == null && prevIsActive) {
             throw UserErrorMessageException(
                 HttpStatus.CONFLICT,
                 "Active subscription already exists for this goods"
             )
-        } else if (isUpdate != null && !latestIsActive) {
+        } else if (isUpdate != null && !prevIsActive) {
             throw UserErrorMessageException(
                 HttpStatus.CONFLICT,
                 "No existing subscription"
@@ -210,19 +215,19 @@ class PaymentService(
         val now = Instant.now()
         when (isUpdate) {
             SubscriptionUpdateType.NOW -> {
-                latest!!
-                latest.active = false
-                latest.validTo = now
-                paymentSubscriptionRepository.saveEntity(latest)
+                prev!!
+                prev.enabled = false
+                prev.validTo = now
+                paymentSubscriptionRepository.saveEntity(prev)
             }
             SubscriptionUpdateType.NEXT -> {
-                latest!!
-                latest.active = false
-                paymentSubscriptionRepository.saveEntity(latest)
+                prev!!
+                prev.enabled = false
+                paymentSubscriptionRepository.saveEntity(prev)
             }
             else -> {}
         }
-        val validFrom = latest?.validTo ?: now
+        val validFrom = prev?.validTo ?: now
 
         // 4. subscription 추가
         val subscriptionInput = PaymentSubscriptionInput(
@@ -230,15 +235,15 @@ class PaymentService(
             traceId = traceId,
             userId = authentication.userId,
             goodsId = goodsId,
-            version = latest?.version ?: 1,
+            version = latest?.version?.let { it + 1 } ?: 1,
             optionId = optionId,
             usedCouponIds = if (couponId != null) listOf(couponId) else null,
             billingId = billing.id,
-            active = true,
-            pgData = emptyMap<String, Any>(),
+            enabled = true,
             billingCycle = billingCycle,
             validFrom = validFrom,
             validTo = validFrom.plus(billingCycle.toLong(), ChronoUnit.DAYS),
+            prevSubscriptionId = subscription?.id,
         )
         val subscription = paymentSubscriptionRepository.save(subscriptionInput)
 
@@ -263,6 +268,24 @@ class PaymentService(
         goodsId: String,
         subscription: PaymentSubscription? = null,
     ) {
+        val latest = subscription ?: paymentSubscriptionRepository.findCurrentByUserIdAndGoodsId(
+            userId = authentication.userId,
+            goodsId = goodsId,
+        ) ?: throw UserErrorMessageException(
+            HttpStatus.NOT_FOUND,
+            "no existing subscription"
+        )
+        latest.enabled = false
+        paymentSubscriptionRepository.saveEntity(latest)
+    }
+
+    @Transactional
+    fun cancelChangeSubscription(
+        authentication: MosaicAuthenticatedToken,
+        goodsId: String,
+        subscription: PaymentSubscription? = null,
+    ) {
+        val now = Instant.now()
         val latest = subscription ?: paymentSubscriptionRepository.findLatestByUserIdAndGoodsId(
             userId = authentication.userId,
             goodsId = goodsId,
@@ -270,24 +293,44 @@ class PaymentService(
             HttpStatus.NOT_FOUND,
             "no existing subscription"
         )
-        latest.active = false
-        paymentSubscriptionRepository.saveEntity(latest)
+
+        var prev: PaymentSubscription
+
+        if (latest.enabled && latest.prevSubscriptionId != null) {
+            if (!latest.validFrom.isAfter(now)) {
+                throw UserErrorMessageException(
+                    HttpStatus.BAD_REQUEST,
+                    "already started subscription"
+                )
+            }
+
+            latest.enabled = false
+            latest.deleted = true
+            paymentSubscriptionRepository.saveEntity(latest)
+
+            prev = paymentSubscriptionRepository.findById(latest.prevSubscriptionId!!).get()
+        } else {
+            prev = latest
+        }
+
+        prev.enabled = true
+        paymentSubscriptionRepository.saveEntity(prev)
     }
 
     fun findSubscriptions(
         authentication: MosaicAuthenticatedToken,
         goodsId: String?,
-        active: Boolean?,
+        enabled: Boolean?,
         pageRequest: PageRequest,
     ): Page<out PaymentSubscription> {
         val now = Instant.now()
         return paymentSubscriptionRepository.findSubscriptions(
             authentication.userId,
             goodsId,
-            active,
+            enabled,
             pageRequest,
         ).map {
-            it.active = isSubscriptionAvailable(it, now)
+            it.enabled = isSubscriptionAvailable(it, now)
             it
         }
     }
@@ -296,13 +339,24 @@ class PaymentService(
         authentication: MosaicAuthenticatedToken,
         goodsId: String,
     ): PaymentSubscription? {
-        val subscription = paymentSubscriptionRepository.findLatestByUserIdAndGoodsId(
+        val subscription = paymentSubscriptionRepository.findCurrentByUserIdAndGoodsId(
             userId = authentication.userId,
             goodsId = goodsId,
         ) ?: return null
         if (!isSubscriptionAvailable(subscription)) {
             return null
         }
+        return subscription
+    }
+
+    fun getActiveSubscription(
+        authentication: MosaicAuthenticatedToken,
+        goodsId: String,
+    ): PaymentSubscription? {
+        val subscription = paymentSubscriptionRepository.findActiveByUserIdAndGoodsId(
+            userId = authentication.userId,
+            goodsId = goodsId,
+        ) ?: return null
         return subscription
     }
 

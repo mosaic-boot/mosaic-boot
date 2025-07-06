@@ -18,16 +18,20 @@ package io.mosaicboot.mongodb.def.payment.repository
 
 import io.mosaicboot.mongodb.def.payment.entity.PaymentSubscriptionEntity
 import io.mosaicboot.payment.db.dto.PaymentSubscriptionInput
+import io.mosaicboot.payment.db.repository.PaymentSubscriptionMosaicRepository
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageRequest
+import java.time.Instant
 
-interface PaymentSubscriptionCustomRepository {
-    fun save(input: PaymentSubscriptionInput): PaymentSubscriptionEntity
-    fun findLatestByUserIdAndGoodsId(userId: String, goodsId: String): PaymentSubscriptionEntity?
-    fun findSubscriptions(
+interface PaymentSubscriptionCustomRepository : PaymentSubscriptionMosaicRepository<PaymentSubscriptionEntity> {
+    override fun save(input: PaymentSubscriptionInput): PaymentSubscriptionEntity
+    override fun findLatestByUserIdAndGoodsId(userId: String, goodsId: String): PaymentSubscriptionEntity?
+    override fun findCurrentByUserIdAndGoodsId(userId: String, goodsId: String): PaymentSubscriptionEntity?
+    override fun findActiveByUserIdAndGoodsId(userId: String, goodsId: String, now: Instant): PaymentSubscriptionEntity?
+    override fun findSubscriptions(
         userId: String,
         goodsId: String?,
-        active: Boolean?,
+        enabled: Boolean?,
         pageRequest: PageRequest,
     ): Page<PaymentSubscriptionEntity>
 }

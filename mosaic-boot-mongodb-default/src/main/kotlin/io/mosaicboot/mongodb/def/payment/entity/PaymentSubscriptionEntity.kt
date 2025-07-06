@@ -42,9 +42,10 @@ data class PaymentSubscriptionEntity(
     override val usedCouponIds: List<String>?,
     override val billingId: String,
     override val billingCycle: Int,
-    override val pgData: Map<String, *>,
-    override var active: Boolean,
-    override var cancelledAt: Instant?,
+    override val customData: Map<String, *>,
+    override var enabled: Boolean,
     override var validFrom: Instant,
     override var validTo: Instant,
+    override var deleted: Boolean,
+    override val prevSubscriptionId: String?,
 ) : PaymentSubscription

@@ -13,13 +13,8 @@ data class SubscriptionResponse(
     val billingCycle: Int,
     @JsonProperty("usedCouponIds")
     val usedCouponIds: List<String>?,
-    @JsonProperty("active")
-    val active: Boolean,
-    /**
-     * unix epoch seconds
-     */
-    @JsonProperty("cancelledAt")
-    val cancelledAt: Long?,
+    @JsonProperty("enabled")
+    val enabled: Boolean,
     /**
      * unix epoch seconds
      */

@@ -32,6 +32,7 @@ import org.springframework.data.mongodb.core.mapping.Field
 import org.springframework.data.mongodb.core.query.Criteria
 import org.springframework.data.mongodb.core.query.Query
 import org.springframework.data.mongodb.core.query.isEqualTo
+import java.time.Instant
 
 class PaymentSubscriptionCustomRepositoryImpl(
     private val mongoTemplate: MongoTemplate,
@@ -54,11 +55,12 @@ class PaymentSubscriptionCustomRepositoryImpl(
             usedCouponIds = input.usedCouponIds,
             billingId = input.billingId,
             billingCycle = input.billingCycle,
-            active = input.active,
-            cancelledAt = null,
-            pgData = input.pgData,
+            enabled = input.enabled,
+            customData = input.customData,
             validFrom = input.validFrom,
             validTo = input.validTo,
+            prevSubscriptionId = input.prevSubscriptionId,
+            deleted = false,
         ))
     }
 
@@ -77,10 +79,42 @@ class PaymentSubscriptionCustomRepositoryImpl(
         )
     }
 
+    override fun findCurrentByUserIdAndGoodsId(
+        userId: String,
+        goodsId: String
+    ): PaymentSubscriptionEntity? {
+        return mongoTemplate.findOne(
+            Query.query(
+                Criteria("userId").isEqualTo(userId)
+                    .and("goodsId").isEqualTo(goodsId)
+                    .and("deleted").ne(true)
+                    .and("enabled").isEqualTo(true)
+            )
+                .with(Sort.by(Sort.Direction.DESC, "_id"))
+                .limit(1),
+            PaymentSubscriptionEntity::class.java,
+        )
+    }
+
+    override fun findActiveByUserIdAndGoodsId(userId: String, goodsId: String, now: Instant): PaymentSubscriptionEntity? {
+        return mongoTemplate.findOne(
+            Query.query(
+                Criteria("userId").isEqualTo(userId)
+                    .and("goodsId").isEqualTo(goodsId)
+                    .and("deleted").ne(true)
+                    .and("validFrom").lte(now)
+                    .and("validTo").gt(now)
+            )
+                .with(Sort.by(Sort.Direction.DESC, "_id"))
+                .limit(1),
+            PaymentSubscriptionEntity::class.java,
+        )
+    }
+
     override fun findSubscriptions(
         userId: String,
         goodsId: String?,
-        active: Boolean?,
+        enabled: Boolean?,
         pageRequest: PageRequest,
     ): Page<PaymentSubscriptionEntity> {
         val sort = if (pageRequest.sort.isUnsorted) {
@@ -92,14 +126,15 @@ class PaymentSubscriptionCustomRepositoryImpl(
             Aggregation.newAggregation(
                 Aggregation.match(
                     Criteria("userId").isEqualTo(userId)
+                        .and("deleted").ne(true)
                         .let { criteria ->
                             if (goodsId != null) {
                                 criteria.and("goodsId").isEqualTo(goodsId)
                             } else criteria
                         }
                         .let { criteria ->
-                            if (active != null) {
-                                criteria.and("active").isEqualTo(active)
+                            if (enabled != null) {
+                                criteria.and("enabled").isEqualTo(enabled)
                             } else criteria
                         }
                 ),

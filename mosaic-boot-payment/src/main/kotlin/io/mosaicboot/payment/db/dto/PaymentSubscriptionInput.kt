@@ -27,12 +27,14 @@ data class PaymentSubscriptionInput(
     val version: Int,
     val usedCouponIds: List<String>?,
     val billingId: String,
-    val active: Boolean,
-    val pgData: Map<String, *>,
+    val enabled: Boolean,
+    val customData: Map<String, *> = emptyMap<String, Any>(),
     /**
      * Days
      */
     val billingCycle: Int,
     val validFrom: Instant,
     val validTo: Instant,
+
+    val prevSubscriptionId: String?,
 )
