@@ -33,6 +33,8 @@ import org.springframework.data.mongodb.core.mapping.Field
 import org.springframework.data.mongodb.core.query.Criteria
 import org.springframework.data.mongodb.core.query.Query
 import org.springframework.data.mongodb.core.query.isEqualTo
+import java.time.Instant
+import java.util.stream.Stream
 
 class PaymentSubscriptionCustomRepositoryImpl(
     private val mongoTemplate: MongoTemplate,
@@ -52,14 +54,14 @@ class PaymentSubscriptionCustomRepositoryImpl(
                 version = input.version,
             ),
             optionId = input.optionId,
-            usedCouponIds = input.usedCouponIds,
-            billingId = input.billingId,
+            usedCouponId = input.usedCouponId,
             billingCycle = input.billingCycle,
             status = input.status,
             customData = input.customData,
             validFrom = input.validFrom,
             validTo = input.validTo,
             scheduledOptionId = input.scheduledOptionId,
+            paymentCount = 0,
         ))
     }
 
@@ -130,4 +132,16 @@ class PaymentSubscriptionCustomRepositoryImpl(
         @Field("items")
         override val items: List<PaymentSubscriptionEntity>,
     ) : Paged<PaymentSubscriptionEntity>
+
+    override fun findSubscriptionsNeedingRenewal(
+        now: Instant
+    ): Stream<PaymentSubscriptionEntity> {
+        return mongoTemplate.stream(
+            Query.query(
+                Criteria("status").isEqualTo(SubscriptionStatus.ACTIVE)
+                    .and("validTo").lte(now)
+            ),
+            PaymentSubscriptionEntity::class.java,
+        )
+    }
 }

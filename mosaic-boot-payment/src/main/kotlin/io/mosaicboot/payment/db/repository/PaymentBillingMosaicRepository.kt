@@ -14,11 +14,14 @@
  * limitations under the License.
  */
 
-package io.mosaicboot.payment.controller.dto
+package io.mosaicboot.payment.db.repository
 
-data class CardInfo(
-    val billingId: String,
-    val primary: Boolean,
-    val alias: String?,
-    val description: String,
-)
+import io.mosaicboot.payment.db.dto.PaymentBillingInput
+import io.mosaicboot.payment.db.entity.PaymentBilling
+
+interface PaymentBillingMosaicRepository<T : PaymentBilling> {
+    fun save(input: PaymentBillingInput): T
+    fun findAllByUserId(userId: String): List<T>
+    fun findPrimaryByUserId(userId: String): T?
+    fun updatePrimary(userId: String, newPrimaryBillingId: String): T?
+}

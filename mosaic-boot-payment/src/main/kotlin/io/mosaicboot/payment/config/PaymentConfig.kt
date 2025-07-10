@@ -22,9 +22,12 @@ import io.mosaicboot.payment.db.repository.PaymentBillingRepositoryBase
 import io.mosaicboot.payment.db.repository.PaymentCouponRepositoryBase
 import io.mosaicboot.payment.db.repository.PaymentGoodsRepositoryBase
 import io.mosaicboot.payment.db.repository.PaymentSubscriptionLogRepositoryBase
+import io.mosaicboot.payment.db.repository.PaymentSubscriptionRenewRepositoryBase
 import io.mosaicboot.payment.db.repository.PaymentSubscriptionRepositoryBase
 import io.mosaicboot.payment.db.repository.PaymentTransactionRepositoryBase
 import io.mosaicboot.payment.service.PaymentService
+import io.mosaicboot.payment.service.PaymentSubscriptionScheduleService
+import io.mosaicboot.payment.service.PaymentSubscriptionService
 import io.mosaicboot.payment.service.PgRouter
 import io.mosaicboot.payment.service.PgService
 import io.mosaicboot.payment.service.SinglePgRouter
@@ -69,6 +72,44 @@ class PaymentConfig {
     }
 
     @Bean
+    fun paymentSubscriptionService(
+        pgRouter: PgRouter,
+        paymentService: PaymentService,
+        paymentBillingRepository: PaymentBillingRepositoryBase<*>,
+        paymentCouponRepository: PaymentCouponRepositoryBase<*>,
+        paymentGoodsRepository: PaymentGoodsRepositoryBase<*>,
+        paymentTransactionRepository: PaymentTransactionRepositoryBase<*>,
+        paymentSubscriptionRepository: PaymentSubscriptionRepositoryBase<*>,
+        paymentSubscriptionLogRepository: PaymentSubscriptionLogRepositoryBase<*>,
+        paymentSubscriptionRenewRepository: PaymentSubscriptionRenewRepositoryBase<*>,
+    ): PaymentSubscriptionService {
+        return PaymentSubscriptionService(
+            pgRouter = pgRouter,
+            paymentService = paymentService,
+            paymentBillingRepository = paymentBillingRepository,
+            paymentCouponRepository = paymentCouponRepository,
+            paymentGoodsRepository = paymentGoodsRepository,
+            paymentTransactionRepository = paymentTransactionRepository,
+            paymentSubscriptionRepository = paymentSubscriptionRepository,
+            paymentSubscriptionLogRepository = paymentSubscriptionLogRepository,
+            paymentSubscriptionRenewRepository = paymentSubscriptionRenewRepository,
+        )
+    }
+
+    @Bean
+    fun paymentSubscriptionScheduleService(
+        paymentSubscriptionService: PaymentSubscriptionService,
+        paymentSubscriptionRepository: PaymentSubscriptionRepositoryBase<*>,
+        paymentSubscriptionRenewRepository: PaymentSubscriptionRenewRepositoryBase<*>,
+    ): PaymentSubscriptionScheduleService {
+        return PaymentSubscriptionScheduleService(
+            paymentSubscriptionService = paymentSubscriptionService,
+            paymentSubscriptionRepository = paymentSubscriptionRepository,
+            paymentSubscriptionRenewRepository = paymentSubscriptionRenewRepository,
+        )
+    }
+
+    @Bean
     @ConditionalOnProperty(prefix = "mosaic.payment.api", name = ["enabled"], havingValue = "true", matchIfMissing = true)
     fun mosaicPaymentController(
         paymentProperties: PaymentProperties,
@@ -91,12 +132,14 @@ class PaymentConfig {
         goodsRepository: PaymentGoodsRepositoryBase<*>,
         paymentOrderRepository: PaymentTransactionRepositoryBase<*>,
         paymentService: PaymentService,
+        paymentSubscriptionService: PaymentSubscriptionService,
     ): MosaicPaymentSubscriptionController {
         return MosaicPaymentSubscriptionController(
             paymentProperties = paymentProperties,
             goodsRepository = goodsRepository,
             paymentTransactionRepository = paymentOrderRepository,
             paymentService = paymentService,
+            paymentSubscriptionService = paymentSubscriptionService,
         )
     }
 }

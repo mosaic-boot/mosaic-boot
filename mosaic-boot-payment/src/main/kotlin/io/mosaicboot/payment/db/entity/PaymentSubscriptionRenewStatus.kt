@@ -14,11 +14,10 @@
  * limitations under the License.
  */
 
-package io.mosaicboot.payment.controller.dto
+package io.mosaicboot.payment.db.entity
 
-data class CardInfo(
-    val billingId: String,
-    val primary: Boolean,
-    val alias: String?,
-    val description: String,
-)
+enum class PaymentSubscriptionRenewStatus {
+    PENDING,
+    PAID,
+    FAILED
+}

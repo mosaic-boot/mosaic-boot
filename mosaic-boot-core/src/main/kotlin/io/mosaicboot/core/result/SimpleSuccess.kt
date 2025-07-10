@@ -1,4 +1,3 @@
 package io.mosaicboot.core.result
 
-class SimpleSuccess(val message: String) {
-}
+class SimpleSuccess(val message: String = "")

@@ -22,5 +22,6 @@ interface TransactionBasicInfo {
     val goodsId: String?
     val goodsName: String?
     val subscriptionId: String?
+    val usedCouponId: String?
     val amount: BigDecimal
 }

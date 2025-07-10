@@ -22,6 +22,7 @@ import io.mosaicboot.payment.db.entity.SubscriptionStatus
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageRequest
 import java.time.Instant
+import java.util.stream.Stream
 
 interface PaymentSubscriptionMosaicRepository<T : PaymentSubscription> {
     fun save(input: PaymentSubscriptionInput): T
@@ -33,4 +34,5 @@ interface PaymentSubscriptionMosaicRepository<T : PaymentSubscription> {
         statuses: List<SubscriptionStatus>?,
         pageRequest: PageRequest,
     ): Page<T>
+    fun findSubscriptionsNeedingRenewal(now: Instant = Instant.now()): Stream<T>
 }

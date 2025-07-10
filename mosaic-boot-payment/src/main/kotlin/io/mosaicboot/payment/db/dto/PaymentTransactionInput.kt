@@ -25,6 +25,8 @@ data class PaymentTransactionInput(
     val createdAt: Instant,
     val traceId: String,
     val type: TransactionType,
+    val paymentMethodAlias: String,
+    val billingId: String? = null,
     val pg: String,
     val pgUniqueId: String,
     var pgData: Map<String, *>? = null,
@@ -32,7 +34,7 @@ data class PaymentTransactionInput(
     val goodsId: String? = null,
     val goodsName: String? = null,
     val subscriptionId: String? = null,
-    val usedCouponIds: List<String>? = null,
+    val usedCouponId: String? = null,
     val amount: BigDecimal? = null,
 
     var orderStatus: OrderStatus,

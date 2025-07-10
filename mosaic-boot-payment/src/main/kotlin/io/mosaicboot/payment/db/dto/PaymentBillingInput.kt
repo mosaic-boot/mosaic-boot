@@ -23,6 +23,8 @@ data class PaymentBillingInput(
     val userId: String,
     val pg: String,
 
+    val primary: Boolean,
+
     val alias: String,
 
     val description: String,

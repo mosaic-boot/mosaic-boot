@@ -27,7 +27,7 @@ interface PgService {
     fun getName(): String
 
     fun addBillingCard(
-        authentication: MosaicAuthenticatedToken,
+        userId: String,
         traceId: String,
         request: AddCardTypeKrRequest,
     ): Result<PaymentBilling> {
@@ -35,7 +35,7 @@ interface PgService {
     }
 
     fun removeBillingMethod(
-        authentication: MosaicAuthenticatedToken,
+        userId: String,
         traceId: String,
         billing: PaymentBilling,
     ): Result<SimpleSuccess> {
@@ -43,11 +43,15 @@ interface PgService {
     }
 
     fun processBillingPayment(
-        authentication: MosaicAuthenticatedToken,
+        userId: String,
         traceId: String,
         billing: PaymentBilling,
         request: SubmitBillingPayment,
     ): Result<PaymentTransaction> {
         throw NotImplementedError("Not implemented this PG")
     }
+
+    fun getTransactionRecipeUrl(
+        transaction: PaymentTransaction,
+    ): String
 }

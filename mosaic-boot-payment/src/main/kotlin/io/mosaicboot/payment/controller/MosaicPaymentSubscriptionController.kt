@@ -28,6 +28,7 @@ import io.mosaicboot.payment.db.entity.SubscriptionStatus
 import io.mosaicboot.payment.db.repository.PaymentGoodsRepositoryBase
 import io.mosaicboot.payment.db.repository.PaymentTransactionRepositoryBase
 import io.mosaicboot.payment.service.PaymentService
+import io.mosaicboot.payment.service.PaymentSubscriptionService
 import io.swagger.v3.oas.annotations.Operation
 import org.springframework.context.ApplicationContext
 import org.springframework.data.domain.PageRequest
@@ -46,6 +47,7 @@ class MosaicPaymentSubscriptionController(
     private val goodsRepository: PaymentGoodsRepositoryBase<*>,
     private val paymentTransactionRepository: PaymentTransactionRepositoryBase<*>,
     private val paymentService: PaymentService,
+    private val paymentSubscriptionService: PaymentSubscriptionService,
 ) : BaseMosaicController {
     override fun getBaseUrl(applicationContext: ApplicationContext): String {
         return paymentProperties.api.path.trimEnd('/') + "/subscriptions"
@@ -60,10 +62,9 @@ class MosaicPaymentSubscriptionController(
     ): ResponseEntity<Any> {
         authentication as MosaicAuthenticatedToken
 
-        val result = paymentService.startSubscription(
+        val result = paymentSubscriptionService.startSubscription(
             authentication,
             UUIDv7.generate().toString(),
-            body.billingId,
             body.goodsId,
             body.optionId,
             body.couponId,
@@ -83,7 +84,7 @@ class MosaicPaymentSubscriptionController(
     ): ResponseEntity<SubscriptionResponse> {
         authentication as MosaicAuthenticatedToken
 
-        val result = paymentService.getCurrentSubscription(
+        val result = paymentSubscriptionService.getCurrentSubscription(
             authentication,
             goodsId,
         ) ?: return ResponseEntity.notFound().build()
@@ -91,10 +92,9 @@ class MosaicPaymentSubscriptionController(
         return ResponseEntity.ok(
             SubscriptionResponse(
                 id = result.id,
-                billingId = result.billingId,
                 optionId = result.optionId,
                 billingCycle = result.billingCycle,
-                usedCouponIds = result.usedCouponIds,
+                usedCouponId = result.usedCouponId,
                 status = result.status,
                 validFrom = result.validFrom.epochSecond,
                 validTo = result.validTo.epochSecond,
@@ -115,7 +115,7 @@ class MosaicPaymentSubscriptionController(
     ): ResponseEntity<PagedResult<SubscriptionResponse>> {
         authentication as MosaicAuthenticatedToken
 
-        val result = paymentService.findSubscriptions(
+        val result = paymentSubscriptionService.findSubscriptions(
             authentication,
             goodsId,
             statuses?.map { SubscriptionStatus.valueOf(it.uppercase()) },
@@ -127,10 +127,9 @@ class MosaicPaymentSubscriptionController(
                 result.content.map {
                     SubscriptionResponse(
                         id = it.id,
-                        billingId = it.billingId,
                         optionId = it.optionId,
                         billingCycle = it.billingCycle,
-                        usedCouponIds = it.usedCouponIds,
+                        usedCouponId = it.usedCouponId,
                         status = it.status,
                         validFrom = it.validFrom.epochSecond,
                         validTo = it.validTo.epochSecond,

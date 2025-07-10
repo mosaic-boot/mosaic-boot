@@ -23,6 +23,7 @@ interface PaymentBilling : UpdatableEntity<String>, UserRelatedObject {
     override val userId: String
     val pg: String
     var deleted: Boolean
+    var primary: Boolean
 
     var alias: String
 

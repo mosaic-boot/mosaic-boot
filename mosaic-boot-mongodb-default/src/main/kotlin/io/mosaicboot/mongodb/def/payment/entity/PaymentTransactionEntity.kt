@@ -35,6 +35,8 @@ class PaymentTransactionEntity(
     override val userId: String,
     override val traceId: String,
     override val type: TransactionType,
+    override var paymentMethodAlias: String,
+    override var billingId: String?,
     override val pg: String,
     @Indexed(unique = true)
     override val pgUniqueId: String,
@@ -43,7 +45,7 @@ class PaymentTransactionEntity(
     override val goodsId: String?,
     override val goodsName: String?,
     override val subscriptionId: String?,
-    override val usedCouponIds: List<String>?,
+    override val usedCouponId: String?,
     override val amount: BigDecimal?,
 
     override var orderStatus: OrderStatus,

@@ -28,6 +28,8 @@ interface PaymentTransaction : UpdatableEntity<String>, UserRelatedObject {
     override val userId: String
     val traceId: String
     val type: TransactionType
+    var paymentMethodAlias: String
+    var billingId: String?
     val pg: String
     val pgUniqueId: String
     var pgData: Map<String, *>?
@@ -35,7 +37,7 @@ interface PaymentTransaction : UpdatableEntity<String>, UserRelatedObject {
     val goodsId: String?
     val goodsName: String?
     val subscriptionId: String?
-    val usedCouponIds: List<String>?
+    val usedCouponId: String?
     val amount: BigDecimal?
 
     var orderStatus: OrderStatus

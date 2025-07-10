@@ -27,7 +27,6 @@ import java.time.Instant
 interface PaymentSubscription : UpdatableEntity<String>, UserRelatedObject {
     override val userId: String
     val traceId: String
-    val billingId: String
     val customData: Map<String, *>
     val goodsId: String
     var optionId: String?
@@ -43,8 +42,9 @@ interface PaymentSubscription : UpdatableEntity<String>, UserRelatedObject {
     val idempotentKey: String
 
     val billingCycle: Int
+    var paymentCount: Int
 
-    val usedCouponIds: List<String>?
+    val usedCouponId: String?
     var status: SubscriptionStatus
     var validFrom: Instant
     var validTo: Instant

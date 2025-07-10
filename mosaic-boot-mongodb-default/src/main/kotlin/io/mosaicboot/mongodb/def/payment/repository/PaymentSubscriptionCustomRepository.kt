@@ -23,6 +23,7 @@ import io.mosaicboot.payment.db.repository.PaymentSubscriptionMosaicRepository
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageRequest
 import java.time.Instant
+import java.util.stream.Stream
 
 interface PaymentSubscriptionCustomRepository : PaymentSubscriptionMosaicRepository<PaymentSubscriptionEntity> {
     override fun save(input: PaymentSubscriptionInput): PaymentSubscriptionEntity
@@ -34,4 +35,6 @@ interface PaymentSubscriptionCustomRepository : PaymentSubscriptionMosaicReposit
         statuses: List<SubscriptionStatus>?,
         pageRequest: PageRequest,
     ): Page<PaymentSubscriptionEntity>
+
+    override fun findSubscriptionsNeedingRenewal(now: Instant): Stream<PaymentSubscriptionEntity>
 }

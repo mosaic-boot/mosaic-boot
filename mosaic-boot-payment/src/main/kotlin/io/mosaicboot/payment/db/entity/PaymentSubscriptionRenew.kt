@@ -14,11 +14,15 @@
  * limitations under the License.
  */
 
-package io.mosaicboot.payment.controller.dto
+package io.mosaicboot.payment.db.entity
 
-data class CardInfo(
-    val billingId: String,
-    val primary: Boolean,
-    val alias: String?,
-    val description: String,
-)
+import io.mosaicboot.data.iface.UserRelatedObject
+import io.mosaicboot.data.entity.UpdatableEntity
+
+interface PaymentSubscriptionRenew : UpdatableEntity<String>, UserRelatedObject {
+    override val userId: String
+    val subscriptionId: String
+    val idempotentKey: String // must be unique key. value: "{subscriptionId}-{paymentCount}"
+    val paymentCount: Int
+    var status: PaymentSubscriptionRenewStatus
+}

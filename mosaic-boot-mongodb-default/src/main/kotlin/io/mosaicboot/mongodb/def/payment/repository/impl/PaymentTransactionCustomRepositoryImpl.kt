@@ -22,8 +22,10 @@ import io.mosaicboot.mongodb.def.payment.repository.PaymentTransactionCustomRepo
 import io.mosaicboot.mongodb.def.repository.impl.Paged
 import io.mosaicboot.mongodb.def.repository.impl.pagedAggregation
 import io.mosaicboot.payment.db.dto.PaymentTransactionInput
+import io.mosaicboot.payment.db.dto.TransactionType
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
+import org.springframework.data.domain.Sort
 import org.springframework.data.mongodb.core.MongoTemplate
 import org.springframework.data.mongodb.core.aggregation.Aggregation
 import org.springframework.data.mongodb.core.mapping.Field
@@ -42,6 +44,8 @@ class PaymentTransactionCustomRepositoryImpl(
             userId = input.userId,
             traceId = input.traceId,
             type = input.type,
+            paymentMethodAlias = input.paymentMethodAlias,
+            billingId = input.billingId,
             pg = input.pg,
             pgUniqueId = input.pgUniqueId,
             pgData = input.pgData,
@@ -49,7 +53,7 @@ class PaymentTransactionCustomRepositoryImpl(
             goodsId = input.goodsId,
             goodsName = input.goodsName,
             subscriptionId = input.subscriptionId,
-            usedCouponIds = input.usedCouponIds,
+            usedCouponId = input.usedCouponId,
             amount = input.amount,
 
             orderStatus = input.orderStatus,
@@ -66,7 +70,9 @@ class PaymentTransactionCustomRepositoryImpl(
             Aggregation.newAggregation(
                 Aggregation.match(
                     Criteria("userId").isEqualTo(userId)
+                        .and("type").isEqualTo(TransactionType.ORDER)
                 ),
+                Aggregation.sort(Sort.by(Sort.Direction.DESC, "createdAt"))
             ),
             PaymentTransactionEntity::class.java,
             PagedPaymentOrder::class.java,

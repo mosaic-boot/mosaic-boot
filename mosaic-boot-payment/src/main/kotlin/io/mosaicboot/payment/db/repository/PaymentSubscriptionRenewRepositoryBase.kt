@@ -14,21 +14,11 @@
  * limitations under the License.
  */
 
-package io.mosaicboot.payment.controller.dto
+package io.mosaicboot.payment.db.repository
 
-import com.fasterxml.jackson.annotation.JsonProperty
-import java.math.BigDecimal
-import java.time.Instant
+import io.mosaicboot.data.repository.BaseRepository
+import io.mosaicboot.payment.db.entity.PaymentSubscriptionRenew
 
-data class CreateSubscriptionResponse(
-    @JsonProperty("subscriptionId")
-    val subscriptionId: String,
-    @JsonProperty("transactionId")
-    val transactionId: String,
-    @JsonProperty("amount")
-    val amount: BigDecimal,
-    @JsonProperty("validFrom")
-    val validFrom: Instant,
-    @JsonProperty("validTo")
-    val validTo: Instant,
-)
+interface PaymentSubscriptionRenewRepositoryBase<T : PaymentSubscriptionRenew> :
+    BaseRepository<PaymentSubscriptionRenew, T, String>,
+    PaymentSubscriptionRenewMosaicRepository<T>

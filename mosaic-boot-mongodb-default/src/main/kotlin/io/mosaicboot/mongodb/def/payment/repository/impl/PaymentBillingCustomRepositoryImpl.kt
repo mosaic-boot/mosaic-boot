@@ -16,16 +16,27 @@
 
 package io.mosaicboot.mongodb.def.payment.repository.impl
 
+import com.mongodb.client.result.UpdateResult
 import io.mosaicboot.core.util.UUIDv7
 import io.mosaicboot.mongodb.def.payment.entity.PaymentBillingEntity
 import io.mosaicboot.mongodb.def.payment.repository.PaymentBillingCustomRepository
 import io.mosaicboot.payment.db.dto.PaymentBillingInput
+import org.springframework.data.mongodb.core.FindAndModifyOptions
 import org.springframework.data.mongodb.core.MongoTemplate
+import org.springframework.data.mongodb.core.query.Criteria
+import org.springframework.data.mongodb.core.query.Query
+import org.springframework.data.mongodb.core.query.Update
+import org.springframework.data.mongodb.core.query.isEqualTo
+import org.springframework.transaction.annotation.Transactional
 
-class PaymentBillingCustomRepositoryImpl(
+open class PaymentBillingCustomRepositoryImpl(
     private val mongoTemplate: MongoTemplate,
 ) : PaymentBillingCustomRepository {
+    @Transactional
     override fun save(input: PaymentBillingInput): PaymentBillingEntity {
+        if (input.primary) {
+            updateAllUnPrimary(input.userId)
+        }
         return mongoTemplate.save(PaymentBillingEntity(
             id = UUIDv7.generate().toString(),
             createdAt = input.createdAt,
@@ -33,11 +44,73 @@ class PaymentBillingCustomRepositoryImpl(
             userId = input.userId,
             pg = input.pg,
             deleted = false,
+            primary = input.primary,
             alias = input.alias,
             description = input.description,
             secret = input.secret,
             addCardTxId = input.addCardTxId,
             deletePaymentMethodTxId = null,
         ))
+    }
+
+    override fun findAllByUserId(userId: String): List<PaymentBillingEntity> {
+        return mongoTemplate.find(
+            Query.query(
+                Criteria.where("userId").isEqualTo(userId)
+                    .and("deleted").ne(true)
+            ),
+            PaymentBillingEntity::class.java
+        )
+    }
+
+    @Transactional
+    override fun updatePrimary(userId: String, newPrimaryBillingId: String): PaymentBillingEntity? {
+        val updated = mongoTemplate.findAndModify(
+            Query.query(
+                Criteria.where("userId").isEqualTo(userId)
+                    .and("_id").isEqualTo(newPrimaryBillingId)
+                    .and("deleted").ne(true)
+            ),
+            Update()
+                .set("primary", true),
+            FindAndModifyOptions.options().returnNew(true),
+            PaymentBillingEntity::class.java
+        ) ?: return null
+        mongoTemplate.updateMulti(
+            Query.query(
+                Criteria.where("userId").isEqualTo(userId)
+                    .and("_id").ne(newPrimaryBillingId)
+                    .and("deleted").ne(true)
+                    .and("primary").isEqualTo(true)
+            ),
+            Update()
+                .set("primary", false),
+            PaymentBillingEntity::class.java
+        )
+        return updated
+    }
+
+    override fun findPrimaryByUserId(userId: String): PaymentBillingEntity? {
+        return mongoTemplate.findOne(
+            Query.query(
+                Criteria.where("userId").isEqualTo(userId)
+                    .and("deleted").ne(true)
+                    .and("primary").isEqualTo(true)
+            ).limit(1),
+            PaymentBillingEntity::class.java
+        )
+    }
+
+    fun updateAllUnPrimary(userId: String): UpdateResult {
+        return mongoTemplate.updateMulti(
+            Query.query(
+                Criteria.where("userId").isEqualTo(userId)
+                    .and("deleted").ne(true)
+                    .and("primary").isEqualTo(true)
+            ),
+            Update()
+                .set("primary", false),
+            PaymentBillingEntity::class.java
+        )
     }
 }

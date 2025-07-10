@@ -4,8 +4,6 @@ import com.fasterxml.jackson.annotation.JsonProperty
 import java.math.BigDecimal
 
 data class StartSubscriptionRequest(
-    @JsonProperty("billingId")
-    val billingId: String,
     @JsonProperty("goodsId")
     val goodsId: String,
     @JsonProperty("optionId")

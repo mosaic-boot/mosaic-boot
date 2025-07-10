@@ -21,9 +21,8 @@ import io.mosaicboot.payment.db.dto.PaymentBillingInput
 import io.mosaicboot.payment.db.entity.PaymentBilling
 
 interface PaymentBillingRepositoryBase<T : PaymentBilling> :
-    BaseRepository<PaymentBilling, T, String>
+    BaseRepository<PaymentBilling, T, String>,
+    PaymentBillingMosaicRepository<T>
 {
-    fun save(input: PaymentBillingInput): T
-    fun findAllByUserId(userId: String): List<T>
-    fun findAllByUserIdAndId(userId: String, id: String): T?
+    fun findByUserIdAndId(userId: String, id: String): T?
 }

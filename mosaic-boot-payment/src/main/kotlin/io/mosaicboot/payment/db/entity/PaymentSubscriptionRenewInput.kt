@@ -14,11 +14,17 @@
  * limitations under the License.
  */
 
-package io.mosaicboot.payment.controller.dto
+package io.mosaicboot.payment.db.entity
 
-data class CardInfo(
-    val billingId: String,
-    val primary: Boolean,
-    val alias: String?,
-    val description: String,
+import java.time.Instant
+
+data class PaymentSubscriptionRenewInput(
+    val id: String,
+    val createdAt: Instant,
+    var updatedAt: Instant,
+    val userId: String,
+    val subscriptionId: String,
+    val idempotentKey: String,
+    val paymentCount: Int,
+    var status: PaymentSubscriptionRenewStatus
 )

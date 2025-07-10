@@ -22,7 +22,6 @@ import io.mosaicboot.core.http.BaseMosaicController
 import io.mosaicboot.core.http.MosaicController
 import io.mosaicboot.core.http.dto.PagedResponse
 import io.mosaicboot.core.http.dto.SimpleErrorResponse
-import io.mosaicboot.core.user.controller.dto.MyTenant
 import io.mosaicboot.core.util.UUIDv7
 import io.mosaicboot.core.util.UnreachableException
 import io.mosaicboot.payment.config.PaymentProperties
@@ -32,7 +31,6 @@ import io.mosaicboot.payment.controller.dto.TransactionDetail
 import io.mosaicboot.payment.controller.dto.AddCardTypeKrRequest
 import io.mosaicboot.payment.controller.dto.CardInfo
 import io.mosaicboot.payment.controller.dto.CouponInfoResponse
-import io.mosaicboot.payment.db.dto.PaymentCouponDiscount
 import io.mosaicboot.payment.db.repository.PaymentGoodsRepositoryBase
 import io.mosaicboot.payment.db.repository.PaymentTransactionRepositoryBase
 import io.mosaicboot.payment.dto.CouponResult
@@ -56,6 +54,7 @@ import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
+import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.server.ResponseStatusException
 import java.math.BigDecimal
 
@@ -76,9 +75,9 @@ class MosaicPaymentController(
     @PageableAsQueryParam
     fun getTransactionList(
         authentication: Authentication,
-        @Param("page") page: Int,
-        @Param("size") size: Int,
-    ): PagedResponse<Transaction> {
+        @RequestParam(value = "page", defaultValue = "0") page: Int,
+        @RequestParam(value = "size", defaultValue = "10") size: Int,
+    ): ResponseEntity<PagedResponse<Transaction>> {
         authentication as MosaicAuthenticatedToken
 
         val realPage = page.coerceAtLeast(0)
@@ -88,24 +87,28 @@ class MosaicPaymentController(
             authentication.userId,
             PageRequest.of(realPage, realSize)
         )
-        return PagedResponse(
-            items = result.content.map {
-                Transaction(
-                    id = it.id,
-                    createdAt = it.createdAt,
-                    type = it.type,
-                    goodsId = it.goodsId,
-                    goodsName = it.goodsName,
-                    subscriptionId = it.subscriptionId,
-                    amount = it.amount,
-                    orderStatus = it.orderStatus,
-                    paidAt = it.paidAt,
-                    cancelledAt = it.cancelledAt,
-                )
-            },
-            total = result.totalElements,
-            page = realPage,
-            size = realSize,
+        return ResponseEntity.ok(
+            PagedResponse(
+                items = result.content.map {
+                    Transaction(
+                        id = it.id,
+                        createdAt = it.createdAt.toEpochMilli(),
+                        type = it.type,
+                        paymentMethodAlias = it.paymentMethodAlias,
+                        billingId = it.billingId,
+                        goodsId = it.goodsId,
+                        goodsName = it.goodsName,
+                        subscriptionId = it.subscriptionId,
+                        amount = it.amount,
+                        orderStatus = it.orderStatus,
+                        paidAt = it.paidAt?.toEpochMilli(),
+                        cancelledAt = it.cancelledAt?.toEpochMilli(),
+                    )
+                },
+                total = result.totalElements,
+                page = realPage,
+                size = realSize,
+            )
         )
     }
 
@@ -113,9 +116,9 @@ class MosaicPaymentController(
     @GetMapping("/transactions/{transactionId}")
     @PreAuthorize("isAuthenticated()")
     fun getTransactionDetail(
-        @PathVariable("transactionId") transactionId: String,
         authentication: Authentication,
-    ): TransactionDetail {
+        @PathVariable("transactionId") transactionId: String,
+    ): ResponseEntity<TransactionDetail> {
         authentication as MosaicAuthenticatedToken
 
         val result = paymentTransactionRepository.findByUserIdAndId(
@@ -126,43 +129,77 @@ class MosaicPaymentController(
             "invalid order id",
         )
 
-        return TransactionDetail(
-            id = result.id,
-            createdAt = result.createdAt,
-            type = result.type,
-            goodsId = result.goodsId,
-            goodsName = result.goodsName,
-            subscriptionId = result.subscriptionId,
-            amount = result.amount,
-            orderStatus = result.orderStatus,
-            paidAt = result.paidAt,
-            cancelledAt = result.cancelledAt,
-            vbank = result.vbank,
+        return ResponseEntity.ok(
+            TransactionDetail(
+                id = result.id,
+                createdAt = result.createdAt.toEpochMilli(),
+                type = result.type,
+                paymentMethodAlias = result.paymentMethodAlias,
+                billingId = result.billingId,
+                goodsId = result.goodsId,
+                goodsName = result.goodsName,
+                subscriptionId = result.subscriptionId,
+                amount = result.amount,
+                orderStatus = result.orderStatus,
+                paidAt = result.paidAt?.toEpochMilli(),
+                cancelledAt = result.cancelledAt?.toEpochMilli(),
+                vbank = result.vbank,
+            )
         )
+    }
+
+    @Operation(summary = "Download a transaction recipe")
+    @GetMapping("/transactions/{transactionId}/recipe")
+    @PreAuthorize("isAuthenticated()")
+    fun downloadTransactionRecipe(
+        authentication: Authentication,
+        @PathVariable("transactionId") transactionId: String,
+    ): ResponseEntity<*> {
+        authentication as MosaicAuthenticatedToken
+
+        val transaction = paymentTransactionRepository.findByUserIdAndId(
+            authentication.userId,
+            transactionId,
+        ) ?: throw ResponseStatusException(
+            HttpStatus.NOT_FOUND,
+            "invalid order id",
+        )
+
+        val url = paymentService.getTransactionRecipeUrl(transaction)
+        return ResponseEntity
+            .status(HttpStatus.FOUND)
+            .header("Location", url)
+            .build<Any>()
     }
 
     @Operation(summary = "Add korea-style credit card")
     @PostMapping("/methods/card-kr")
-    @ApiResponses(value = [
-        ApiResponse(
-            responseCode = "200",
-            description = "success",
-            content = [
-                Content(mediaType = "application/json", array = ArraySchema(
-                    schema = Schema(implementation = BillingMethod::class)
-                ))
-            ]
-        ),
-        ApiResponse(
-            responseCode = "400",
-            description = "request failure",
-            content = [
-                Content(mediaType = "application/json", array = ArraySchema(
-                    schema = Schema(implementation = SimpleErrorResponse::class)
-                ))
-            ]
-        ),
-    ])
+    @ApiResponses(
+        value = [
+            ApiResponse(
+                responseCode = "200",
+                description = "success",
+                content = [
+                    Content(
+                        mediaType = "application/json", array = ArraySchema(
+                            schema = Schema(implementation = BillingMethod::class)
+                        )
+                    )
+                ]
+            ),
+            ApiResponse(
+                responseCode = "400",
+                description = "request failure",
+                content = [
+                    Content(
+                        mediaType = "application/json", array = ArraySchema(
+                            schema = Schema(implementation = SimpleErrorResponse::class)
+                        )
+                    )
+                ]
+            ),
+        ]
+    )
     @PreAuthorize("isAuthenticated()")
     fun cardAddKr(
         authentication: Authentication,
@@ -175,10 +212,12 @@ class MosaicPaymentController(
             body,
         )
         val billing = result.getOrThrow()
-        return ResponseEntity.ok(BillingMethod(
-            billingId = billing.id,
-            alias = billing.alias,
-        ))
+        return ResponseEntity.ok(
+            BillingMethod(
+                billingId = billing.id,
+                alias = billing.alias,
+            )
+        )
     }
 
     @Operation(summary = "Get registered card list")
@@ -192,11 +231,38 @@ class MosaicPaymentController(
             .map {
                 CardInfo(
                     billingId = it.id,
+                    primary = it.primary,
                     alias = it.alias,
                     description = it.description,
                 )
             }
         return ResponseEntity.ok(cardList)
+    }
+
+    @Operation(summary = "Set a card as primary")
+    @PostMapping("/methods/{billingId}/set-primary")
+    @PreAuthorize("isAuthenticated()")
+    fun setPrimaryPaymentMethod(
+        authentication: Authentication,
+        @PathVariable("billingId") billingId: String,
+    ): ResponseEntity<Any> {
+        authentication as MosaicAuthenticatedToken
+        val result = paymentService.setPrimaryPaymentMethod(
+            authentication,
+            billingId
+        )
+        return if (result.isSuccess) {
+            ResponseEntity.ok().build()
+        } else {
+            val exception = result.exceptionOrNull()!!
+            if (exception is UserErrorMessageException) {
+                ResponseEntity.status(
+                    HttpStatus.BAD_REQUEST
+                ).body(SimpleErrorResponse(exception))
+            } else {
+                throw exception
+            }
+        }
     }
 
     @Operation(summary = "Delete a registered card")
@@ -228,26 +294,32 @@ class MosaicPaymentController(
 
     @Operation(summary = "Get coupon information and validate for goods")
     @GetMapping("/coupons/-/info")
-    @ApiResponses(value = [
-        ApiResponse(
-            responseCode = "200",
-            description = "success",
-            content = [
-                Content(mediaType = "application/json", array = ArraySchema(
-                    schema = Schema(implementation = CouponInfoResponse::class)
-                ))
-            ]
-        ),
-        ApiResponse(
-            responseCode = "400",
-            description = "request failure",
-            content = [
-                Content(mediaType = "application/json", array = ArraySchema(
-                    schema = Schema(implementation = SimpleErrorResponse::class)
-                ))
-            ]
-        ),
-    ])
+    @ApiResponses(
+        value = [
+            ApiResponse(
+                responseCode = "200",
+                description = "success",
+                content = [
+                    Content(
+                        mediaType = "application/json", array = ArraySchema(
+                            schema = Schema(implementation = CouponInfoResponse::class)
+                        )
+                    )
+                ]
+            ),
+            ApiResponse(
+                responseCode = "400",
+                description = "request failure",
+                content = [
+                    Content(
+                        mediaType = "application/json", array = ArraySchema(
+                            schema = Schema(implementation = SimpleErrorResponse::class)
+                        )
+                    )
+                ]
+            ),
+        ]
+    )
     @PreAuthorize("isAuthenticated()")
     fun getCouponInfo(
         @Param("code") code: String,
@@ -268,9 +340,11 @@ class MosaicPaymentController(
             is CouponResult.AlreadyUsed -> {
                 throw UserErrorMessageException(HttpStatus.BAD_REQUEST, "coupon.already_used")
             }
+
             is CouponResult.SoldOut -> {
                 throw UserErrorMessageException(HttpStatus.BAD_REQUEST, "coupon.sold_out")
             }
+
             is CouponResult.Usable -> {
                 ResponseEntity.ok(
                     CouponInfoResponse(
@@ -281,6 +355,7 @@ class MosaicPaymentController(
                     )
                 )
             }
+
             else -> throw UnreachableException()
         }
     }

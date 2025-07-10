@@ -14,19 +14,14 @@
  * limitations under the License.
  */
 
-package io.mosaicboot.payment.controller.dto
+package io.mosaicboot.mongodb.def.payment.repository
 
-import com.fasterxml.jackson.annotation.JsonProperty
+import io.mosaicboot.mongodb.def.payment.entity.PaymentSubscriptionRenewEntity
+import io.mosaicboot.payment.db.repository.PaymentSubscriptionRenewRepositoryBase
+import org.springframework.data.mongodb.repository.MongoRepository
+import org.springframework.stereotype.Repository
 
-data class CreateSubscriptionRequest(
-    @JsonProperty("goodsId")
-    val goodsId: String,
-    @JsonProperty("planId")
-    val planId: String,
-    @JsonProperty("billingId")
-    val billingId: String,
-    @JsonProperty("optionId")
-    val optionId: String?,
-    @JsonProperty("couponId")
-    val couponId: String?,
-)
+@Repository
+interface PaymentSubscriptionRenewRepository : MongoRepository<PaymentSubscriptionRenewEntity, String>,
+    PaymentSubscriptionRenewRepositoryBase<PaymentSubscriptionRenewEntity>,
+    PaymentSubscriptionRenewCustomRepository

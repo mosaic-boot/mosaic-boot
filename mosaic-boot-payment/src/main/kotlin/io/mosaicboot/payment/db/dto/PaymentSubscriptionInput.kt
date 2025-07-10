@@ -26,7 +26,7 @@ data class PaymentSubscriptionInput(
     val goodsId: String,
     val optionId: String?,
     val version: Int,
-    val usedCouponIds: List<String>?,
+    val usedCouponId: String?,
     val billingId: String,
     val status: SubscriptionStatus,
     val customData: Map<String, *> = emptyMap<String, Any>(),

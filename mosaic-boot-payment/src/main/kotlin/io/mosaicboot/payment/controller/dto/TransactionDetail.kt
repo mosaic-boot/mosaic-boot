@@ -25,21 +25,25 @@ import java.time.Instant
 
 class TransactionDetail(
     id: String,
-    createdAt: Instant?,
+    createdAt: Long?,
     type: TransactionType,
+    paymentMethodAlias: String,
+    billingId: String?,
     goodsId: String?,
     goodsName: String?,
     subscriptionId: String?,
     amount: BigDecimal?,
     orderStatus: OrderStatus,
-    paidAt: Instant?,
-    cancelledAt: Instant?,
+    paidAt: Long?,
+    cancelledAt: Long?,
     @field:JsonProperty("vbank")
     val vbank: VbankInfo?,
 ) : Transaction(
     id,
     createdAt,
     type,
+    paymentMethodAlias,
+    billingId,
     goodsId,
     goodsName,
     subscriptionId,

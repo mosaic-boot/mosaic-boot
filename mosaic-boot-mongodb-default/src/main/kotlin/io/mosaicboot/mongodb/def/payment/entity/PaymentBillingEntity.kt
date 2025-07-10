@@ -31,6 +31,7 @@ class PaymentBillingEntity(
 
     override val pg: String,
     override var deleted: Boolean,
+    override var primary: Boolean,
 
     override var alias: String,
 

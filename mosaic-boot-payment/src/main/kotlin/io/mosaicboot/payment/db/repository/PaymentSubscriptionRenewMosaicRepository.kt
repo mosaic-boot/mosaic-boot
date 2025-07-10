@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-package io.mosaicboot.payment.controller.dto
+package io.mosaicboot.payment.db.repository
 
-data class CardInfo(
-    val billingId: String,
-    val primary: Boolean,
-    val alias: String?,
-    val description: String,
-)
+import io.mosaicboot.payment.db.entity.PaymentSubscriptionRenew
+import io.mosaicboot.payment.db.entity.PaymentSubscriptionRenewInput
+
+interface PaymentSubscriptionRenewMosaicRepository<T : PaymentSubscriptionRenew> {
+    fun saveOrIgnore(input: PaymentSubscriptionRenewInput): T?
+}

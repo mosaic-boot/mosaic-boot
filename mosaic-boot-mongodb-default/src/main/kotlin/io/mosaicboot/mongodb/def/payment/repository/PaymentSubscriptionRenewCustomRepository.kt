@@ -1,0 +1,7 @@
+package io.mosaicboot.mongodb.def.payment.repository
+
+import io.mosaicboot.mongodb.def.payment.entity.PaymentSubscriptionRenewEntity
+import io.mosaicboot.payment.db.repository.PaymentSubscriptionRenewMosaicRepository
+
+interface PaymentSubscriptionRenewCustomRepository :
+    PaymentSubscriptionRenewMosaicRepository<PaymentSubscriptionRenewEntity>

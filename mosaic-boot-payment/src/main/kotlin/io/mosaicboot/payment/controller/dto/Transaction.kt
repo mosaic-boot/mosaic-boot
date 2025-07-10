@@ -28,11 +28,19 @@ open class Transaction(
     @field:JsonProperty("id")
     val id: String,
 
+    /**
+     * unix timestamp milliseconds
+     */
     @field:JsonProperty("createdAt")
-    val createdAt: Instant?,
+    val createdAt: Long?,
 
     @field:JsonProperty("type")
     val type: TransactionType,
+
+    @field:JsonProperty("paymentMethodAlias")
+    val paymentMethodAlias: String,
+    @field:JsonProperty("billingId")
+    val billingId: String?,
 
     @field:JsonProperty("goodsId")
     val goodsId: String?,
@@ -46,8 +54,15 @@ open class Transaction(
     @field:JsonProperty("orderStatus")
     val orderStatus: OrderStatus,
 
+    /**
+     * unix timestamp milliseconds
+     */
     @field:JsonProperty("paidAt")
-    val paidAt: Instant?,
+    val paidAt: Long?,
+
+    /**
+     * unix timestamp milliseconds
+     */
     @field:JsonProperty("cancelledAt")
-    val cancelledAt: Instant?,
+    val cancelledAt: Long?,
 )

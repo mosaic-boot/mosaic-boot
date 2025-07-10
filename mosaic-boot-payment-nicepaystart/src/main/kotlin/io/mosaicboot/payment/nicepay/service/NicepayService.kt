@@ -42,6 +42,7 @@ import io.mosaicboot.payment.nicepay.api.NicepayApiClient
 import io.mosaicboot.payment.nicepay.api.PaymentNotificationResponse
 import io.mosaicboot.payment.nicepay.api.V1PaymentNetCancelRequestBody
 import io.mosaicboot.payment.nicepay.api.V1PaymentRequestBody
+import io.mosaicboot.payment.nicepay.api.V1PaymentResponseBody
 import io.mosaicboot.payment.nicepay.api.V1PaymentResultBase
 import io.mosaicboot.payment.nicepay.api.V1SubscribeExpireRequestBody
 import io.mosaicboot.payment.nicepay.api.V1SubscribePaymentRequestBody
@@ -57,7 +58,10 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
 import java.time.Instant
+import java.time.OffsetDateTime
 import java.time.format.DateTimeFormatter
+import java.time.format.DateTimeParseException
+import kotlin.String
 
 @Service
 class NicepayService(
@@ -71,6 +75,12 @@ class NicepayService(
 ) : PgService {
     companion object {
         private val log = LoggerFactory.getLogger(NicepayService::class.java)
+
+        private val DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSZ")
+
+        fun parseTime(text: String): Instant {
+            return OffsetDateTime.parse(text, DATE_TIME_FORMATTER).toInstant()
+        }
     }
 
     override fun getName(): String = NicepayConst.PG
@@ -201,21 +211,22 @@ class NicepayService(
             orderEntity.vbank = VbankInfo(
                 name = vbank.vbankName,
                 number = vbank.vbankNumber,
-                expire = Instant.parse(vbank.vbankExpDate),
+                expire = parseTime(vbank.vbankExpDate),
                 holder = vbank.vbankHolder,
             )
         }
     }
 
     override fun addBillingCard(
-        authentication: MosaicAuthenticatedToken,
+        userId: String,
         traceId: String,
         request: AddCardTypeKrRequest,
     ): Result<PaymentBilling> {
         return handleTransaction(
-            authentication,
-            traceId,
-            TransactionType.BILLING_ADD_CARD
+            userId = userId,
+            traceId = traceId,
+            type = TransactionType.BILLING_ADD_CARD,
+            paymentMethodAlias = "",
         ) { transaction, ediDate ->
             val response = nicepayApiClient.postSubscribeRegist(
                 V1SubscribeRegistRequestBody(
@@ -248,7 +259,8 @@ class NicepayService(
 
                 val paymentBilling = paymentBillingRepository.save(PaymentBillingInput(
                     createdAt = Instant.now(),
-                    userId = authentication.userId,
+                    userId = userId,
+                    primary = request.primary,
                     pg = NicepayConst.PG,
                     addCardTxId = transaction.id,
                     alias = request.alias ?: "",
@@ -262,6 +274,7 @@ class NicepayService(
                         )
                     ),
                 ))
+                transaction.paymentMethodAlias = paymentBilling.description
 
                 Result.success(paymentBilling)
             } else {
@@ -278,14 +291,16 @@ class NicepayService(
     }
 
     override fun removeBillingMethod(
-        authentication: MosaicAuthenticatedToken,
+        userId: String,
         traceId: String,
         billing: PaymentBilling
     ): Result<SimpleSuccess> {
         return handleTransaction(
-            authentication,
-            traceId,
-            TransactionType.BILLING_REMOVE_CARD
+            userId = userId,
+            traceId = traceId,
+            type = TransactionType.BILLING_REMOVE_CARD,
+            paymentMethodAlias = billing.description,
+            billingId = billing.id,
         ) { transaction, ediDate ->
             val data = serverSideCrypto.decrypt(billing.secret!!, NicepayBillingData::class.java)
             val response = nicepayApiClient.postSubscribeExpire(
@@ -314,15 +329,17 @@ class NicepayService(
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     override fun processBillingPayment(
-        authentication: MosaicAuthenticatedToken,
+        userId: String,
         traceId: String,
         billing: PaymentBilling,
         request: SubmitBillingPayment
     ): Result<PaymentTransaction> {
         return handleTransaction(
-            authentication,
-            traceId,
-            TransactionType.ORDER,
+            userId = userId,
+            traceId = traceId,
+            type = TransactionType.ORDER,
+            paymentMethodAlias = billing.description,
+            billingId = billing.id,
             transactionBasicInfo = request,
         ) { transaction, ediDate ->
             val data = serverSideCrypto.decrypt(billing.secret!!, NicepayBillingData::class.java)
@@ -337,27 +354,48 @@ class NicepayService(
                     amount = request.amount.toInt(), // TODO: convert safety
                 ).withSign(data.bid, nicepayProperties.clientSecret)
             )
-            transaction.pgData = objectMapper.convertValue(
-                response,
-                object: TypeReference<Map<String, *>>() {}
-            )
-            if (response.resultCode == "0000") {
-                transaction.orderStatus = OrderStatus.COMPLETED
-                Result.success(transaction)
-            } else {
-                transaction.orderStatus = OrderStatus.FAILURE
-                Result.failure(UserErrorMessageException(
-                    HttpStatus.BAD_REQUEST,
-                    "${response.resultCode}: ${response.resultMsg}"
-                ))
+            try {
+                transaction.pgData = objectMapper.convertValue(
+                    response,
+                    object : TypeReference<Map<String, *>>() {}
+                )
+                if (response.resultCode == "0000") {
+                    transaction.orderStatus = OrderStatus.PAID
+                    transaction.paidAt = parseTime(response.paidAt)
+                    Result.success(transaction)
+                } else {
+                    transaction.orderStatus = OrderStatus.FAILURE
+                    Result.failure(
+                        UserErrorMessageException(
+                            HttpStatus.BAD_REQUEST,
+                            "${response.resultCode}: ${response.resultMsg}"
+                        )
+                    )
+                }
+            } catch (e: Exception) {
+                nicepayApiClient.postV1PaymentNetCancel(
+                    requestBody = V1PaymentNetCancelRequestBody(
+                        orderID = response.orderId,
+                    )
+                )
+                throw e
             }
         }
     }
 
+    override fun getTransactionRecipeUrl(
+        transaction: PaymentTransaction,
+    ): String {
+        val paymentResult = objectMapper.convertValue(transaction.pgData, V1PaymentResponseBody::class.java)
+        return paymentResult.receiptUrl!!
+    }
+
     fun <T> handleTransaction(
-        authentication: MosaicAuthenticatedToken,
+        userId: String,
         traceId: String,
         type: TransactionType,
+        paymentMethodAlias: String,
+        billingId: String? = null,
         transactionBasicInfo: TransactionBasicInfo? = null,
         fn: (tx: PaymentTransaction, ediDate: String) -> Result<T>,
     ): Result<T> {
@@ -366,9 +404,11 @@ class NicepayService(
         val transaction = paymentTransactionRepository.save(PaymentTransactionInput(
             traceId = traceId,
             id = txId,
-            userId = authentication.userId,
+            userId = userId,
             createdAt = now,
             type = type,
+            paymentMethodAlias = paymentMethodAlias,
+            billingId = billingId,
             pg = NicepayConst.PG,
             pgUniqueId = txId,
             orderStatus = OrderStatus.PROCESSING,
@@ -376,6 +416,7 @@ class NicepayService(
             goodsName = transactionBasicInfo?.goodsName,
             subscriptionId = transactionBasicInfo?.subscriptionId,
             amount = transactionBasicInfo?.amount,
+            usedCouponId = transactionBasicInfo?.usedCouponId,
         ))
         val ediDate = DateTimeFormatter.ISO_INSTANT.format(now)
 

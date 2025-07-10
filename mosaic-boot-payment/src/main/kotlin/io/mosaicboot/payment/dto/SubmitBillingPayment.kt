@@ -22,6 +22,7 @@ open class SubmitBillingPayment(
     override val goodsId: String? = null,
     override val goodsName: String? = null,
     override val subscriptionId: String? = null,
+    override val usedCouponId: String? = null,
 
     override val amount: BigDecimal,
 ) : TransactionBasicInfo

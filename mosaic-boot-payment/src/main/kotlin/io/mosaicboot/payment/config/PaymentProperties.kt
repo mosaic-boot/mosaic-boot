@@ -22,9 +22,15 @@ import org.springframework.boot.context.properties.ConfigurationProperties
 data class PaymentProperties(
     var enabled: Boolean = true,
     var api: Api = Api(),
+    var subscription: Subscription = Subscription(),
 ) {
     data class Api(
         var enabled: Boolean = true,
         var path: String = "/api/payment",
+    )
+
+    data class Subscription(
+        var enabled: Boolean = true,
+        var scheduledRenewal: Boolean = true,
     )
 }
